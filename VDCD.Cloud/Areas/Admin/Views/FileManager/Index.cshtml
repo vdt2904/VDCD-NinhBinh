@@ -1,0 +1,304 @@
+﻿@{
+    Layout = null;
+}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+    
+
+    .file-manager-container {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        height: 95vh;
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .fm-header {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .fm-toolbar {
+        padding: 10px 15px;
+        border-bottom: 1px dashed #ccc;
+        background: #fafafa;
+    }
+
+    .fm-body {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    /* Sidebar - Tree view */
+    .fm-sidebar {
+        width: 260px;
+        border-right: 1px solid #eee;
+        overflow-y: auto;
+        padding: 10px;
+        background: #fdfdfd;
+    }
+
+    .tree-list {
+        list-style: none;
+        padding-left: 15px;
+    }
+
+    .tree-item-content {
+        cursor: pointer;
+        padding: 5px 8px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        transition: 0.2s;
+    }
+
+        .tree-item-content:hover {
+            background: #f0f0f0;
+        }
+
+        .tree-item-content.active {
+            background: #e7f1ff;
+            color: #0d6efd;
+            font-weight: bold;
+        }
+
+        .tree-item-content i {
+            margin-right: 8px;
+            width: 18px;
+            text-align: center;
+        }
+
+    /* Main Content - Grid */
+    .fm-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .file-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 15px;
+        align-content: start;
+    }
+
+    .file-item {
+        text-align: center;
+        padding: 12px;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.2s;
+        position: relative;
+    }
+
+        .file-item:hover {
+            background: #f8fbff;
+            border-color: #d1e5ff;
+        }
+
+        .file-item.selected {
+            background: #e7f1ff;
+            border-color: #0d6efd;
+        }
+
+    .file-preview {
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 8px;
+        overflow: hidden;
+        border-radius: 4px;
+    }
+
+        .file-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .file-preview i {
+            font-size: 45px;
+            color: #ffc107;
+        }
+
+    .file-name {
+        font-size: 12px;
+        line-height: 1.4;
+        word-break: break-all;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    #loader {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: 10;
+    }
+</style>
+
+    <div class="container-fluid">
+        <div class="file-manager-container">
+            <div class="fm-header">
+                <h6 class="m-0 fw-bold"><i class="fas fa-images me-2"></i>THƯ VIỆN HÌNH ẢNH</h6>
+            </div>
+
+            <div class="fm-toolbar">
+                <button class="btn btn-white btn-sm border me-2" onclick="createFolder()"><i class="fas fa-folder-plus text-primary"></i> Thêm thư mục</button>
+                <button class="btn btn-white btn-sm border me-2 text-danger" onclick="deleteSelected()"><i class="fas fa-trash-alt"></i> Xóa</button>
+                <label class="btn btn-dark btn-sm m-0">
+                    <i class="fas fa-upload"></i> Tải ảnh (Nhiều ảnh)
+                    <input type="file" id="fileUpload" hidden multiple onchange="handleUpload(this)">
+                </label>
+            </div>
+
+            <div class="fm-body">
+                <div class="fm-sidebar" id="folderTree">
+                    <div class="tree-item-content active" data-id="" onclick="navigateTo(null, this)">
+                        <i class="fas fa-database text-secondary"></i> Thư mục gốc
+                    </div>
+                    <div id="treeContent"></div>
+                </div>
+
+                <div class="fm-content">
+                    <div id="loader" class="spinner-border text-primary"></div>
+                    <div class="file-grid" id="fileGrid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let currentParentId = null;
+        let selectedItemId = null;
+
+        $(document).ready(function () {
+            loadTree();
+            loadFiles(null);
+        });
+
+        // 1. Load cây thư mục phân cấp
+        function loadTree() {
+            $.get('/Admin/FileManager/GetFoldersTree', function (data) {
+                const renderNode = (nodes) => {
+                    let html = '<ul class="tree-list mt-1">';
+                    nodes.forEach(node => {
+                        html += `<li>
+                                    <div class="tree-item-content" data-id="${node.id}" onclick="navigateTo(${node.id}, this)">
+                                        <i class="fas fa-folder text-warning"></i> ${node.name}
+                                    </div>
+                                    ${node.children && node.children.length > 0 ? renderNode(node.children) : ''}
+                                </li>`;
+                    });
+                    html += '</ul>';
+                    return html;
+                };
+                $('#treeContent').html(renderNode(data));
+            });
+        }
+
+        // 2. Chuyển thư mục
+        function navigateTo(id, el) {
+            $('.tree-item-content').removeClass('active');
+            $(el).addClass('active');
+            loadFiles(id);
+        }
+
+        // 3. Load danh sách File/Folder trong Grid
+        function loadFiles(parentId) {
+            currentParentId = parentId;
+            selectedItemId = null;
+            $('#loader').show();
+
+            $.get('/Admin/FileManager/GetFilesByFolder', { parentId: parentId }, function (data) {
+                let html = '';
+                data.forEach(item => {
+                    const isImage = item.contentType && item.contentType.includes('image');
+                    const preview = item.isFolder
+                        ? `<i class="fas fa-folder"></i>`
+                        : (isImage ? `<img src="${item.url}" alt="${item.name}">` : `<i class="fas fa-file-alt text-secondary"></i>`);
+
+                    html += `
+                                <div class="file-item" onclick="selectItem(this, ${item.id})" ondblclick="${item.isFolder ? `openFolder(${item.id})` : ''}">
+                                    <div class="file-preview">${preview}</div>
+                                    <div class="file-name" title="${item.name}">${item.name}</div>
+                                </div>`;
+                });
+                $('#fileGrid').html(html || '<div class="text-muted p-5 w-100 text-center">Thư mục trống</div>');
+                $('#loader').hide();
+            });
+        }
+
+        function openFolder(id) {
+            const treeEl = $(`.tree-item-content[data-id="${id}"]`);
+            navigateTo(id, treeEl);
+        }
+
+        function selectItem(el, id) {
+            $('.file-item').removeClass('selected');
+            $(el).addClass('selected');
+            selectedItemId = id;
+        }
+
+        // 4. Upload nhiều ảnh
+        function handleUpload(input) {
+            if (!input.files.length) return;
+            const formData = new FormData();
+            for (let i = 0; i < input.files.length; i++) {
+                formData.append('files', input.files[i]);
+            }
+            formData.append('parentId', currentParentId || '');
+
+            $('#loader').show();
+            $.ajax({
+                url: '/Admin/FileManager/UploadMultiple',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function () {
+                    loadFiles(currentParentId);
+                },
+                error: function () { alert('Lỗi khi tải lên'); },
+                complete: function () { $('#loader').hide(); input.value = ""; }
+            });
+        }
+
+        // 5. Thêm thư mục
+        function createFolder() {
+            const name = prompt("Nhập tên thư mục mới:");
+            if (name) {
+                $.post('/Admin/FileManager/CreateFolder', { name: name, parentId: currentParentId }, function () {
+                    loadTree();
+                    loadFiles(currentParentId);
+                });
+            }
+        }
+
+        // 6. Xóa mục đã chọn
+        function deleteSelected() {
+            if (!selectedItemId) return alert("Vui lòng chọn 1 mục để xóa!");
+            if (confirm("Bạn có chắc chắn muốn xóa mục này?")) {
+                $.post('/Admin/FileManager/DeleteItem', { id: selectedItemId }, function () {
+                    loadTree();
+                    loadFiles(currentParentId);
+                }).fail(function () { alert("Lỗi khi xóa mục"); });
+            }
+        }
+    </script>
+

@@ -1,0 +1,118 @@
+﻿
+@{
+    ViewData["Title"] = "GeneralSetting";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<style>
+    /* Điều chỉnh độ rộng tổng thể của khung cấu hình */
+    .settings-container {
+        width :100%;
+        font-size: 1.1rem; /* Tăng kích thước chữ tổng thể */
+    }
+
+    .settings-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+        background: #fff;
+    }
+
+    .settings-header {
+        background-color: transparent;
+        border-bottom: 1px solid #f1f1f1;
+        padding: 1.5rem 2rem;
+        font-weight: 700;
+        color: #4e73df;
+        text-transform: uppercase;
+        font-size: 1rem;
+        letter-spacing: 0.05rem;
+    }
+
+    /* Làm cho các ô nhập liệu to và dễ bấm hơn */
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #d1d3e2;
+        padding: 1.2rem 1rem; /* Tăng độ dày ô nhập liệu */
+        font-size: 1.05rem;
+        height: auto;
+    }
+
+        .form-control:focus {
+            border-color: #4e73df;
+            box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.1);
+        }
+
+    /* Tùy chỉnh nút bấm to hơn */
+    .btn-custom {
+        padding: 12px 35px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .btn-save {
+        background-color: #4e73df;
+        color: white;
+        border: none;
+    }
+
+    /* Switch bảo trì to hơn */
+    .custom-switch .custom-control-label::before {
+        height: 1.75rem;
+        width: 3rem;
+        border-radius: 1rem;
+    }
+
+    .custom-switch .custom-control-label::after {
+        width: calc(1.75rem - 4px);
+        height: calc(1.75rem - 4px);
+        border-radius: 1rem;
+    }
+
+    .custom-switch {
+        padding-left: 3.5rem;
+    }
+</style>
+<div class="settings-container">
+    <form>
+        <div class="card settings-card">
+            <div class="card-header settings-header p-0">
+                <a class="d-flex justify-content-between align-items-center px-4 py-3 text-decoration-none"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#footerSetting"
+                   aria-expanded="true">
+
+                    <span>Thông tin của công ty</span>
+                    <i class="bi bi-chevron-down toggle-icon"></i>
+                </a>
+            </div>
+
+            <div id="footerSetting" class="collapse show">
+                <div class="card-body p-4">
+                    @foreach (var item in ViewBag.Footer)
+                    {
+                        <div class="form-group mb-3">
+                            <label>@item.Description</label>
+                            <input type="text"
+                                   class="form-control"
+                                   name="Settings[@item.SettingKey]"
+                                   value="@item.Value" />
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+
+        <div class="d-flex justify-content-end align-items-center">
+            <button type="submit" class="btn btn-custom btn-save">Lưu thay đổi</button>
+        </div>
+    </form>
+</div>

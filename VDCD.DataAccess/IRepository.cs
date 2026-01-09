@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using VDCD.Entities.Custom;
 
 namespace VDCD.DataAccess
 {
@@ -96,6 +97,7 @@ namespace VDCD.DataAccess
         /// </summary>
         /// <param name="entity">The entity.</param>
         void Delete(T entity);
+        void Update(T entity);
 
         ///// <summary>
         ///// 

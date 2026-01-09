@@ -128,5 +128,10 @@ namespace VDCD.DataAccess
             _dbSet.Remove(entity);
             _context.SaveChanges();
         }
+        public void Update(T entity)
+        {
+            _dbSet.Update(entity);
+            _context.SaveChanges();
+        }
     }
 }

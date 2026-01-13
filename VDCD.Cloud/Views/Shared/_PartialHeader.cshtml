@@ -1,0 +1,314 @@
+﻿<style>
+    /* Màu nền đen tuyệt đối cho header */
+.bg-black { background-color: #000 !important; }
+
+/* Styling Logo */
+.logo-text {
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+    letter-spacing: 1px;
+}
+.v-red { color: #ff0000; }
+.logo-sub {
+    font-size: 9px;
+    color: #fff;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+}
+
+/* Menu links */
+.navbar-nav .nav-link {
+        color: #fff !important;
+        font-size: 20px;
+        line-height: 1.5;
+        font-weight: bold;
+        font-family: var(--e-global-typography-text-font-family), sans-serif;
+        padding: 0.5rem 1.1rem !important;
+        transition: color 0.2s ease-in-out;
+}
+.navbar-nav .nav-link:hover {
+    color: #ff0000 !important;
+}
+
+/* Nút Đăng Nhập đặc trưng */
+.btn-login-custom {
+    background-color: #ff0000;
+    color: #fff !important;
+    padding: 8px 25px;
+    border-radius: 50px;
+    text-decoration: none;
+        font-size: 20px;
+        line-height: 1.5;
+        font-weight: bold;
+        font-family: var(--e-global-typography-text-font-family), sans-serif;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+.btn-login-custom:hover {
+    background-color: #d60000;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+}
+
+/* Mobile adjustments */
+@@media (max-width: 991px) {
+    .navbar-collapse {
+        background: #111;
+        padding: 20px;
+        margin-top: 15px;
+        border-radius: 8px;
+    }
+    .btn-login-custom { margin-top: 10px; width: 100%; text-align: center; }
+}
+</style>
+<header class="header-main">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-black py-2">
+        <div class="container-fluid px-lg-5">
+            <a class="navbar-brand py-0" href="/">
+                <img src="" alt="Logo" class="header-logo" id="main-logo">
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#headerNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="headerNavbar">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="#">Về chúng tôi</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Cơ cấu tổ chức</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Hệ thống trung tâm</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Dự án</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Tin tức</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Liên hệ</a></li>
+
+                    <li class="nav-item px-lg-2">
+                        <a class="nav-link d-flex align-items-center" href="#">
+                            <img src="https://flagcdn.com/w20/us.png" alt="English" class="me-2" style="width: 20px;">
+                            <span>English</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn-login-custom" href="/login">Đăng Nhập</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+<style>
+    .hero-slider {
+        position: relative;
+        width: 100%;
+        height: 100vh; /* Full màn hình */
+        overflow: hidden;
+    }
+
+    /* Hiệu ứng Zoom nhẹ cho ảnh nền */
+    .carousel-item {
+        height: 100vh;
+        background-color: #000;
+    }
+
+    .zoom-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        transition: transform 6s ease-out; /* Thời gian zoom */
+        transform: scale(1);
+    }
+
+    /* Khi slide active, thực hiện zoom lên 1.1 */
+    .carousel-item.active .zoom-bg {
+        transform: scale(1.15);
+    }
+
+    /* Overlay tối để nổi bật chữ */
+    .carousel-item::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+    }
+
+    /* Căn chỉnh chữ */
+    .custom-caption {
+        text-align: left;
+        left: 10%;
+        bottom: 20%;
+        z-index: 10;
+    }
+
+    .hero-title {
+        font-size: 80px;
+        font-weight: 900;
+        color: #fff;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .hero-subtitle {
+        font-size: 60px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: 2px;
+    }
+
+    .text-red {
+        color: #ff0000;
+    }
+
+    /* Nút Khám phá dự án */
+    .explore-button-wrapper {
+        position: absolute;
+        bottom: 50px;
+        right: 10%;
+        z-index: 20;
+    }
+
+    .btn-explore {
+        border: 1px solid #fff;
+        color: #fff;
+        padding: 10px 25px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        transition: 0.3s;
+        background: rgba(0,0,0,0.3);
+    }
+
+    .icon-arrow {
+        background: #ff0000;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 15px;
+    }
+
+    .btn-explore:hover {
+        background: #fff;
+        color: #000;
+    }
+
+    /* Indicators tùy chỉnh */
+    .custom-indicators {
+        justify-content: flex-start;
+        left: 10%;
+        margin-bottom: 50px;
+    }
+
+        .custom-indicators [data-bs-target] {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #fff;
+            border: none;
+            margin-right: 10px;
+        }
+</style>
+<section class="hero-slider">
+    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+        <div class="carousel-indicators custom-indicators" id="slider-indicators"></div>
+
+        <div class="carousel-inner" id="slider-content">
+        </div>
+
+        <div class="explore-button-wrapper">
+            <a href="#" class="btn-explore">
+                Khám Phá Dự Án <span class="icon-arrow">↗</span>
+            </a>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/home/GetHeader',
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    // 1. Cập nhật Logo từ mảng footer
+                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
+                    if (logoData) {
+                        $('#main-logo').attr('src', logoData.value);
+                    }
+
+                    // 2. Cập nhật Slider từ mảng slice
+                    let indicatorsHtml = '';
+                    let slidesHtml = '';
+
+                    // Gom nhóm title và image vì API trả về các object rời rạc
+                    const slices = [];
+                    for (let i = 0; i < response.slice.length; i += 2) {
+                        slices.push({
+                            title: response.slice[i].value,
+                            image: response.slice[i + 1].value
+                        });
+                    }
+
+                    slices.forEach((item, index) => {
+                        const activeClass = index === 0 ? 'active' : '';
+
+                        // Tạo Indicators
+                        indicatorsHtml += `<button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="${index}" class="${activeClass}"></button>`;
+
+                        // Tạo Slide Content với cấu trúc Zoom-bg
+                        slidesHtml += `
+                            <div class="carousel-item ${activeClass}">
+                                <div class="zoom-bg" style="background-image: url('${item.image}');"></div>
+                                <div class="carousel-caption custom-caption">
+                                    <h1 class="hero-title">${item.title.split(' ')[0]} <span class="text-red">${item.title.split(' ').slice(1).join(' ')}</span></h1>
+                                </div>
+                            </div>`;
+                    });
+
+                    $('#slider-indicators').html(indicatorsHtml);
+                    $('#slider-content').html(slidesHtml);
+
+                    // Khởi động lại carousel sau khi thêm dữ liệu động
+                    new bootstrap.Carousel('#heroCarousel', {
+                        interval: 5000,
+                        pause: false
+                    });
+                }
+            },
+            error: function (err) {
+                console.error("Không thể lấy dữ liệu từ API", err);
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        // Khởi tạo Carousel với hiệu ứng fade
+        var myCarousel = document.querySelector('#heroCarousel');
+        var carousel = new bootstrap.Carousel(myCarousel, {
+            interval: 5000,
+            pause: false
+        });
+
+        // Reset lại trạng thái zoom khi chuyển slide để tạo hiệu ứng liên tục
+        myCarousel.addEventListener('slide.bs.carousel', function () {
+            $('.zoom-bg').css('transition', 'none');
+            $('.zoom-bg').css('transform', 'scale(1)');
+
+            // Cần một khoảng nghỉ cực ngắn để trình duyệt nhận diện reset scale
+            setTimeout(function () {
+                $('.zoom-bg').css('transition', 'transform 6s ease-out');
+            }, 50);
+        });
+    });
+</script>

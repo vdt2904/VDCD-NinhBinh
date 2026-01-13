@@ -1,12 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using VDCD.Business.Service;
 
 namespace VDCD.Cloud.Areas.Admin.Controllers
 {
     [Area("Admin")]
     public class AccountController : Controller
     {
+        private readonly CacheSevice _cacheSevice;
+        public AccountController(CacheSevice cacheSevice) { 
+            _cacheSevice = cacheSevice;
+        }
         [HttpGet]
         public IActionResult Login() => View();
         [HttpPost]
@@ -35,7 +40,11 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
 
             return RedirectToAction("Index", "Dashboard");
         }
-
+        public IActionResult RemoveCache()
+        {
+            _cacheSevice.ClearAll();
+            return  Redirect("/Admin");
+        }
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync("AdminAuth");

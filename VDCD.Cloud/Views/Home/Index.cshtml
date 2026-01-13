@@ -1,8 +1,234 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model VDCD.Models.HomeModelView
+@{
+    
+}
+@functions {
+    // Hàm hỗ trợ lấy giá trị nhanh và an toàn
+    string GetSt(string key) => Model.Settings.ContainsKey(key) ? Model.Settings[key] : "";
+}
+<style>
+    .vdcd-about .line {
+    width: 30px;
+    height: 2px;
+    background-color: #dc3545;
+    display: inline-block;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+.vdcd-about .bg-red {
+    background-color: #e30613; /* Màu đỏ đặc trưng */
+}
+
+.vdcd-about .bg-black {
+    background-color: #000000;
+}
+
+/* Định vị khối thống kê đè lên ảnh */
+.stats-container {
+    position: absolute;
+    top: -50px;
+    right: 0;
+    width: 350px;
+    z-index: 10;
+}
+
+.stat-box {
+    min-width: 150px;
+    transition: transform 0.3s ease;
+}
+
+.stat-box:hover {
+    transform: translateY(-5px);
+}
+
+.main-image-wrapper img {
+    object-fit: cover;
+    height: 450px; /* Điều chỉnh chiều cao phù hợp với ảnh của bạn */
+    display: block;
+}
+
+/* Nút cuộn lên ở góc dưới */
+.scroll-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 45px;
+    height: 45px;
+    background-color: #b0b0b0;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+
+/* Responsive cho thiết bị di động */
+@@media (max-width: 991.98px) {
+    .stats-container {
+        position: static;
+        width: 100%;
+        margin-top: 20px;
+    }
+    
+    .main-image-wrapper img {
+        height: auto;
+    }
+}
+</style>
+<section class="vdcd-about py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="line me-2"></span>
+                    <span class="text-danger fw-bold text-uppercase small">Về chúng tôi.</span>
+                </div>
+                <h1 class="display-5 fw-bold text-uppercase">
+                    @GetSt("setting.general.aboutus.headertext")
+                </h1>
+            </div>
+        </div>
+
+        <div class="row g-0 position-relative mt-5">
+            <div class="col-lg-4 pe-lg-5 mb-4 mb-lg-0">
+                <h3 class="fw-bold fs-4 mb-4">
+                    @GetSt("setting.general.aboutus.title")
+                </h3>
+                <p class="text-muted lh-lg" style="font-size: 0.9rem; text-align: justify;">
+                    @GetSt("setting.general.aboutus.content")
+                </p>
+            </div>
+
+            <div class="col-lg-8 position-relative">
+                <div class="main-image-wrapper">
+                    <img src="@GetSt("setting.general.aboutus.image")" alt="VDCD Tech" class="img-fluid w-100 shadow-sm">
+                </div>
+
+                <div class="stats-container d-flex">
+                    <div class="stat-box bg-red text-white p-4 flex-fill text-center">
+                        <i class="fa-solid fa-trophy mb-3" style="font-size: 2.5rem;"></i>
+                        <div class="counter-num h2 fw-bold mb-0">500+</div>
+                        <div class="text-uppercase small fw-bold">Dự án hoàn thành</div>
+                    </div>
+                    <div class="stat-box bg-black text-white p-4 flex-fill text-center">
+                        <i class="fa-solid fa-handshake mb-3" style="font-size: 2.5rem;"></i>
+                        <div class="counter-num h2 fw-bold mb-0">250+</div>
+                        <div class="text-uppercase small fw-bold">Khách hàng</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="scroll-top">
+    <i class="bi bi-arrow-up-short"></i>
 </div>
+@if (GetSt("setting.general.aboutus.centerhidden") == "true")
+{
+    <section class="services-grid container-fluid p-0">
+        <div class="row g-0">
+            @foreach (var item in Model.Centers)
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6 col-12 service-item">
+                    <div class="service-card position-relative overflow-hidden">
+
+                        @* Ảnh nền của toàn bộ ô *@
+                        <div class="service-bg-holder" style="background-image: url('@item.Image');"></div>
+
+                        @* Lớp phủ tối *@
+                        <div class="service-overlay"></div>
+
+                        @* Nội dung *@
+                        <div class="service-content p-4 d-flex flex-column h-100 justify-content-between">
+                            <div class="icon-box">
+                                <div class="bg-danger d-inline-flex align-items-center justify-content-center box-icon-red">
+                                    @* THAY ĐỔI Ở ĐÂY: Dùng thẻ img cho icon *@
+                                    <img src="@item.Icon" alt="icon" class="service-icon-img">
+                                </div>
+                            </div>
+
+                            <div class="text-box">
+                                <h4 class="text-white fw-bold mb-3 service-title">@item.Name</h4>
+                                <a href="@item.Url" target="_blank" class="text-white text-decoration-none small learn-more-btn">
+                                    <i class="fa-solid fa-arrow-right-long me-2"></i>Tìm Hiểu Thêm
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<style>
+    .service-card {
+        height: 550px;
+        position: relative;
+        cursor: pointer;
+        background-color: #000;
+    }
+
+    .service-bg-holder {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        z-index: 1;
+    }
+
+    /* Icon dạng ảnh */
+    .service-icon-img {
+        width: 35px; /* Điều chỉnh kích thước icon cho vừa mắt */
+        height: 35px;
+        object-fit: contain; /* Giữ nguyên tỷ lệ icon */
+        filter: brightness(0) invert(1); /* Nếu icon gốc là màu đen, dòng này sẽ đổi nó sang màu trắng */
+    }
+
+    .box-icon-red {
+        width: 65px;
+        height: 65px;
+        z-index: 3;
+    }
+
+    .service-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+        z-index: 2;
+        transition: all 0.4s ease;
+    }
+
+    .service-content {
+        position: relative;
+        z-index: 3;
+    }
+
+    .service-title {
+        font-size: 1.2rem;
+        line-height: 1.4;
+        text-transform: uppercase;
+    }
+
+    /* Hover effects */
+    .service-item:hover .service-bg-holder {
+        transform: scale(1.1);
+    }
+
+    .service-item:hover .service-overlay {
+        background: rgba(227, 6, 19, 0.5);
+    }
+
+    .learn-more-btn {
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+
+    .service-item:hover .learn-more-btn {
+        padding-left: 8px;
+    }
+</style>

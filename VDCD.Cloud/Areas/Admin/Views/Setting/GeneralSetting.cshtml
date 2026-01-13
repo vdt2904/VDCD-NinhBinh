@@ -3,6 +3,7 @@
     ViewData["Title"] = "GeneralSetting";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
+
 <style>
     /* Điều chỉnh độ rộng tổng thể của khung cấu hình */
     .settings-container {
@@ -79,40 +80,519 @@
     .custom-switch {
         padding-left: 3.5rem;
     }
+    /* Đảm bảo container không bị cố định chiều cao */
+    .settings-container {
+        height: auto;
+        overflow: visible;
+        display: block; /* [cite: 2] */
+    }
+
+    /* Thêm hiệu ứng mượt khi đóng/mở để thấy nút di chuyển */
+    .collapse {
+        transition: all 0.35s ease;
+    }
+
+    /* Đẩy nút lưu cách xa phần nội dung một chút */
+    .btn-save {
+        box-shadow: 0 4px 10px rgba(78, 115, 223, 0.2);
+        transition: transform 0.2s;
+    }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+        }
 </style>
 <div class="settings-container">
-    <form>
+    <form id="settingForm">
+        @Html.AntiForgeryToken()
+
         <div class="card settings-card">
             <div class="card-header settings-header p-0">
                 <a class="d-flex justify-content-between align-items-center px-4 py-3 text-decoration-none"
                    data-bs-toggle="collapse"
-                   data-bs-target="#footerSetting"
-                   aria-expanded="true">
-
+                   data-bs-target="#footerSetting">
                     <span>Thông tin của công ty</span>
                     <i class="bi bi-chevron-down toggle-icon"></i>
                 </a>
             </div>
-
             <div id="footerSetting" class="collapse show">
                 <div class="card-body p-4">
                     @foreach (var item in ViewBag.Footer)
                     {
                         <div class="form-group mb-3">
                             <label>@item.Description</label>
-                            <input type="text"
-                                   class="form-control"
-                                   name="Settings[@item.SettingKey]"
-                                   value="@item.Value" />
+                            <div class="input-group">
+                                <input type="text" class="form-control"
+                                       id="input-@item.SettingKey.Replace(".", "-")"
+                                       name="@item.SettingKey" value="@item.Value" />
+                                @if (item.SettingKey == "setting.general.footer.logo")
+                                {
+                                    <button class="btn btn-outline-secondary" type="button" onclick="openFileManager('@item.SettingKey')">
+                                        <i class="bi bi-image"></i> Chọn ảnh
+                                    </button>
+                                }
+                            </div>
                         </div>
                     }
                 </div>
             </div>
         </div>
+        <div class="card settings-card">
+            <div class="card-header settings-header p-0">
+                <a class="d-flex justify-content-between align-items-center px-4 py-3 text-decoration-none"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#trademarkSetting">
+                    <span>Thương hiệu</span>
+                    <i class="bi bi-chevron-down toggle-icon"></i>
+                </a>
+            </div>
+            <div id="trademarkSetting" class="collapse show">
+                <div class="card-body p-4">
+                    @foreach (var item in ViewBag.Trademark)
+                    {
+                        <div class="form-group mb-3">
+                            <label>@item.Description</label>
+                            @if (item.SettingKey == "setting.general.trademark.description")
+                            {
+                                <textarea class="form-control" name="@item.SettingKey" rows="5">@item.Value</textarea>
+                            }
+                            else
+                            {
+                                <div class="input-group">
+                                    <input type="text" class="form-control"
+                                           id="input-@item.SettingKey.Replace(".", "-")"
+                                           name="@item.SettingKey" value="@item.Value" />
+                                    @if (item.SettingKey == "setting.general.trademark.image")
+                                    {
+                                        <button class="btn btn-outline-secondary" type="button" onclick="openFileManager('@item.SettingKey')">
+                                            <i class="bi bi-image"></i> Chọn ảnh
+                                        </button>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card settings-card">
+            <div class="card-header settings-header p-0">
+                <a class="d-flex justify-content-between align-items-center px-4 py-3 text-decoration-none"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#socialSetting">
+                    <span>Mạng xã hội</span>
+                    <i class="bi bi-chevron-down toggle-icon"></i>
+                </a>
+            </div>
+            <div id="socialSetting" class="collapse show">
+                <div class="card-body p-4">
+                    @foreach (var item in ViewBag.Social)
+                    {
+                        <div class="form-group mb-3">
+                            <label>@item.Description</label>
+                            <input type="text" class="form-control" name="@item.SettingKey" value="@item.Value" />
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="card settings-card">
+            <div class="card-header settings-header p-0">
+                <a class="d-flex justify-content-between align-items-center px-4 py-3 text-decoration-none"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#strengthSetting">
+                    <span>Thế mạnh của công ty</span>
+                    <i class="bi bi-chevron-down toggle-icon"></i>
+                </a>
+            </div>
 
+            <div id="strengthSetting" class="collapse show">
+                <div class="card-body p-4">
+                    <div id="strength-list">
+                        @{
+                            var strengths = (ViewBag.Strengths as IEnumerable<dynamic>) ?? new List<dynamic>();
 
-        <div class="d-flex justify-content-end align-items-center">
-            <button type="submit" class="btn btn-custom btn-save">Lưu thay đổi</button>
+                            // Lấy danh sách các index thực tế đang tồn tại trong DB dựa trên key 'orientation'
+                            // Ví dụ: từ 'setting.general.strengths.orientation.0' lấy được số 0
+                            var existingIndices = strengths
+                            .Where(x => x.SettingKey.Contains("orientation"))
+                            .Select(x =>
+                            {
+                                var parts = x.SettingKey.Split('.');
+
+                            return int.Parse(parts[parts.Length - 1]);
+                            })
+                            .OrderBy(i => i)
+                            .ToList();
+
+                            int displayCount = 0;
+                            foreach (int i in existingIndices)
+                            {
+                                var orientKey = $"setting.general.strengths.orientation.{i}";
+                                var titleKey = $"setting.general.strengths.title.{i}";
+
+                                var orientVal = strengths.FirstOrDefault(x => x.SettingKey == orientKey)?.Value ?? "";
+                                var titleVal = strengths.FirstOrDefault(x => x.SettingKey == titleKey)?.Value ?? "";
+
+                                <div class="strength-item border rounded p-3 mb-3 bg-light">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="badge bg-primary">Thế mạnh #<span class="index-label">@(displayCount + 1)</span></span>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveItem(this, 'up')"><i class="bi bi-arrow-up"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveItem(this, 'down')"><i class="bi bi-arrow-down"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeItem(this)"><i class="bi bi-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-2">
+                                            <label class="form-label small fw-bold">Định hướng</label>
+                                            <input type="text" class="form-control strength-orient"
+                                                   name="setting.general.strengths.orientation.@displayCount" value="@orientVal">
+                                        </div>
+                                        <div class="col-md-8 mb-2">
+                                            <label class="form-label small fw-bold">Nội dung</label>
+                                            <input type="text" class="form-control strength-title"
+                                                   name="setting.general.strengths.title.@displayCount" value="@titleVal">
+                                        </div>
+                                    </div>
+                                </div>
+                                displayCount++;
+                            }
+                        }
+                    </div>
+                    <button type="button" class="btn btn-outline-primary w-100 mt-2" onclick="addNewStrength()">
+                        <i class="bi bi-plus-circle"></i> Thêm thế mạnh mới
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card settings-card">
+            <div class="card-header settings-header p-0">
+                <a class="d-flex justify-content-between align-items-center px-4 py-3 text-decoration-none"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#sliderSetting">
+                    <span>Cấu hình Slider</span>
+                    <i class="bi bi-chevron-down toggle-icon"></i>
+                </a>
+            </div>
+
+            <div id="sliderSetting" class="collapse show">
+                <div class="card-body p-4">
+                    <div id="slider-list">
+                        @{
+                            var sliders = (ViewBag.Sliders as IEnumerable<dynamic>) ?? new List<dynamic>();
+
+                            // Lấy index dựa trên key title
+                            var sliderIndices = sliders
+                            .Where(x => x.SettingKey.Contains("setting.general.sliders.title"))
+                            .Select(x =>
+                            {
+                                var parts = x.SettingKey.Split('.');
+                                return int.Parse(parts[parts.Length - 1]);
+                            })
+                            .OrderBy(i => i)
+                            .ToList();
+
+                            int sliderCount = 0;
+                            foreach (int i in sliderIndices)
+                            {
+                                var titleKey = $"setting.general.sliders.title.{i}";
+                                var imageKey = $"setting.general.sliders.image.{i}";
+
+                                var titleVal = sliders.FirstOrDefault(x => x.SettingKey == titleKey)?.Value ?? "";
+                                var imageVal = sliders.FirstOrDefault(x => x.SettingKey == imageKey)?.Value ?? "";
+
+                                <div class="slider-item border rounded p-3 mb-3 bg-light">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="badge bg-success">Slider #<span class="slider-index-label">@(sliderCount + 1)</span></span>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSlider(this, 'up')"><i class="bi bi-arrow-up"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSlider(this, 'down')"><i class="bi bi-arrow-down"></i></button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSlider(this)"><i class="bi bi-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-5 mb-2">
+                                            <label class="form-label small fw-bold">Tiêu đề slider</label>
+                                            <input type="text" class="form-control slider-title"
+                                                   name="setting.general.sliders.title.@sliderCount" value="@titleVal">
+                                        </div>
+                                        <div class="col-md-7 mb-2">
+                                            <label class="form-label small fw-bold">Hình ảnh</label>
+                                            <div class="input-group">
+                                                <input type="text" class="form-control slider-image"
+                                                       id="input-slider-image-@sliderCount"
+                                                       name="setting.general.sliders.image.@sliderCount" value="@imageVal">
+                                                <button class="btn btn-outline-secondary" type="button" onclick="openFileManagerSlider('@sliderCount')">
+                                                    <i class="bi bi-image"></i> Chọn ảnh
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                sliderCount++;
+                            }
+                        }
+                    </div>
+                    <button type="button" class="btn btn-outline-success w-100 mt-2" onclick="addNewSlider()">
+                        <i class="bi bi-plus-circle"></i> Thêm Slider mới
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card settings-card">
+            <div class="card-header settings-header p-0">
+                <a class="d-flex justify-content-between align-items-center px-4 py-3 text-decoration-none"
+                   data-bs-toggle="collapse"
+                   data-bs-target="#aboutusSetting">
+                    <span>Về chúng tôi</span>
+                    <i class="bi bi-chevron-down toggle-icon"></i>
+                </a>
+            </div>
+            <div id="aboutusSetting" class="collapse show">
+                <div class="card-body p-4">
+                    @foreach (var item in ViewBag.AboutUs)
+                    {
+                        <div class="form-group mb-3">
+                            <label>@item.Description</label>
+                            @if (item.SettingKey == "setting.general.aboutus.content")
+                            {
+                                <textarea class="form-control" name="@item.SettingKey" rows="5">@item.Value</textarea>
+                            }
+                            else if (item.SettingKey == "setting.general.aboutus.centerhidden")
+                            {
+                                <input type="checkbox"
+                                       name="@item.SettingKey"
+                                       value="true"
+                                @(item.Value == "true" || item.Value == "1" ? "checked" : "") />
+                            }
+                            else
+                            {
+                                <div class="input-group">
+                                    <input type="text" class="form-control"
+                                           id="input-@item.SettingKey.Replace(".", "-")"
+                                           name="@item.SettingKey" value="@item.Value" />
+                                    @if (item.SettingKey == "setting.general.aboutus.image")
+                                    {
+                                        <button class="btn btn-outline-secondary" type="button" onclick="openFileManager('@item.SettingKey')">
+                                            <i class="bi bi-image"></i> Chọn ảnh
+                                        </button>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 mb-5 d-flex justify-content-end">
+            <button type="button" class="btn btn-custom btn-save" onclick="saveSetting()">
+                <i class="bi bi-check2-circle"></i> Lưu thay đổi
+            </button>
         </div>
     </form>
 </div>
+<div class="modal fade" id="fileManagerModal" tabindex="-1" aria-hidden="true" style="z-index:1060;">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="height:90vh;">
+        <div class="modal-content h-100">
+            <div class="modal-header">
+                <h5 class="modal-title">Thư viện ảnh</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0 h-100">
+                <iframe id="fileManagerIframe" src="" style="width:100%; height:100%; border:none;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function saveSetting() {
+        const form = document.getElementById('settingForm');
+        const formData = new FormData(form);
+
+        // Xử lý checkbox: nếu không checked thì set = false
+        form.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            if (!cb.checked) {
+                // nếu chưa có key trong FormData thì append false
+                if (!formData.has(cb.name)) {
+                    formData.append(cb.name, 'false');
+                }
+            } else {
+                // đảm bảo giá trị true (phòng value khác)
+                formData.set(cb.name, 'true');
+            }
+        });
+        fetch('/Admin/setting/save', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    alert('Lưu cấu hình thành công');
+                } else {
+                    alert(res.message || 'Lưu thất bại');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Có lỗi xảy ra');
+            });
+    }
+    let currentTargetInput = '';
+
+    function openFileManager(settingKey) {
+        // Chuyển đổi key thành ID input (thay dấu . thành - để khớp với ID đã đặt ở trên)
+        currentTargetInput = 'input-' + settingKey.replaceAll('.', '-');
+
+        // Gán src cho iframe (Đảm bảo đường dẫn này đúng với route Index của FileManager)
+        document.getElementById('fileManagerIframe').src = '/Admin/FileManager/Index';
+
+        // Mở modal
+        var myModal = new bootstrap.Modal(document.getElementById('fileManagerModal'));
+        myModal.show();
+    }
+
+    // Lắng nghe sự kiện từ iframe FileManager gửi về
+    window.addEventListener('message', function (event) {
+        // Kiểm tra nếu dữ liệu gửi về có chứa URL ảnh
+        if (event.data && event.data.type === 'getFileUrl') {
+            const fileUrl = event.data.url;
+
+            // Gán giá trị vào input
+            const input = document.getElementById(currentTargetInput);
+            if (input) {
+                input.value = fileUrl;
+            }
+
+            // Đóng modal
+            var modalEl = document.getElementById('fileManagerModal');
+            var modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+        }
+    });
+    function addNewStrength() {
+        const list = document.getElementById('strength-list');
+        const index = list.querySelectorAll('.strength-item').length;
+
+        const html = `
+            <div class="strength-item border rounded p-3 mb-3 bg-light">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-primary">Thế mạnh #<span class="index-label">${index + 1}</span></span>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveItem(this, 'up')"><i class="bi bi-arrow-up"></i></button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveItem(this, 'down')"><i class="bi bi-arrow-down"></i></button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeItem(this)"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label small fw-bold">Định hướng</label>
+                        <input type="text" class="form-control strength-orient" name="setting.general.strengths.orientation.${index}">
+                    </div>
+                    <div class="col-md-8 mb-2">
+                        <label class="form-label small fw-bold">Nội dung</label>
+                        <input type="text" class="form-control strength-title" name="setting.general.strengths.title.${index}">
+                    </div>
+                </div>
+            </div>`;
+        list.insertAdjacentHTML('beforeend', html);
+    }
+
+    function removeItem(btn) {
+        if (confirm("Bạn có chắc muốn xóa mục này?")) {
+            btn.closest('.strength-item').remove();
+            refreshIndices();
+        }
+    }
+
+    function moveItem(btn, direction) {
+        const item = btn.closest('.strength-item');
+        if (direction === 'up' && item.previousElementSibling) {
+            item.parentNode.insertBefore(item, item.previousElementSibling);
+        } else if (direction === 'down' && item.nextElementSibling) {
+            item.parentNode.insertBefore(item.nextElementSibling, item);
+        }
+        refreshIndices();
+    }
+
+    function refreshIndices() {
+        const items = document.querySelectorAll('.strength-item');
+        items.forEach((item, i) => {
+            item.querySelector('.index-label').innerText = i + 1;
+            item.querySelector('.strength-orient').name = `setting.general.strengths.orientation.${i}`;
+            item.querySelector('.strength-title').name = `setting.general.strengths.title.${i}`;
+        });
+    }
+</script>
+<script>
+    function addNewSlider() {
+        const list = document.getElementById('slider-list');
+        const index = list.querySelectorAll('.slider-item').length;
+        const html = `
+            <div class="slider-item border rounded p-3 mb-3 bg-light">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-success">Slider #<span class="slider-index-label">${index + 1}</span></span>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSlider(this, 'up')"><i class="bi bi-arrow-up"></i></button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSlider(this, 'down')"><i class="bi bi-arrow-down"></i></button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSlider(this)"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5 mb-2">
+                        <label class="form-label small fw-bold">Tiêu đề slider</label>
+                        <input type="text" class="form-control slider-title" name="setting.general.sliders.title.${index}">
+                    </div>
+                    <div class="col-md-7 mb-2">
+                        <label class="form-label small fw-bold">Hình ảnh</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control slider-image" id="input-slider-image-${index}" name="setting.general.sliders.image.${index}">
+                            <button class="btn btn-outline-secondary" type="button" onclick="openFileManagerSlider('${index}')">
+                                <i class="bi bi-image"></i> Chọn ảnh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        list.insertAdjacentHTML('beforeend', html);
+    }
+
+    function openFileManagerSlider(index) {
+        currentTargetInput = 'input-slider-image-' + index;
+        document.getElementById('fileManagerIframe').src = '/Admin/FileManager/Index';
+        var myModal = new bootstrap.Modal(document.getElementById('fileManagerModal'));
+        myModal.show();
+    }
+
+    function removeSlider(btn) {
+        if (confirm("Bạn có chắc muốn xóa slider này?")) {
+            btn.closest('.slider-item').remove();
+            refreshSliderIndices();
+        }
+    }
+
+    function moveSlider(btn, direction) {
+        const item = btn.closest('.slider-item');
+        if (direction === 'up' && item.previousElementSibling) {
+            item.parentNode.insertBefore(item, item.previousElementSibling);
+        } else if (direction === 'down' && item.nextElementSibling) {
+            item.parentNode.insertBefore(item.nextElementSibling, item);
+        }
+        refreshSliderIndices();
+    }
+
+    function refreshSliderIndices() {
+        const items = document.querySelectorAll('.slider-item');
+        items.forEach((item, i) => {
+            item.querySelector('.slider-index-label').innerText = i + 1;
+            item.querySelector('.slider-title').name = `setting.general.sliders.title.${i}`;
+            const imgInput = item.querySelector('.slider-image');
+            imgInput.name = `setting.general.sliders.image.${i}`;
+            imgInput.id = `input-slider-image-${i}`;
+        });
+    }
+</script>

@@ -30,10 +30,14 @@ namespace VDCD.Entities.Cache
 
         /* ================== USER ================== */
 
-        public const string UserById = "$domain.user.{0}";
+        public const string UserById = "$domain.user.all";
         public const int UserByIdTimeout = 30;
-
-
+        public const string CategoryAll = "$domain.category.all";
+        public const int CategoryAllTimeout = 30;
+        public const string ProjectAll = "$domain.center.all";
+        public const int ProjectAllTimeout = 30;
+        public const string CenterAll = "$domain.center.all";
+        public const int CenterAllTimeout = 30;
         /* ================== COMMON ================== */
 
         public const int OneMinute = 1;

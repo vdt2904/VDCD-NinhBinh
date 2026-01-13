@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using System;
+using VDCD.Business;
 using VDCD.Business.Infrastructure;
 using VDCD.Business.Service;
 using VDCD.DataAccess;
@@ -19,9 +20,12 @@ builder.Services.AddSingleton<ICacheService, CacheSevice>();
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 // DI service
-builder.Services.AddScoped<UserBll>();
+builder.Services.AddBusinessServices();
+/*builder.Services.AddScoped<UserBll>();
 builder.Services.AddScoped<SettingService>();
 builder.Services.AddScoped<FileManagerService>();
+builder.Services.AddScoped<CacheSevice>();
+builder.Services.AddScoped<CategoryService>();*/
 
 builder.Services.AddControllersWithViews();
 // authen riêng cho admin

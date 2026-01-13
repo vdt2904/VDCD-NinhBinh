@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,10 +19,12 @@ namespace VDCD.Business.Service
         private readonly IRepository<Files> _filesRepository;
         private readonly ICacheService _cache;
         private readonly string _uploadFolder;
-        public FileManagerService(IRepository<Files> repo, ICacheService cache, IConfiguration config)
+        protected readonly AppDbContext _context;
+        public FileManagerService(AppDbContext context,IRepository<Files> repo, ICacheService cache, IConfiguration config)
         {
             _filesRepository = repo;
             _cache = cache;
+            _context = context;
             _uploadFolder = config["FileManager:UploadFolder"] ?? "wwwroot/uploads";
             if (!Directory.Exists(_uploadFolder))
                 Directory.CreateDirectory(_uploadFolder);
@@ -36,6 +39,7 @@ namespace VDCD.Business.Service
                 path = "", // Thư mục không có đường dẫn vật lý [cite: 2]
                 created_at = DateTime.Now
             });
+            _context.SaveChanges();
             _cache.Remove(CacheParam.FileAllKey); // Refresh cache [cite: 2]
 }
         public IEnumerable<FilePickerItemDto> GetForPicker(long? parentId = null, bool onlyImage = false)
@@ -89,7 +93,7 @@ namespace VDCD.Business.Service
                 size = fileStream.Length,
                 created_at = DateTime.Now
             });
-
+            _context.SaveChanges();
             _cache.Remove(CacheParam.FileAllKey); // refresh cache
         }
         public void Move(long id, long? newParentId)
@@ -100,7 +104,7 @@ namespace VDCD.Business.Service
 
             node.parent_id = newParentId;
             _filesRepository.Update(node);
-            
+            _context.SaveChanges();
             _cache.Remove(CacheParam.FileAllKey); // refresh cache
         }
         public void Delete(long id)
@@ -113,7 +117,7 @@ namespace VDCD.Business.Service
                 File.Delete(node.path);
 
             _filesRepository.Delete(node);
-
+            _context.SaveChanges();
             _cache.Remove(CacheParam.FileAllKey); // refresh cache
         }
         public Files GetById(long id)

@@ -97,6 +97,7 @@ namespace VDCD.DataAccess
         /// </summary>
         /// <param name="entity">The entity.</param>
         void Delete(T entity);
+        void DeleteRange(IEnumerable<T> entity);
         void Update(T entity);
 
         ///// <summary>

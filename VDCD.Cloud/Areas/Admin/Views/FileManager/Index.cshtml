@@ -220,29 +220,46 @@
         }
 
         // 3. Load danh sách File/Folder trong Grid
-        function loadFiles(parentId) {
-            currentParentId = parentId;
-            selectedItemId = null;
-            $('#loader').show();
+    // 3. Load danh sách File/Folder trong Grid
+    function loadFiles(parentId) {
+        currentParentId = parentId;
+        selectedItemId = null;
+        $('#loader').show();
 
-            $.get('/Admin/FileManager/GetFilesByFolder', { parentId: parentId }, function (data) {
-                let html = '';
-                data.forEach(item => {
-                    const isImage = item.contentType && item.contentType.includes('image');
-                    const preview = item.isFolder
-                        ? `<i class="fas fa-folder"></i>`
-                        : (isImage ? `<img src="${item.url}" alt="${item.name}">` : `<i class="fas fa-file-alt text-secondary"></i>`);
+        $.get('/Admin/FileManager/GetFilesByFolder', { parentId: parentId }, function (data) {
+            let html = '';
+            data.forEach(item => {
+                const isImage = item.contentType && item.contentType.includes('image');
 
-                    html += `
-                                <div class="file-item" onclick="selectItem(this, ${item.id})" ondblclick="${item.isFolder ? `openFolder(${item.id})` : ''}">
-                                    <div class="file-preview">${preview}</div>
-                                    <div class="file-name" title="${item.name}">${item.name}</div>
-                                </div>`;
-                });
-                $('#fileGrid').html(html || '<div class="text-muted p-5 w-100 text-center">Thư mục trống</div>');
-                $('#loader').hide();
+                // Phân biệt Icon hiển thị
+                const preview = item.isFolder
+                    ? `<i class="fas fa-folder" style="color: #ffc107; font-size: 45px;"></i>`
+                    : (isImage
+                        ? `<img src="${item.url}" alt="${item.name}" style="width:100%; height:100%; object-fit:cover;">`
+                        : `<i class="fas fa-file-alt text-secondary" style="font-size: 45px;"></i>`);
+
+                // PHÂN BIỆT DOUBLE CLICK:
+                // - Nếu là Thư mục: Double click để VÀO TRONG thư mục đó.
+                // - Nếu là File/Ảnh: Double click để CHỌN và gửi link về trang Setting.
+                const doubleClickAction = item.isFolder
+                    ? `openFolder(${item.id})`
+                    : `selectFileToSetting('${item.url}')`;
+
+                html += `
+                    <div class="file-item ${item.isFolder ? 'type-folder' : 'type-file'}"
+                         onclick="selectItem(this, ${item.id})"
+                         ondblclick="${doubleClickAction}"
+                         style="cursor: pointer;">
+                        <div class="file-preview">${preview}</div>
+                        <div class="file-name" title="${item.name}" style="font-weight: ${item.isFolder ? 'bold' : 'normal'}">
+                            ${item.name}
+                        </div>
+                    </div>`;
             });
-        }
+            $('#fileGrid').html(html || '<div class="text-muted p-5 w-100 text-center">Thư mục trống</div>');
+            $('#loader').hide();
+        });
+    }
 
         function openFolder(id) {
             const treeEl = $(`.tree-item-content[data-id="${id}"]`);
@@ -300,5 +317,18 @@
                 }).fail(function () { alert("Lỗi khi xóa mục"); });
             }
         }
+    function selectFileToSetting(url) {
+        // Chỉ thực hiện gửi dữ liệu nếu trang này đang nằm trong iframe (Modal)
+        if (window.self !== window.top) {
+            window.parent.postMessage({
+                type: 'getFileUrl',
+                url: url
+            }, '*');
+            console.log("Đã gửi URL ảnh về trang cấu hình:", url);
+        } else {
+            // Nếu mở trang FileManager độc lập, double click ảnh sẽ mở ảnh trong tab mới
+            window.open(url, '_blank');
+        }
+    }
     </script>
 

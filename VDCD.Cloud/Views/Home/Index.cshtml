@@ -1,8 +1,1160 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model VDCD.Models.HomeModelView
+@{
+    
+}
+<section class="hero-slider">
+    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+        <div class="carousel-indicators custom-indicators" id="slider-indicators"></div>
+
+        <div class="carousel-inner" id="slider-content">
+        </div>
+
+        <div class="explore-button-wrapper">
+            <a href="#" class="btn-explore">
+                Khám Phá Dự Án <span class="icon-arrow">↗</span>
+            </a>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/home/GetHeader',
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    // 1. Cập nhật Logo từ mảng footer
+                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
+                    if (logoData) {
+                        $('#main-logo').attr('src', logoData.value);
+                    }
+
+                    // 2. Cập nhật Slider từ mảng slice
+                    let indicatorsHtml = '';
+                    let slidesHtml = '';
+
+                    // Gom nhóm title và image vì API trả về các object rời rạc
+                    const slices = [];
+                    for (let i = 0; i < response.slice.length; i += 2) {
+                        slices.push({
+                            title: response.slice[i].value,
+                            image: response.slice[i + 1].value
+                        });
+                    }
+
+                    slices.forEach((item, index) => {
+                        const activeClass = index === 0 ? 'active' : '';
+
+                        // Tạo Indicators
+                        indicatorsHtml += `<button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="${index}" class="${activeClass}"></button>`;
+
+                        // Tạo Slide Content với cấu trúc Zoom-bg
+                        slidesHtml += `
+                                <div class="carousel-item ${activeClass}">
+                                    <div class="zoom-bg" style="background-image: url('${item.image}');"></div>
+                                    <div class="carousel-caption custom-caption">
+                                        <h1 class="hero-title">${item.title.split(' ')[0]} <span class="text-red">${item.title.split(' ').slice(1).join(' ')}</span></h1>
+                                    </div>
+                                </div>`;
+                    });
+
+                    $('#slider-indicators').html(indicatorsHtml);
+                    $('#slider-content').html(slidesHtml);
+
+                    // Khởi động lại carousel sau khi thêm dữ liệu động
+                    new bootstrap.Carousel('#heroCarousel', {
+                        interval: 5000,
+                        pause: false
+                    });
+                }
+            },
+            error: function (err) {
+                console.error("Không thể lấy dữ liệu từ API", err);
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        // Khởi tạo Carousel với hiệu ứng fade
+        var myCarousel = document.querySelector('#heroCarousel');
+        var carousel = new bootstrap.Carousel(myCarousel, {
+            interval: 5000,
+            pause: false
+        });
+
+        // Reset lại trạng thái zoom khi chuyển slide để tạo hiệu ứng liên tục
+        myCarousel.addEventListener('slide.bs.carousel', function () {
+            $('.zoom-bg').css('transition', 'none');
+            $('.zoom-bg').css('transform', 'scale(1)');
+
+            // Cần một khoảng nghỉ cực ngắn để trình duyệt nhận diện reset scale
+            setTimeout(function () {
+                $('.zoom-bg').css('transition', 'transform 6s ease-out');
+            }, 50);
+        });
+    });
+</script>
+@functions {
+    // Hàm hỗ trợ lấy giá trị nhanh và an toàn
+    string GetSt(string key) => Model.Settings.ContainsKey(key) ? Model.Settings[key] : "";
+}
+<style>
+    .vdcd-about .line {
+    width: 30px;
+    height: 2px;
+    background-color: #dc3545;
+    display: inline-block;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+.vdcd-about .bg-red {
+    background-color: #e30613; /* Màu đỏ đặc trưng */
+}
+
+.vdcd-about .bg-black {
+    background-color: #000000;
+}
+
+/* Định vị khối thống kê đè lên ảnh */
+.stats-container {
+    position: absolute;
+    top: -50px;
+    right: 0;
+    width: 350px;
+    z-index: 10;
+}
+
+.stat-box {
+    min-width: 150px;
+    transition: transform 0.3s ease;
+}
+
+.stat-box:hover {
+    transform: translateY(-5px);
+}
+
+.main-image-wrapper img {
+    object-fit: cover;
+    height: 450px; /* Điều chỉnh chiều cao phù hợp với ảnh của bạn */
+    display: block;
+}
+
+/* Nút cuộn lên ở góc dưới */
+   
+
+/* Responsive cho thiết bị di động */
+@@media (max-width: 991.98px) {
+    .stats-container {
+        position: static;
+        width: 100%;
+        margin-top: 20px;
+    }
+    
+    .main-image-wrapper img {
+        height: auto;
+    }
+}
+</style>
+
+<section class="vdcd-about py-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="line me-2"></span>
+                    <span class="text-danger fw-bold text-uppercase small">Về chúng tôi.</span>
+                </div>
+                <h1 class="display-5 fw-bold text-uppercase">
+                    @GetSt("setting.general.aboutus.headertext")
+                </h1>
+            </div>
+        </div>
+
+        <div class="row g-0 position-relative mt-5">
+            <div class="col-lg-4 pe-lg-5 mb-4 mb-lg-0">
+                <h3 class="fw-bold fs-4 mb-4">
+                    @GetSt("setting.general.aboutus.title")
+                </h3>
+                <p class="text-muted lh-lg" style="font-size: 0.9rem; text-align: justify;">
+                    @GetSt("setting.general.aboutus.content")
+                </p>
+            </div>
+
+            <div class="col-lg-8 position-relative">
+                <div class="main-image-wrapper">
+                    <img src="@GetSt("setting.general.aboutus.image")" alt="VDCD Tech" class="img-fluid w-100 shadow-sm">
+                </div>
+
+                <div class="stats-container d-flex">
+                    <div class="stat-box bg-red text-white p-4 flex-fill text-center">
+                        <i class="fa-solid fa-trophy mb-3" style="font-size: 2.5rem;"></i>
+                        <div class="counter-num h2 fw-bold mb-0">500+</div>
+                        <div class="text-uppercase small fw-bold">Dự án hoàn thành</div>
+                    </div>
+                    <div class="stat-box bg-black text-white p-4 flex-fill text-center">
+                        <i class="fa-solid fa-handshake mb-3" style="font-size: 2.5rem;"></i>
+                        <div class="counter-num h2 fw-bold mb-0">250+</div>
+                        <div class="text-uppercase small fw-bold">Khách hàng</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (GetSt("setting.general.aboutus.centerhidden") == "true")
+{
+    <section class="services-grid container-fluid p-0">
+        <div class="row g-0">
+            @foreach (var item in Model.Centers)
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6 col-12 service-item">
+                    <div class="service-card position-relative overflow-hidden">
+
+                        @* Ảnh nền của toàn bộ ô *@
+                        <div class="service-bg-holder" style="background-image: url('@item.Image');"></div>
+
+                        @* Lớp phủ tối *@
+                        <div class="service-overlay"></div>
+
+                        @* Nội dung *@
+                        <div class="service-content p-4 d-flex flex-column h-100 justify-content-between">
+                            <div class="icon-box">
+                                <div class="bg-danger d-inline-flex align-items-center justify-content-center box-icon-red">
+                                    @* THAY ĐỔI Ở ĐÂY: Dùng thẻ img cho icon *@
+                                    <img src="@item.Icon" alt="icon" class="service-icon-img">
+                                </div>
+                            </div>
+
+                            <div class="text-box">
+                                <h4 class="text-white fw-bold mb-3 service-title">@item.Name</h4>
+                                <a href="@item.Url" target="_blank" class="text-white text-decoration-none small learn-more-btn">
+                                    <i class="fa-solid fa-arrow-right-long me-2"></i>Tìm Hiểu Thêm
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<style>
+    .service-card {
+        height: 550px;
+        position: relative;
+        cursor: pointer;
+        background-color: #000;
+    }
+
+    .service-bg-holder {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        z-index: 1;
+    }
+
+    /* Icon dạng ảnh */
+    .service-icon-img {
+        width: 35px; /* Điều chỉnh kích thước icon cho vừa mắt */
+        height: 35px;
+        object-fit: contain; /* Giữ nguyên tỷ lệ icon */
+        filter: brightness(0) invert(1); /* Nếu icon gốc là màu đen, dòng này sẽ đổi nó sang màu trắng */
+    }
+
+    .box-icon-red {
+        width: 65px;
+        height: 65px;
+        z-index: 3;
+    }
+
+    .service-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+        z-index: 2;
+        transition: all 0.4s ease;
+    }
+
+    .service-content {
+        position: relative;
+        z-index: 3;
+    }
+
+    .service-title {
+        font-size: 1.2rem;
+        line-height: 1.4;
+        text-transform: uppercase;
+    }
+
+    /* Hover effects */
+    .service-item:hover .service-bg-holder {
+        transform: scale(1.1);
+    }
+
+    .service-item:hover .service-overlay {
+        background: rgba(227, 6, 19, 0.5);
+    }
+
+    .learn-more-btn {
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+
+    .service-item:hover .learn-more-btn {
+        padding-left: 8px;
+    }
+</style>
+@{
+    // Lấy danh sách các index hiện có trong Database (0, 1, 2...)
+    var visionIndexes = Model.Settings.Keys
+        .Where(k => k.StartsWith("setting.general.vision.tab_name."))
+        .Select(k => k.Replace("setting.general.vision.tab_name.", ""))
+        .OrderBy(idx => idx)
+        .ToList();
+}
+
+<section class="vision-section py-5 position-relative">
+    <div class="vision-bg-overlay d-none d-lg-block"></div>
+
+    <div class="container position-relative" style="z-index: 2;">
+        @* 1. TIÊU ĐỀ CHÍNH *@
+        <div class="row mb-4">
+            <div class="col-12 text-center text-lg-start">
+                <div class="d-flex align-items-center mb-2 justify-content-center justify-content-lg-start">
+                    <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+                    <span class="text-danger fw-bold text-uppercase small">Tầm nhìn & giá trị.</span>
+                </div>
+                <h2 class="display-5 fw-bold text-uppercase">@GetSt("setting.general.vision.main_title")</h2>
+            </div>
+        </div>
+
+        @* 2. THANH ĐIỀU HƯỚNG TAB (Đã tách ra ngoài để sửa lỗi click 2 lần) *@
+        <div class="row mb-4">
+            <div class="col-lg-6 offset-lg-6 ps-lg-5">
+                <ul class="nav nav-pills gap-3 justify-content-center justify-content-lg-start" id="visionTab" role="tablist">
+                    @foreach (var idx in visionIndexes)
+                    {
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link rounded-pill px-4 fw-bold @(idx == visionIndexes.First() ? "active" : "bg-white text-dark shadow-sm")"
+                                    id="tab-btn-@idx"
+                                    data-bs-toggle="pill"
+                                    data-bs-target="#content-tab-@idx"
+                                    type="button" role="tab">
+                                @GetSt($"setting.general.vision.tab_name.{idx}")
+                            </button>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        @* 3. NỘI DUNG TAB *@
+        <div class="tab-content" id="visionTabContent">
+            @foreach (var idx in visionIndexes)
+            {
+                var isActive = (idx == visionIndexes.First()) ? "show active" : "";
+
+                <div class="tab-pane fade @isActive" id="content-tab-@idx" role="tabpanel">
+                    <div class="row align-items-center">
+                        <div class="col-lg-6 p-0 position-relative">
+                            <div class="vision-image shadow-lg">
+                                <img src="@GetSt($"setting.general.vision.image.{idx}")" class="img-fluid w-100" alt="Vision" style="height: 500px; object-fit: cover;">
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 ps-lg-5 mt-4 mt-lg-0">
+                            <div class="vision-content-box">
+                                <h3 class="fw-bold mb-3 fs-2 text-uppercase">@GetSt($"setting.general.vision.title.{idx}")</h3>
+                                <p class="text-muted lh-lg mb-4" style="text-align: justify;">
+                                    @GetSt($"setting.general.vision.content.{idx}")
+                                </p>
+
+                                @* XỬ LÝ DÒNG CHỮ XUỐNG DÒNG THÀNH LIST *@
+                                <div class="vision-lines-list">
+                                    @{
+                                        var linesRaw = GetSt($"setting.general.vision.lines.{idx}");
+                                        if (!string.IsNullOrEmpty(linesRaw))
+                                        {
+                                            // Tách chuỗi theo ký tự xuống dòng
+                                            var lines = linesRaw.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                                            foreach (var line in lines)
+                                            {
+                                                <div class="line-item d-flex align-items-center py-3 border-bottom">
+                                                    <span class="dot-red me-3"></span>
+                                                    <span class="fw-bold text-dark">@line.Trim()</span>
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+<style>
+    /* Dấu chấm đỏ */
+    .dot-red {
+        width: 8px;
+        height: 8px;
+        background-color: #e30613;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    /* Tùy chỉnh danh sách dòng */
+    .vision-lines-list .line-item:first-child {
+        border-top: 1px solid #eee;
+    }
+
+    .vision-lines-list .line-item {
+        border-bottom: 1px solid #eee;
+        font-size: 1.05rem;
+    }
+
+    /* Sửa lại Nav Link của Bootstrap để giống mẫu */
+    .vision-section .nav-pills .nav-link {
+        border: none;
+        background-color: #fff;
+        color: #333;
+        transition: all 0.3s;
+    }
+
+        .vision-section .nav-pills .nav-link.active {
+            background-color: #e30613 !important;
+            color: #fff !important;
+        }
+
+    /* Lớp nền xám bên phải */
+    .vision-bg-overlay {
+        position: absolute;
+        top: 50px;
+        right: 0;
+        bottom: 0;
+        left: 40%;
+        background-color: #f8f9fa;
+        z-index: 1;
+    }
+</style>
+<section class="featured-projects py-5 bg-black text-white overflow-hidden">
+    <div class="container py-4" style="max-width:unset;">
+        @* Tiêu đề *@
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="d-flex align-items-center mb-2" style="margin-left: 20%;">
+                    <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+                    <span class="text-danger fw-bold text-uppercase small">dự án.</span>
+                </div>
+                <h2 class="display-4 fw-bold text-uppercase text-center">Dự án nổi bật</h2>
+            </div>
+        </div>
+
+        @* Container Slider *@
+        <div class="project-slider-wrapper" style="margin: 0 50px;">
+            <div class="project-slider">
+                @foreach (var item in Model.Projects)
+                {
+                    var category = ((IEnumerable<dynamic>)ViewBag.Categories)
+                    .FirstOrDefault(c => c.Id == item.CategoryId);
+                    var categoryName = category != null ? category.CategoryName : "Dự án";
+
+                    @* Mỗi slide item *@
+                    <div class="px-2">
+                        <div class="project-card position-relative overflow-hidden shadow">
+                            <img src="@item.Image" class="project-img w-100" alt="@item.ProjectName">
+                            <div class="project-overlay"></div>
+                            <div class="project-info p-4">
+                                <h4 class="fw-bold mb-2 text-white text-truncate">
+                                    @item.ProjectName <i class="fa-solid fa-arrow-up-right-from-square fs-6 ms-1"></i>
+                                </h4>
+                                <span class="badge border border-white rounded-pill px-3 py-2 fw-light">
+                                    @categoryName
+                                </span>
+                            </div>
+                            <div class="hover-line"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* Nút điều hướng *@
+        <div class="row mt-5">
+            <div class="col-12 d-flex gap-2 justify-content-center justify-content-lg-start" style="padding-left: 10%;">
+                <button id="prevProject" class="btn btn-outline-light rounded-0 p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button id="nextProject" class="btn btn-outline-light rounded-0 p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $('.project-slider').slick({
+            infinite: true,
+            slidesToShow: 4, // Mặc định hiện 4 ảnh như col-lg-3
+            slidesToScroll: 1,
+            arrows: false, // Tắt mũi tên mặc định của Slick
+            autoplay: true,
+            autoplaySpeed: 3000,
+            responsive: [
+                {
+                    breakpoint: 1200,
+                    settings: { slidesToShow: 3 }
+                },
+                {
+                    breakpoint: 992,
+                    settings: { slidesToShow: 2 }
+                },
+                {
+                    breakpoint: 576,
+                    settings: { slidesToShow: 1 }
+                }
+            ]
+        });
+
+        // Sự kiện cho nút bấm Custom
+        $('#prevProject').click(function () {
+            $('.project-slider').slick('slickPrev');
+        });
+        $('#nextProject').click(function () {
+            $('.project-slider').slick('slickNext');
+        });
+    });
+</script>
+<style>
+    .project-slider .slick-list {
+        margin: 0 -10px;
+    }
+
+    /* Đảm bảo ảnh dự án luôn chiếm hết chiều cao thẻ */
+    .project-card {
+        height: 450px; /* Tăng nhẹ chiều cao cho cân đối */
+        background-color: #222;
+    }
+
+    /* Hiệu ứng mượt mà khi di chuyển slide */
+    .slick-slide {
+        transition: opacity 0.3s ease;
+    }
+
+    /* Các nút điều hướng khi hover */
+    .featured-projects .btn-outline-light:hover {
+        background-color: #e30613;
+        border-color: #e30613;
+        color: white;
+    }
+    .featured-projects {
+        background-color: #111 !important; /* Màu nền đen nhám */
+    }
+
+    .project-card {
+        height: 400px;
+        cursor: pointer;
+    }
+
+    .project-img {
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* Tạo lớp phủ tối để chữ màu trắng nổi bật */
+    .project-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+        z-index: 1;
+    }
+
+    .project-info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 2;
+        transition: transform 0.3s ease;
+    }
+
+    .project-card:hover .project-img {
+        transform: scale(1.1);
+    }
+
+    /* Thanh đỏ dưới chân thẻ */
+    .hover-line {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 4px;
+        background-color: #e30613;
+        z-index: 3;
+        transition: width 0.4s ease;
+    }
+
+    .project-card:hover .hover-line {
+        width: 100%;
+    }
+
+    /* Badge phong cách trong ảnh */
+    .project-card .badge {
+        font-size: 0.75rem;
+        background: transparent;
+        text-transform: uppercase;
+    }
+</style>
+
+@{
+    // Lấy danh sách các index của dịch vụ (0, 1, 2...) từ Dictionary
+    var serviceIndexes = Model.Settings.Keys
+        .Where(k => k.StartsWith("setting.general.services.title."))
+        .Select(k => k.Replace("setting.general.services.title.", ""))
+        .OrderBy(idx => idx)
+        .ToList();
+}
+
+<section class="services-section py-5 position-relative">
+    <div class="tech-bg-overlay"></div>
+
+    <div class="container position-relative" style="z-index: 2;">
+        @* TIÊU ĐỀ CHÍNH *@
+        <div class="row mb-5">
+            <div class="col-12 text-center">
+                <div class="d-flex align-items-center mb-2 ">
+                    <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+                    <span class="text-danger fw-bold text-uppercase small">dịch vụ.</span>
+                </div>
+                <h2 class="display-4 fw-bold text-uppercase">
+                    @GetSt("setting.general.services.titlemain")
+                </h2>
+            </div>
+        </div>
+
+        @* DANH SÁCH DỊCH VỤ DÙNG VÒNG LẶP *@
+        <div class="row g-4 justify-content-center">
+            @foreach (var idx in serviceIndexes)
+            {
+                <div class="col-lg-4 col-md-6">
+                    <div class="service-box p-5 bg-white shadow-sm position-relative h-100">
+                        @* Số thứ tự (01, 02, 03...) *@
+                        <div class="service-number position-absolute top-0 start-0 border p-2 bg-light text-muted small">
+                            @(int.Parse(idx) + 1 < 10 ? "0" + (int.Parse(idx) + 1) : (int.Parse(idx) + 1)).
+                        </div>
+
+                        <div class="service-content mt-3">
+                            <h3 class="fw-bold fs-4 mb-4 title-limit">
+                                @GetSt($"setting.general.services.title.{idx}")
+                            </h3>
+                            <p class="text-muted lh-lg mb-5 content-limit">
+                                @GetSt($"setting.general.services.content.{idx}")
+                            </p>
+
+                            @* Nút tìm hiểu thêm *@
+                            <div class="mt-auto">
+                                <a href="#" class="btn-learn-more d-inline-flex align-items-center text-decoration-none text-dark fw-bold border rounded-pill px-4 py-2">
+                                    Tìm Hiểu Thêm
+                                    <span class="ms-2 bg-black text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                                        <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px;"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+<style>
+    .services-section {
+        background-color: #fcfdfe;
+        overflow: hidden;
+    }
+
+    /* Giả lập nền mạng lưới công nghệ phía sau */
+    .tech-bg-overlay {
+        position: absolute;
+        inset: 0;
+        background-image: url('/path-to-your-network-icon-bg.png'); /* Bạn có thể dùng ảnh mạng lưới mờ */
+        background-size: cover;
+        opacity: 0.05;
+        z-index: 1;
+    }
+
+    .service-box {
+        border: 1px solid #eee;
+        transition: all 0.4s ease;
+        border-radius: 4px;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .service-box:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.1) !important;
+            border-color: #e30613;
+        }
+
+    .service-number {
+        font-weight: bold;
+        border-bottom-right-radius: 10px;
+        font-size: 0.8rem;
+    }
+
+    /* Giới hạn số dòng để các box đều nhau */
+    .title-limit {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 3.2rem;
+    }
+
+    .content-limit {
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 6rem;
+    }
+
+    /* Nút tìm hiểu thêm */
+    .btn-learn-more {
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+        .btn-learn-more:hover {
+            background-color: #f8f9fa;
+            border-color: #000;
+        }
+
+        .btn-learn-more span {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-learn-more:hover span {
+            transform: rotate(45deg);
+            background-color: #e30613 !important;
+        }
+</style>
+
+<section class="partners-section py-5 bg-light">
+    <div class="container">
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-auto">
+                <div class="d-flex align-items-center">
+                    <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+                    <span class="text-danger fw-bold text-uppercase small" style="white-space: nowrap;">khách hàng & đối tác.</span>
+                </div>
+            </div>
+            <div class="col border-top border-secondary-subtle ms-3 d-none d-md-block">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="customer-slider">
+                    @foreach (var item in Model.Customers)
+                    {
+                        <div class="px-4">
+                            <div class="partner-logo-wrapper d-flex align-items-center justify-content-center">
+                                <img src="@item.Image"
+                                     alt="@item.CustomerName"
+                                     title="@item.CustomerName"
+                                     class="img-fluid partner-logo">
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $('.customer-slider').slick({
+            slidesToShow: 6,      // Hiển thị 6 logo một lúc trên PC
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 2000,
+            arrows: false,        // Ẩn nút điều hướng để slider chạy tự nhiên
+            dots: false,
+            infinite: true,
+            responsive: [
+                {
+                    breakpoint: 1200,
+                    settings: { slidesToShow: 5 }
+                },
+                {
+                    breakpoint: 992,
+                    settings: { slidesToShow: 4 }
+                },
+                {
+                    breakpoint: 768,
+                    settings: { slidesToShow: 3 }
+                },
+                {
+                    breakpoint: 480,
+                    settings: { slidesToShow: 2 }
+                }
+            ]
+        });
+    });
+</script>
+<style>
+    .partners-section {
+        padding: 60px 0;
+        background-color: #fff; /* Hoặc #f8f9fa nếu muốn nền xám nhạt */
+    }
+
+    .partner-logo-wrapper {
+        height: 150px; /* Tăng chiều cao khung chứa */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 15px;
+        /* XÓA DÒNG filter: grayscale(100%) TẠI ĐÂY ĐỂ HIỆN MÀU */
+        transition: all 0.3s ease;
+    }
+
+        .partner-logo-wrapper:hover {
+            transform: scale(1.1); /* Hiệu ứng phóng to nhẹ khi di chuột */
+        }
+
+    .partner-logo {
+        /* ĐIỀU CHỈNH ĐỘ LỚN TẠI ĐÂY */
+        max-height: 120px; /* Tăng lên 90px hoặc 100px nếu bạn thấy vẫn bé */
+        max-width: 100%;
+        width: auto;
+        object-fit: contain;
+        display: block;
+    }
+
+    /* Đảm bảo khoảng cách giữa các logo trong slider thoáng hơn */
+    .customer-slider .px-4 {
+        padding-left: 25px !important;
+        padding-right: 25px !important;
+    }
+</style>
+<section class="latest-blogs py-5 bg-white">
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-12" style="text-align: center;">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+                    <span class="text-danger fw-bold text-uppercase small">tin tức.</span>
+                </div>
+                <h2 class="display-4 fw-bold text-uppercase">Bài viết mới</h2>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var item in Model.Blogs)
+            {
+                <div class="col-lg-4 col-md-6 blog-item">
+                    <div class="blog-card">
+                        @* Phần ảnh và ngày tháng *@
+                        <div class="blog-thumb position-relative overflow-hidden mb-3">
+                            <a href="/tin-tuc/@item.Slug">
+                                <img src="@item.Thumbnail" class="img-fluid w-100" alt="@item.Title">
+                            </a>
+
+                            @* Box ngày tháng đè lên ảnh *@
+                            <div class="date-box position-absolute top-0 start-0 bg-white p-2 text-center shadow-sm">
+                                <span class="d-block fw-bold fs-4 lh-1">@item.PublishedDate.Value.ToString("dd")</span>
+                                <span class="d-block text-muted small text-uppercase">TH @item.PublishedDate.Value.ToString("MM")</span>
+                            </div>
+                        </div>
+
+                        @* Nội dung bài viết *@
+                        <div class="blog-content">
+                            @{
+                                // Tạo bảng tra cứu nhanh: Key = Id, Value = CategoryName
+                                var blogCats = ((IEnumerable<dynamic>)ViewBag.Categories)
+                                .ToDictionary(c => (int)c.Id, c => (string)c.CategoryName);
+                            }
+
+                            <span class="text-muted small text-uppercase fw-bold">
+                                @(blogCats.ContainsKey((int)item.CategoryId) ? blogCats[(int)item.CategoryId] : "Tin tức")
+                            </span>
+
+                            <h4 class="blog-title mb-3">
+                                <a href="/tin-tuc/@item.Slug" class="text-decoration-none text-dark fw-bold">
+                                    @item.Title
+                                </a>
+                            </h4>
+
+                            <p class="blog-excerpt text-muted mb-3">
+                                @(item.Summary?.Length > 120 ? item.Summary.Substring(0, 120) + "..." : item.Summary)
+                            </p>
+
+                            <a href="/tin-tuc/@item.Slug" class="btn-readmore fw-bold text-dark text-decoration-none border-bottom border-2 border-dark pb-1">
+                                Đọc Thêm
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+<style>
+    .latest-blogs {
+        background-color: #fff;
+    }
+
+    /* Box ngày tháng */
+    .date-box {
+        min-width: 65px;
+        z-index: 10;
+        transition: all 0.3s ease;
+    }
+
+        .date-box span:first-child {
+            color: #333;
+        }
+
+    /* Ảnh bài viết */
+    .blog-thumb img {
+        height: 250px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .blog-item:hover .blog-thumb img {
+        transform: scale(1.05);
+    }
+
+    /* Tiêu đề bài viết */
+    .blog-title {
+        font-size: 1.25rem;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* Giới hạn 2 dòng tiêu đề */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        height: 3.5rem;
+    }
+
+        .blog-title a:hover {
+            color: #e30613 !important;
+        }
+
+    /* Mô tả ngắn */
+    .blog-excerpt {
+        font-size: 0.95rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3; /* Giới hạn 3 dòng mô tả */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Nút Đọc thêm */
+    .btn-readmore {
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-readmore:hover {
+            color: #e30613 !important;
+            border-color: #e30613 !important;
+            padding-left: 5px;
+        }
+
+    /* Meta category */
+    .blog-meta {
+        letter-spacing: 1px;
+    }
+</style>
+
+<section class="statistics-section py-5 bg-white">
+    <div class="container py-5">
+        <div class="row align-items-start">
+            <div class="col-lg-4 mb-5 mb-lg-0">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+                    <span class="text-danger fw-bold text-uppercase small">con số ấn tượng.</span>
+                </div>
+                <h2 class="display-3 fw-bold text-uppercase brand-text">VDCD</h2>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="row g-5">
+                    <div class="col-md-6 stat-item">
+                        <div class="d-flex justify-content-between align-items-center border-top pt-2 mb-3">
+                            <span class="text-muted small">01.</span>
+                            <span class="text-muted small text-uppercase fw-bold">Trung tâm</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <h3 class="stat-number mb-0 me-3">12</h3>
+                            <p class="stat-text mb-0 text-dark fw-bold">Trung tâm thuộc hệ sinh<br>thái công nghệ</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 stat-item">
+                        <div class="d-flex justify-content-between align-items-center border-top pt-2 mb-3">
+                            <span class="text-muted small">02.</span>
+                            <span class="text-muted small text-uppercase fw-bold">Kinh nghiệm</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <h3 class="stat-number mb-0 me-3">20</h3>
+                            <p class="stat-text mb-0 text-dark fw-bold">Năm nền tảng phát triển<br>về tài chính – nhân lực</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 stat-item">
+                        <div class="d-flex justify-content-between align-items-center border-top pt-2 mb-3">
+                            <span class="text-muted small">03.</span>
+                            <span class="text-muted small text-uppercase fw-bold">Nhân sự</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <h3 class="stat-number mb-0 me-3">1500</h3>
+                            <p class="stat-text mb-0 text-dark fw-bold">Nhân sự khắp cả nước</p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 stat-item">
+                        <div class="d-flex justify-content-between align-items-center border-top pt-2 mb-3">
+                            <span class="text-muted small">04.</span>
+                            <span class="text-muted small text-uppercase fw-bold">Dự án</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <h3 class="stat-number mb-0 me-3">500</h3>
+                            <p class="stat-text mb-0 text-dark fw-bold">Dự án đã hoàn thành</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<style>
+    .statistics-section {
+        background-color: #fff;
+        font-family: 'Inter', sans-serif; /* Hoặc font bạn đang dùng */
+    }
+
+    .brand-text {
+        letter-spacing: -2px;
+        color: #000;
+    }
+
+    /* Đường kẻ trên mỗi item */
+    .stat-item .border-top {
+        border-top: 1px solid #333 !important;
+        opacity: 0.8;
+    }
+
+    /* Kiểu dáng con số */
+    .stat-number {
+        font-size: 5rem;
+        font-weight: 800;
+        color: #e30613;
+        line-height: 1;
+        letter-spacing: -3px;
+    }
+
+    /* Văn bản mô tả bên cạnh số */
+    .stat-text {
+        font-size: 1rem;
+        line-height: 1.3;
+        color: #333;
+    }
+
+    /* Responsive cho di động */
+    @@media (max-width: 991.98px) {
+        .stat-number {
+            font-size: 4rem;
+        }
+        .brand-text {
+            font-size: 3rem;
+        }
+    }
+</style>
+<section class="ideals-section position-relative bg-black overflow-hidden">
+    <div class="container-fluid p-0">
+        <div class="row g-0 align-items-center" style="min-height: 550px;">
+
+            <div class="col-lg-7 d-flex align-items-center justify-content-center py-5">
+                <div class="content-wrapper px-4 px-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+                        <span class="text-danger fw-bold text-uppercase small">đồng hành & phát triển.</span>
+                    </div>
+
+                    <h2 class="text-white fw-bold display-4 text-uppercase mb-0" style="letter-spacing: -1px; line-height: 1.1;">
+                        Cùng VDCD biến ý tưởng<br>
+                        thành hiện thực
+                    </h2>
+                </div>
+            </div>
+
+            <div class="col-lg-5 position-relative">
+                <div class="image-container">
+                    <img src="/uploads/8fa2dee3-43e4-4d6c-a573-c8e42a28d04d_h1_img-5.png" alt="VDCD Building" class="img-fluid building-image">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-accent-bar"></div>
+</section>
+<style>
+    .ideals-section {
+        background-color: #000000; /* Nền đen tuyệt đối */
+    }
+
+    /* Định dạng cột chứa ảnh */
+    .image-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-end;
+        height: 100%;
+    }
+
+    .building-image {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        /* Nếu ảnh h1_img-5 có nền trắng, dùng mix-blend-mode để hòa vào nền đen */
+        mix-blend-mode: lighten; 
+        display: block;
+    }
+
+    /* Thanh đỏ dưới cùng */
+    .bottom-accent-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%; /* Độ dài vệt đỏ */
+        height: 6px;
+        background-color: #e30613;
+        z-index: 10;
+    }
+
+    /* Responsive cho mobile */
+    @@media (max-width: 991.98px) {
+        .ideals-section h2 {
+            font-size: 2.2rem;
+        }
+        .image-container {
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        .bottom-accent-bar {
+            width: 100%;
+        }
+    }
+</style>

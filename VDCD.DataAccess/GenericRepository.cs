@@ -120,18 +120,19 @@ namespace VDCD.DataAccess
         public void Create(T entity)
         {
             _dbSet.Add(entity);
-            _context.SaveChanges();
         }
 
         public void Delete(T entity)
         {
             _dbSet.Remove(entity);
-            _context.SaveChanges();
+        }
+        public void DeleteRange(IEnumerable<T> entity)
+        {
+            _dbSet.RemoveRange(entity);
         }
         public void Update(T entity)
         {
             _dbSet.Update(entity);
-            _context.SaveChanges();
         }
     }
 }

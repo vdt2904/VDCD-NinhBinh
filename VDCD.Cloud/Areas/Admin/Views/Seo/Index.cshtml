@@ -1,0 +1,114 @@
+﻿@model List<VDCD.Entities.Custom.SeoMeta>
+@{
+    ViewData["Title"] = "Quản lý SEO Meta";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Cấu hình SEO Meta</h5>
+            <div class="d-flex gap-2">
+                <input type="text" id="searchInput" class="form-control form-control-sm"
+                       style="width:250px" placeholder="Tìm theo Seo Key hoặc Title..." />
+                <button class="btn btn-primary" onclick="openSeoModal()">Thêm mới SEO</button>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <table class="table table-bordered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:60px">STT</th>
+                        <th>Seo Key (Định danh)</th>
+                        <th>Tiêu đề (Title)</th>
+                        <th style="width:100px">Index</th>
+                        <th style="width:120px">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="seoTable">
+                    @{
+                        var stt = 1;
+                    }
+                    @foreach (var item in Model)
+                    {
+                        <tr data-id="@item.Id"
+                            data-key="@item.Seo_Key"
+                            data-title="@item.Title"
+                            data-desc="@item.Description"
+                            data-keywords="@item.Keywords"
+                            data-index="@item.Is_Index.ToString().ToLower()">
+                            <td>@stt</td>
+                            <td><code class="fw-bold">@item.Seo_Key</code></td>
+                            <td>@item.Title</td>
+                            <td class="text-center">
+                                @if (item.Is_Index)
+                                {
+                                    <span class="badge bg-success">Yes</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">No</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-warning" onclick="editSeo(this)">Sửa</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteSeo(this)">Xóa</button>
+                            </td>
+                        </tr>
+                        stt++;
+                    }
+                </tbody>
+            </table>
+            <div class="d-flex justify-content-center p-3">
+                <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="seoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <form id="seoForm" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cấu hình Meta Tags</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="SeoId" name="Id" />
+
+                <div class="mb-3">
+                    <label class="form-label">Seo Key (Ví dụ: home, service:slug...)</label>
+                    <input class="form-control" id="SeoKey" name="Seo_Key" required />
+                    <small class="text-muted">Dùng để định danh trang cần SEO.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Google Title</label>
+                    <input class="form-control" id="SeoTitle" name="Title" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Google Description</label>
+                    <textarea class="form-control" id="SeoDesc" name="Description" rows="3" required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Keywords (Cách nhau bằng dấu phẩy)</label>
+                    <input class="form-control" id="SeoKeywords" name="Keywords" />
+                </div>
+
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="SeoIndex" name="Is_Index" checked>
+                    <label class="form-check-label" for="SeoIndex">Cho phép Google Index trang này</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="submit">Lưu cấu hình</button>
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="~/js/admin/seometa/index.js" asp-append-version="true"></script>

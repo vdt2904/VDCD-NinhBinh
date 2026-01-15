@@ -9,7 +9,7 @@ using VDCD.Entities.Custom;
 
 namespace VDCD.DataAccess.Mapping
 {
-    internal class FIlesMap : IEntityTypeConfiguration<Files>
+    public class FIlesMap : IEntityTypeConfiguration<Files>
     {
         public void Configure(EntityTypeBuilder<Files> builder)
         {

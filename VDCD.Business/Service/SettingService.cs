@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,11 +16,12 @@ namespace VDCD.Business.Service
     {
         private readonly IRepository<Setting> _settingService;
         private readonly ICacheService _cache;
-
-        public SettingService(IRepository<Setting> repo, ICacheService cache)
+        protected readonly AppDbContext _context;
+        public SettingService(AppDbContext context,IRepository<Setting> repo, ICacheService cache)
         {
             _settingService = repo;
             _cache = cache;
+            _context = context;
         }
 
         public string Get(string key)
@@ -64,10 +67,25 @@ namespace VDCD.Business.Service
                 _settingService.Create(new Setting { SettingKey = key, Value = value });
             else
                 entity.Value = value;
-
-            // clear cache
-            _cache.Remove(string.Format(CacheParam.SettingByKey, key));
+        }
+        public void Comit()
+        {
+            _context.SaveChanges();
             _cache.Remove(CacheParam.SettingAllKey);
+        }
+        public void DeleteByPrefix(string prefix)
+        {
+            // Lấy tất cả các bản ghi có Key bắt đầu bằng prefix
+            var entities = _settingService.Gets(false, x => x.SettingKey.StartsWith(prefix)).ToList();
+            if (entities.Any())
+            {
+                foreach (var entity in entities)
+                {
+                    _settingService.Delete(entity);
+                    // Xóa cache của từng key          
+                }
+                Comit();
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VDCD.Business.Service;
 using VDCD.Cloud.Controllers;
+using VDCD.Entities.Custom;
 
 namespace VDCD.Areas.Admin.Controllers
 {
@@ -20,12 +21,35 @@ namespace VDCD.Areas.Admin.Controllers
         {
             var lstSetting = _settingService.GetAll();
             ViewBag.Footer = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.footer."));
+            ViewBag.Social = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.social."));
+            ViewBag.Trademark = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.trademark."));
+            ViewBag.Strengths = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.strengths."));
+            ViewBag.Sliders = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.sliders."));
+            ViewBag.AboutUs = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.aboutus."));
+            ViewBag.Visions = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.vision."));
+            ViewBag.Services = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.services."));
             return View();
         }
-        public JsonResult getsetting(string settingName)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult save(IFormCollection form)
         {
-            var lstSetting = _settingService.GetAll();
-            return Json(lstSetting);
+            _settingService.DeleteByPrefix("setting.general.strengths.");
+            _settingService.DeleteByPrefix("setting.general.vision.");
+            foreach (var key in form.Keys)
+            {
+                // bỏ token
+                if (key == "__RequestVerificationToken")
+                    continue;
+
+                var value = form[key].ToString();
+
+                _settingService.Save(key, value);
+            }
+            _settingService.Comit();
+            TempData["Success"] = "Lưu cấu hình thành công";
+            return new JsonResult(new { success = true, message = "Lưu cấu hình thành công" }) ;
         }
+
     }
 }

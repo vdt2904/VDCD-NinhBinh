@@ -1,0 +1,273 @@
+﻿@model IEnumerable<VDCD.Entities.Custom.Posts>
+@{
+    ViewData["Title"] = "Quản lý Blog";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+    .ck-editor__editable_inline {
+        max-height: 500px;
+        min-height:400px;
+    }
+
+    .modal-xl {
+        max-width: 95% !important;
+    }
+
+    .form-group label {
+        margin-bottom: 5px;
+        color: #4e73df;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    /* Giúp ảnh hiển thị co giãn trong editor */
+    .ck-content img {
+        max-width: 100%;
+        height: auto;
+    }
+</style>
+
+<div class="settings-container">
+    <div class="card settings-card border-0 shadow-sm">
+        <div class="card-header settings-header d-flex justify-content-between align-items-center bg-white">
+            <span class="fw-bold">DANH SÁCH BÀI VIẾT BLOG</span>
+            <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+                <i class="bi bi-plus-lg"></i> Thêm bài mới
+            </button>
+        </div>
+        <div class="card-body">
+            <table id="blogTable" class="table table-hover w-100">
+                <thead>
+                    <tr>
+                        <th style="width: 70px;">Ảnh</th>
+                        <th>Tiêu đề</th>
+                        <th>Ngày đăng</th>
+                        <th>Trạng thái</th>
+                        <th style="width: 100px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><img src="@item.Thumbnail" width="60" class="rounded border" /></td>
+                            <td class="fw-bold">@item.Title</td>
+                            <td>@item.PublishedDate?.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <span class="badge @(item.IsPublished ? "bg-success" : "bg-secondary")">
+                                    @(item.IsPublished ? "Hiện" : "Ẩn")
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="editPost(@item.Id)"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deletePost(@item.Id)"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="postModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">BIÊN TẬP NỘI DUNG</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="postForm">
+                    <input type="hidden" id="postId" name="Id" value="0" />
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="form-group mb-3">
+                                <label>Tiêu đề bài viết</label>
+                                <input type="text" class="form-control" id="postTitle" name="Title" placeholder="Nhập tiêu đề...">
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label>Mô tả ngắn (Summary)</label>
+                                <textarea class="form-control" id="postSummary" name="Summary" rows="2" placeholder="Tóm tắt nội dung bài viết..."></textarea>
+                            </div>
+
+                            <div class="form-group mb-0">
+                                <label class="d-flex justify-content-between">
+                                    Nội dung chi tiết
+                                    <button type="button" class="btn btn-xs btn-dark mb-1" style="font-size: 12px;" onclick="openFileManager('editor')">
+                                        <i class="bi bi-image"></i> Thêm ảnh
+                                    </button>
+                                </label>
+                                <textarea id="editor" name="Content"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-3 border-start">
+                            <div class="form-group mb-3">
+                                <label>Danh mục</label>
+                                <select class="form-select" id="postCategoryId" name="CategoryId">
+                                    <option value="">-- Chọn danh mục --</option>
+                                    @if (ViewBag.Categories != null)
+                                    {
+                                        foreach (var cat in ViewBag.Categories)
+                                        {
+                                            <option value="@cat.Id">@cat.CategoryName</option>
+                                        }
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="form-group mb-3 text-center">
+                                <label class="d-block text-start">Ảnh đại diện</label>
+                                <img id="thumbPreview" src="https://placehold.co/400x300?text=No+Image" class="img-fluid rounded border mb-2" style="height:140px; width:100%; object-fit:cover" />
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" id="postThumbnail" name="Thumbnail">
+                                    <button class="btn btn-secondary" type="button" onclick="openFileManager('thumb')">Chọn</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-0">
+                                <label>Trạng thái</label>
+                                <select class="form-select" name="IsPublished" id="postStatus">
+                                    <option value="true">Công khai</option>
+                                    <option value="false">Bản nháp</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary px-5 fw-bold" onclick="savePost()">LƯU BÀI VIẾT</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="fileManagerModal" tabindex="-1" aria-hidden="true" style="z-index:1070;">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="height:90vh;">
+        <div class="modal-content h-100 shadow-lg">
+            <div class="modal-body p-0 h-100">
+                <iframe id="fileManagerIframe" src="" style="width:100%; height:100%; border:none;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script src="https://cdn.ckeditor.com/ckeditor5/40.0.0/classic/ckeditor.js"></script>
+
+    <script>
+        let myEditor;
+        let fmType = 'editor';
+
+        $(document).ready(function () {
+            $('#blogTable').DataTable({
+                "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json" },
+                "order": [[2, "desc"]]
+            });
+
+            // Khởi tạo ClassicEditor với cấu hình Resize
+            ClassicEditor.create(document.querySelector('#editor'), {
+                toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'insertTable', 'undo', 'redo'],
+                image: {
+                    toolbar: ['imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|', 'toggleImageCaption', 'imageTextAlternative'],
+                    // Bản Classic CDN hỗ trợ Resize qua thanh công cụ (Toolbar)
+                    resizeUnit: '%',
+                    resizeOptions: [
+                        { name: 'resizeImage:original', value: null, label: 'Gốc' },
+                        { name: 'resizeImage:25', value: '25', label: '25%' },
+                        { name: 'resizeImage:50', value: '50', label: '50%' },
+                        { name: 'resizeImage:75', value: '75', label: '75%' }
+                    ]
+                }
+            }).then(editor => { myEditor = editor; }).catch(error => console.error(error));
+        });
+
+        function openFileManager(type) {
+            fmType = type;
+            document.getElementById('fileManagerIframe').src = '/Admin/FileManager/Index';
+            new bootstrap.Modal(document.getElementById('fileManagerModal')).show();
+        }
+
+        window.addEventListener('message', function (event) {
+            if (event.data && event.data.type === 'getFileUrl') {
+                const url = event.data.url;
+                if (fmType === 'thumb') {
+                    $('#postThumbnail').val(url);
+                    $('#thumbPreview').attr('src', url);
+                } else if (myEditor) {
+                    const content = `<img src="${url}" />`;
+                    const viewFragment = myEditor.data.processor.toView(content);
+                    const modelFragment = myEditor.data.toModel(viewFragment);
+                    myEditor.model.insertContent(modelFragment);
+                }
+                bootstrap.Modal.getInstance(document.getElementById('fileManagerModal')).hide();
+            }
+        });
+
+        function openAddModal() {
+            $('#postId').val(0);
+            $('#postForm')[0].reset();
+            $('#thumbPreview').attr('src', 'https://placehold.co/400x300?text=No+Image');
+            if (myEditor) myEditor.setData('');
+            new bootstrap.Modal(document.getElementById('postModal')).show();
+        }
+
+    function editPost(id) {
+        $.get('/Admin/Posts/GetById/' + id, function (response) {
+            if (response.success) {
+                // Lấy object bài viết từ response.data
+                var item = response.data;
+
+                $('#postId').val(item.id);
+                $('#postTitle').val(item.title);
+                $('#postSummary').val(item.summary);
+                $('#postCategoryId').val(item.categoryId);
+                $('#postThumbnail').val(item.thumbnail);
+                $('#thumbPreview').attr('src', item.thumbnail || 'https://placehold.co/400x300?text=No+Image');
+                $('#postStatus').val(item.isPublished.toString());
+
+                if (myEditor) myEditor.setData(item.content || '');
+
+                new bootstrap.Modal(document.getElementById('postModal')).show();
+            } else {
+                alert("Lỗi: " + response.message);
+            }
+        });
+    }
+
+        function savePost() {
+            const data = {
+                Id: parseInt($('#postId').val()),
+                Title: $('#postTitle').val(),
+                Summary: $('#postSummary').val(),
+                CategoryId: parseInt($('#postCategoryId').val()),
+                Content: myEditor ? myEditor.getData() : '',
+                Thumbnail: $('#postThumbnail').val(),
+                IsPublished: $('#postStatus').val() === "true"
+            };
+
+        $.post('/Admin/Posts/Save', data, function (res) {
+                if (res.success) {
+                    location.reload();
+                } else {
+                    alert(res.message || "Lỗi lưu dữ liệu");
+                }
+            });
+        }
+
+        function deletePost(id) {
+            if (confirm("Xóa bài viết này?")) {
+            $.post('/Admin/Posts/Delete/' + id, function (res) { if (res.success) location.reload(); });
+            }
+        }
+    </script>

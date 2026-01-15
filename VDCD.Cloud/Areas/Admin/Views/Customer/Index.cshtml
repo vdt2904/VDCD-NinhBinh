@@ -1,0 +1,140 @@
+﻿@model List<VDCD.Entities.Custom.Customer>
+@{
+    ViewData["Title"] = "Quản lý Khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Danh sách Khách hàng</h5>
+            <div class="d-flex gap-2">
+                <input type="text" id="searchInput" class="form-control form-control-sm" style="width:250px" placeholder="Tìm tên, email, sđt..." />
+                <button class="btn btn-primary" onclick="openCustomerModal()">Thêm mới</button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-bordered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:60px">STT</th>
+                        <th>Khách hàng</th>
+                        <th>Liên hệ</th>
+                        <th style="width:100px">Hiển thị</th>
+                        <th style="width:120px">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="customerTable">
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        var item = Model[i];
+                        <tr data-id="@item.Id" data-name="@item.CustomerName" data-email="@item.Email"
+                            data-phone="@item.Phone" data-address="@item.Address"
+                            data-image="@item.Image" data-isshow="@item.IsShow.ToString().ToLower()">
+                            <td>@(i + 1)</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="@(string.IsNullOrEmpty(item.Image) ? "/images/no-avatar.png" : item.Image)"
+                                         style="width:40px;height:40px;object-fit:cover" class="me-2 rounded-circle border" />
+                                    <span>@item.CustomerName</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div><small>@item.Email</small></div>
+                                <div><small>@item.Phone</small></div>
+                            </td>
+                            <td class="text-center">
+                                @if (item.IsShow)
+                                {
+                                    <span class="badge bg-success">Hiện</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Ẩn</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-warning" onclick="editCustomer(this)">Sửa</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteCustomer(this)">Xóa</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="d-flex justify-content-center p-3">
+                <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="customerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <form id="customerForm" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thông tin khách hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="CustomerId" name="Id" />
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label class="form-label">Tên khách hàng</label>
+                            <input class="form-control" id="CustomerName" name="CustomerName" required />
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="CustomerEmail" name="Email" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Số điện thoại</label>
+                                <input class="form-control" id="CustomerPhone" name="Phone" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Ảnh đại diện</label>
+                            <div class="border rounded p-2 text-center mb-2" style="height: 120px;">
+                                <img id="previewImage" src="/images/no-avatar.png" class="h-100 object-fit-cover" />
+                            </div>
+                            <div class="input-group input-group-sm">
+                                <input class="form-control" id="CustomerImage" name="Image" />
+                                <button class="btn btn-outline-secondary" type="button" onclick="openFileManagerForBlock('CustomerImage')">Chọn</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Địa chỉ</label>
+                    <input class="form-control" id="CustomerAddress" name="Address" />
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="CustomerIsShow" name="IsShow">
+                    <label class="form-check-label" for="CustomerIsShow">Hiển thị lên website</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="submit">Lưu dữ liệu</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="fileManagerModal" tabindex="-1" style="z-index:1060;">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="height:90vh;">
+        <div class="modal-content h-100">
+            <div class="modal-header">
+                <h5 class="modal-title">Thư viện ảnh</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0 h-100">
+                <iframe id="fileManagerIframe" src="" style="width:100%; height:100%; border:none;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/admin/customer/index.js"></script>

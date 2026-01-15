@@ -6,32 +6,43 @@ using VDCD.Helper;
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class ProjectsController : Controller
+    public class PostsController : Controller
     {
-        private readonly ProjectService _projectService;
+        private readonly PostsService _postsService;
         private readonly CategoryService _categoryService;
 
-        public ProjectsController(ProjectService projectService,
+        public PostsController(PostsService postsService,
                                  CategoryService categoryService)
         {
-            _projectService = projectService;
+            _postsService = postsService;
             _categoryService = categoryService;
         }
         public IActionResult Index()
         {
-            var lst = _projectService.GetAll();
+            var lst = _postsService.GetAll();
             ViewBag.Categories = _categoryService.GetAll();
             return View(lst);
         }
-        [HttpPost]
-        public IActionResult Save(Project model)
+        public IActionResult Save(Posts model)
         {
             try
             {
-                model.Plug = SlugHelper.Generate(model.ProjectName);
-                string keywords = GenerateKeywords(model.ProjectName);
-                _projectService.Save(model,keywords);
+                model.Slug = SlugHelper.Generate(model.Title);
+                string keywords = GenerateKeywords(model.Title);
+                _postsService.Save(model, keywords);
                 return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        public IActionResult GetById(int id)
+        {
+            try
+            {
+                var model = _postsService.GetById(id);  
+                return Json(new { success = true,data = model });
             }
             catch (Exception ex)
             {
@@ -42,9 +53,10 @@ namespace VDCD.Areas.Admin.Controllers
         {
             try
             {
-                _projectService.Delete(id);
+                _postsService.Delete(id);
                 return Json(new { success = true });
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return Json(new { success = false, error = ex.Message });
             }

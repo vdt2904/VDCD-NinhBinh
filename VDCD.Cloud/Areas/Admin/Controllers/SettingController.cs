@@ -26,6 +26,8 @@ namespace VDCD.Areas.Admin.Controllers
             ViewBag.Strengths = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.strengths."));
             ViewBag.Sliders = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.sliders."));
             ViewBag.AboutUs = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.aboutus."));
+            ViewBag.Visions = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.vision."));
+            ViewBag.Services = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.services."));
             return View();
         }
         [HttpPost]
@@ -33,6 +35,7 @@ namespace VDCD.Areas.Admin.Controllers
         public IActionResult save(IFormCollection form)
         {
             _settingService.DeleteByPrefix("setting.general.strengths.");
+            _settingService.DeleteByPrefix("setting.general.vision.");
             foreach (var key in form.Keys)
             {
                 // bỏ token

@@ -1,1 +1,220 @@
-﻿
+﻿@{
+    // Ép kiểu ViewBag.Settings về Dictionary (giả sử bạn lưu dạng Dictionary<string, string>)
+    var settings = ViewBag.Settings as Dictionary<string, string> ?? new Dictionary<string, string>();
+
+    // Hàm tra cứu an toàn: nếu không có key thì trả về chuỗi rỗng
+    string GetSt(string key)
+    {
+        return settings.ContainsKey(key) ? settings[key] : "";
+    }
+}
+<footer class="footer-section bg-black text-white pt-100 pb-4">
+    <div class="container">
+        <div class="row border-bottom border-dark-subtle pb-5 mb-5 contact-info-row">
+            <div class="col-md-4 mb-4 mb-md-0 border-end border-dark-subtle">
+                <p class="text-danger fw-bold small text-uppercase mb-2" style="letter-spacing: 2px;">Hotline</p>
+                <h3 class="fw-bold mb-0 display-6">@GetSt("setting.general.footer.phone")</h3>
+            </div>
+            <div class="col-md-4 mb-4 mb-md-0 border-end border-dark-subtle ps-md-5">
+                <p class="text-danger fw-bold small text-uppercase mb-2" style="letter-spacing: 2px;">Email</p>
+                <h3 class="fw-bold mb-0 fs-2">@GetSt("setting.general.footer.mail")</h3>
+            </div>
+            <div class="col-md-4 ps-md-5">
+                <p class="text-danger fw-bold small text-uppercase mb-2" style="letter-spacing: 2px;">Trụ Sở</p>
+                <h4 class="fw-bold mb-0 lh-base">@GetSt("setting.general.footer.address")</h4>
+            </div>
+        </div>
+
+        <div class="row mb-5 py-4">
+            <div class="col-lg-4 mb-5 mb-lg-0">
+                <a href="/" class="d-block mb-4">
+                    <img src="@GetSt("setting.general.footer.logo")" alt="VDCD Logo" class="footer-logo">
+                </a>
+                <div class="social-links d-flex gap-3">
+                    <a href="@GetSt("setting.general.social.facebook")" class="social-item" target="_blank">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </a>
+                    <a href="@GetSt("setting.general.social.telegram")" class="social-item" target="_blank">
+                        <i class="fa-brands fa-telegram"></i>
+                    </a>
+                    <a href="@GetSt("setting.general.social.youtube")" class="social-item" target="_blank">
+                        <i class="fa-brands fa-youtube"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3 offset-lg-1">
+                <h5 class="text-white fw-bold mb-4 text-uppercase">Khám phá</h5>
+                <ul class="list-unstyled footer-menu">
+                    <li class="mb-3"><a href="/">Trang chủ</a></li>
+                    <li class="mb-3"><a href="/gioi-thieu">Về chúng tôi</a></li>
+                    <li class="mb-3"><a href="/tin-tuc">Tin tức mới nhất</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <h5 class="text-white fw-bold mb-4 text-uppercase">Dịch vụ</h5>
+                <ul class="list-unstyled footer-menu">
+                    <li class="mb-3"><a href="/he-thong-trung-tam">Hệ thống trung tâm</a></li>
+                    <li class="mb-3"><a href="/du-an">Dự án tiêu biểu</a></li>
+                    <li class="mb-3"><a href="/lien-he">Liên hệ hợp tác</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row pt-5 border-top border-dark align-items-center">
+            <div class="col-md-6 text-center text-md-start">
+                <p class="text-muted mb-0">© @DateTime.Now.Year <span class="text-danger fw-bold">VDCD Ninh Bình</span>. All Rights Reserved.</p>
+            </div>
+          
+        </div>
+    </div>
+</footer>
+<style>
+    /* Tăng khoảng cách tổng thể */
+    .pt-100 {
+        padding-top: 100px;
+    }
+
+    .footer-section {
+        font-family: 'Inter', sans-serif;
+        background-color: #080808; /* Đen sâu hơn nhìn sẽ sang hơn */
+    }
+
+    /* Tăng size thông tin liên hệ */
+    .contact-info-row h3 {
+        font-size: calc(1.5rem + 1vw); /* Co giãn theo màn hình nhưng luôn to */
+        letter-spacing: -1px;
+    }
+
+    .footer-logo {
+        height: 70px; /* Tăng từ 50px lên 70px */
+        width: auto;
+
+    }
+
+    /* Social Items to hơn */
+    .social-item {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        color: white;
+        text-decoration: none;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        border-radius: 4px;
+    }
+
+        .social-item:hover {
+            background-color: #e30613;
+            border-color: #e30613;
+            color: white;
+            transform: translateY(-5px);
+        }
+
+    /* Menu Link to và thoáng */
+    .footer-menu a {
+        color: #aaa;
+        text-decoration: none;
+        font-size: 1.1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+        .footer-menu a:hover {
+            color: #e30613;
+            padding-left: 10px;
+        }
+
+    /* Nút Back to Top kiểu mới */
+    .back-to-top-btn {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 0.8rem;
+        letter-spacing: 2px;
+        border: 1px solid #333;
+        padding: 12px 25px;
+        transition: 0.3s;
+    }
+
+        .back-to-top-btn:hover {
+            background: white;
+            color: black;
+        }
+
+    /* Fix đường kẻ cho mobile */
+    @@media (max-width: 767.98px) {
+        .contact-info-row div {
+            border-right: none !important;
+            border-bottom: 1px solid #333;
+            padding-left: 0 !important;
+            padding-bottom: 25px;
+        }
+
+        .pt-100 {
+            padding-top: 60px;
+        }
+    }
+
+    .scroll-top {
+        position: fixed;
+        visibility: hidden;
+        opacity: 0;
+        right: 30px;
+        bottom: 30px;
+        z-index: 999;
+        background: #e30613; /* Màu đỏ VDCD */
+        width: 50px; /* Tăng kích thước cho dễ bấm */
+        height: 50px;
+        border-radius: 4px;
+        transition: all 0.4s;
+        color: white;
+        text-decoration: none;
+    }
+
+        .scroll-top.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .scroll-top i {
+            font-size: 32px; /* Icon to rõ */
+            line-height: 0;
+        }
+
+        .scroll-top:hover {
+            background: #b3050f;
+            color: white;
+        }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const btn = document.querySelector('.scroll-top');
+
+        // Hiện nút khi cuộn xuống 200px
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > 200) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Xử lý cuộn mượt khi click
+        btn.addEventListener('click', function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
+
+<a href="javascript:void(0)" class="scroll-top d-flex align-items-center justify-content-center">
+    <i class="bi bi-arrow-up-short"></i>
+</a>

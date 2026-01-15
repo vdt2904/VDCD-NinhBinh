@@ -19,6 +19,7 @@
                     <nav class="sb-sidenav-menu-nested nav">
                         <a class="nav-link" href="~/Admin/category/index">Danh sách danh mục</a>
                         <a class="nav-link" href="~/admin/projects/index">Danh sách dự án</a>
+                        <a class="nav-link" href="~/admin/customer/index">Danh sách khách hàng </a>
                     </nav>
                 </div>
                 <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
@@ -33,6 +34,22 @@
                         <a class="nav-link" href="~/admin/admin">Admin</a>
                     </nav>
                 </div>
+                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePosts" aria-expanded="false" aria-controls="collapsePosts">
+                    <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
+                    Quản lý bài viết
+                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                </a>
+                <div class="collapse" id="collapsePosts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                    <nav class="sb-sidenav-menu-nested nav">
+                        <a class="nav-link" href="~/Admin/posts/index">Danh sách bài viết</a>
+                        <a class="nav-link" href="~/admin/projects/index">Danh sách HasTags</a>
+                    </nav>
+                </div>
+                <a class="nav-link" href="~/admin/seo/index">
+                    <div class="sb-nav-link-icon"><i class="fa-solid fa-bars"></i></div>
+                    Quản lý SEO
+                </a>
+
             </div>
         </div>
         <div class="sb-sidenav-footer">
@@ -41,3 +58,39 @@
         </div>
     </nav>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const currentPath = window.location.pathname.toLowerCase();
+
+        document.querySelectorAll('.sb-sidenav a.nav-link').forEach(link => {
+            const href = link.getAttribute('href');
+            if (!href || href === '#') return;
+
+            // Chuẩn hóa href
+            const linkPath = href
+                .replace('~', '')
+                .split('?')[0]
+                .toLowerCase();
+
+            if (currentPath.startsWith(linkPath)) {
+                // Active link
+                link.classList.add('active');
+
+                // Nếu là menu con → mở menu cha
+                const collapse = link.closest('.collapse');
+                if (collapse) {
+                    collapse.classList.add('show');
+
+                    // active menu cha
+                    const parentLink = document.querySelector(
+                        `[data-bs-target="#${collapse.id}"]`
+                    );
+                    if (parentLink) {
+                        parentLink.classList.remove('collapsed');
+                        parentLink.classList.add('active');
+                    }
+                }
+            }
+        });
+    });
+</script>

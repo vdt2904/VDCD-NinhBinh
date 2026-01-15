@@ -38,6 +38,9 @@ namespace VDCD.Entities.Cache
         public const int ProjectAllTimeout = 30;
         public const string CenterAll = "$domain.center.all";
         public const int CenterAllTimeout = 30;
+
+        public const string PostsAll = "$domain.posts.all";
+        public const int PostsAllTimeout = 30;
         /* ================== COMMON ================== */
 
         public const int OneMinute = 1;

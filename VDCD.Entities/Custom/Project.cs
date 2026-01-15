@@ -18,5 +18,6 @@ namespace VDCD.Entities.Custom
         public string? Time { get; set; }
         public string? Image {  get; set; }
         public bool? IsActive { get; set; }
+        public string? Plug {  get; set; }
     }
 }

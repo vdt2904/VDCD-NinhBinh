@@ -4,6 +4,7 @@ using VDCD.Entities.Custom;
 
 namespace VDCD.Areas.Admin.Controllers
 {
+    [Area("Admin")]
     public class SeoController : Controller
     {
         private readonly SeoMetaService _seoService;
@@ -14,7 +15,8 @@ namespace VDCD.Areas.Admin.Controllers
         }
         public IActionResult Index()
         {
-            return View();
+            var data = _seoService.GetAll();
+            return View(data);
         }
         [HttpPost]
         public IActionResult Save(SeoMeta model)

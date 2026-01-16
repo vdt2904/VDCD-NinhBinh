@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_PublishTargetUrl>C:\Product\Publish\VDCD</_PublishTargetUrl>
+    <History>True|2026-01-16T07:59:58.3184102Z;False|2026-01-16T14:57:02.8934094+07:00;True|2026-01-16T14:50:24.6497752+07:00;False|2026-01-16T14:49:38.7195965+07:00;False|2026-01-16T14:46:40.6362318+07:00;False|2026-01-16T14:46:36.6134929+07:00;False|2026-01-16T14:46:30.1476403+07:00;False|2026-01-16T14:46:23.9382905+07:00;True|2026-01-16T13:58:01.4485303+07:00;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="DefaultConnection">
+      <Value>server=localhost%3bport=3307%3bdatabase=vdcd%3buser=root%3bpassword=%40Zz29042002%3bCharSet=utf8mb4%3b</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>

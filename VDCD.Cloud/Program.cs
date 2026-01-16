@@ -57,6 +57,11 @@ app.UseRouting();
 
 app.UseAuthorization();
 app.MapControllerRoute(
+    name: "center",
+    pattern: "he-thong-trung-tam",
+    defaults: new { controller = "Home", action = "Center" }
+);
+app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
 );

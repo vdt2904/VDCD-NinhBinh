@@ -17,50 +17,78 @@
     letter-spacing: 4px;
     text-transform: uppercase;
 }
-
-/* Menu links */
 .navbar-nav .nav-link {
         color: #fff !important;
-        font-size: 20px;
+        /* Sử dụng clamp để font không quá to trên màn hình nhỏ */
+        font-size: clamp(16px, 1.2vw, 20px) !important; 
         line-height: 1.5;
         font-weight: bold;
         font-family: var(--e-global-typography-text-font-family), sans-serif;
-        padding: 0.5rem 1.1rem !important;
+        padding: 0.5rem clamp(0.5rem, 1vw, 1.1rem) !important;
         transition: color 0.2s ease-in-out;
-}
-.navbar-nav .nav-link:hover {
-    color: #ff0000 !important;
-}
+    }
 
-/* Nút Đăng Nhập đặc trưng */
-.btn-login-custom {
-    background-color: #ff0000;
-    color: #fff !important;
-    padding: 8px 25px;
-    border-radius: 50px;
-    text-decoration: none;
-        font-size: 20px;
+    .btn-login-custom {
+        background-color: #ff0000;
+        color: #fff !important;
+        padding: 8px clamp(15px, 2vw, 25px);
+        border-radius: 50px;
+        text-decoration: none;
+        font-size: clamp(16px, 1.2vw, 20px);
         line-height: 1.5;
         font-weight: bold;
-        font-family: var(--e-global-typography-text-font-family), sans-serif;
-    display: inline-block;
-    transition: all 0.3s ease;
-}
-.btn-login-custom:hover {
-    background-color: #d60000;
-    box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
-}
-
-/* Mobile adjustments */
-@@media (max-width: 991px) {
-    .navbar-collapse {
-        background: #111;
-        padding: 20px;
-        margin-top: 15px;
-        border-radius: 8px;
+        display: inline-block;
+        transition: all 0.3s ease;
     }
-    .btn-login-custom { margin-top: 10px; width: 100%; text-align: center; }
-}
+
+    /* --- TỐI ƯU HERO SLIDER --- */
+    .hero-title {
+        /* Chữ tự động co giãn: Cực tiểu 35px, Linh hoạt 6vw, Cực đại 80px */
+        font-size: clamp(35px, 6vw, 80px) !important;
+        font-weight: 900;
+        color: #fff;
+        margin: 10%;
+        line-height: 1.1;
+    }
+
+    .hero-subtitle {
+        font-size: clamp(25px, 4.5vw, 60px) !important;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: 2px;
+    }
+
+    .custom-caption {
+        text-align: left;
+        /* Thay vì left: 10% cố định, ta dùng lề của container Bootstrap */
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 20%;
+        z-index: 10;
+    }
+
+    /* Đảm bảo caption nằm trong khung chuẩn của web */
+    .caption-content {
+        max-width: 1320px; /* Khớp với container-xxl của Bootstrap */
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+
+    .explore-button-wrapper {
+        position: absolute;
+        bottom: 50px;
+        right: 5%; /* Thu hẹp lại để không bị sát mép màn hình lớn */
+        z-index: 20;
+    }
+
+    @@media (max-width: 768px) {
+        .explore-button-wrapper {
+            right: auto;
+            left: 15px;
+            bottom: 30px;
+        }
+        .custom-caption { bottom: 15%; }
+    }
 </style>
 <header class="header-main">
     <nav class="navbar navbar-expand-lg navbar-dark bg-black py-2">
@@ -77,7 +105,7 @@
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link" href="#">Về chúng tôi</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Cơ cấu tổ chức</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#">Hệ thống trung tâm</a></li>
+                    <li class="nav-item"><a class="nav-link" href="~/he-thong-trung-tam">Hệ thống trung tâm</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Dự án</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Tin tức</a></li>
                     <li class="nav-item"><a class="nav-link" href="#">Liên hệ</a></li>
@@ -151,7 +179,7 @@
         font-size: 80px;
         font-weight: 900;
         color: #fff;
-        margin: 0;
+        margin: 0 0 0 5%;
         line-height: 1;
     }
 

@@ -28,6 +28,7 @@ namespace VDCD.Areas.Admin.Controllers
             ViewBag.AboutUs = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.aboutus."));
             ViewBag.Visions = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.vision."));
             ViewBag.Services = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.services."));
+			ViewBag.Operations = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.operation."));
             return View();
         }
         [HttpPost]

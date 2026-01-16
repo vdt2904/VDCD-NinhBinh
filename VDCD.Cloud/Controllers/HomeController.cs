@@ -52,6 +52,23 @@ namespace VDCD.Cloud.Controllers
 
             return View(homeModel);
         }
+        public IActionResult Center()
+        {
+            ApplySeo("he-thong-trung-tam");
+            var lstSetting = _settingService.GetAll();
+
+            // Biến toàn bộ list thành Dictionary để tra cứu theo Key
+            // ToDictionary giúp truy cập giá trị cực nhanh, không ảnh hưởng hiệu suất khi dữ liệu lớn
+            var settingsDic = lstSetting.ToDictionary(x => x.SettingKey, x => x.Value);
+            ViewBag.Categories = _categoryService.GetAll();
+            ViewBag.Settings = settingsDic;
+            var Data = new CenterModelView
+            {
+                Settings = settingsDic,
+                Centers = _centerService.GetAll().ToList(),
+            };
+            return View(Data);
+        }
         public JsonResult GetUsers()
         {
             var lstU = userService.GetAllActiveUsers();

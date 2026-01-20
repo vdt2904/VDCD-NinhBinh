@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VDCD.Business.Service;
+using VDCD.Entities.Custom;
 
 namespace VDCD.Controllers
 {

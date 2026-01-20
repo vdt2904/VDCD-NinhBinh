@@ -16,5 +16,8 @@ namespace VDCD.Entities.Custom
         public string? Phone { get; set; }              // varchar(11)
         public bool? IsActive { get; set; }             // bit(1) => bool
         public DateTime? CreateAt { get; set; }         // datetime
+        public string? Profile {  get; set; }
+        public bool? IsShow { get; set; } = false;
+        public string? Avatar { get; set; }
     }
 }

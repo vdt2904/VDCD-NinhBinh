@@ -7,7 +7,7 @@ namespace VDCD.DataAccess
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options) { }
-        public DbSet<User> Users => Set<User>();
+     
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Tự động tìm và apply tất cả IEntityTypeConfiguration<T> trong assembly này

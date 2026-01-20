@@ -1,0 +1,65 @@
+﻿@model List<VDCD.Entities.Custom.Position>
+@{
+    ViewData["Title"] = "Quản lý Chức vụ";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid px-4">
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Danh sách Chức vụ</h5>
+            <button class="btn btn-primary" onclick="openCreateModal()">Thêm mới</button> 
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-bordered table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:60px">ID</th> 
+                        <th>Tên Chức vụ</th>
+                        <th style="width:150px">Thao tác</th> 
+                    </tr>
+                </thead>
+                <tbody id="positionTable">
+                    @foreach (var item in Model)
+                    {
+                        <tr data-id="@item.Id" data-name="@item.PositionName"> 
+                            <td>@item.Id</td>
+                            <td>@item.PositionName</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-warning" onclick="openEditModal(this)">Sửa</button> 
+                                <button class="btn btn-sm btn-danger" onclick="deletePosition(this)">Xóa</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="d-flex justify-content-end p-3">
+                <ul class="pagination pagination-sm mb-0" id="pagination"></ul> 
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="positionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form id="positionForm" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chức vụ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body"> 
+                <input type="hidden" id="Id" name="Id" />
+                <div class="mb-3">
+                    <label>Tên Chức vụ</label>
+                    <input class="form-control" id="PositionName" name="PositionName" required /> 
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" type="submit">Lưu</button>
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="~/js/admin/position/index.js" asp-append-version="true"></script>

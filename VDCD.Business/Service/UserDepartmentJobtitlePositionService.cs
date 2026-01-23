@@ -23,5 +23,10 @@ namespace VDCD.Business.Service
         public IEnumerable<UserDepartmentJobtitlePosition> GetByUserId(int id) {
             return _userDepartmentJobtitlePositionRepository.Gets(true,x=>x.UserId == id);
         }
+
+        public IEnumerable<UserDepartmentJobtitlePosition> Gets()
+        {
+            return _userDepartmentJobtitlePositionRepository.Gets(true);
+        }
     }
 }

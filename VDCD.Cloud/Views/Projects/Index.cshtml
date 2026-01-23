@@ -1,0 +1,235 @@
+﻿@model VDCD.Models.ProjectsViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@functions {
+    string GetSt(string key) => Model.Settings.ContainsKey(key) ? Model.Settings[key] : "";
+}
+<section class="hero-section d-flex align-items-end">
+    <div class="container-fluid px-0">
+        <div class="hero-content text-white p-5">
+
+            <h1 class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <hr class="border-light opacity-50 mb-4" style="width:90%">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active text-white fw-light" aria-current="page">Dự án</li>
+                </ol>
+            </nav>
+
+        </div>
+    </div>
+</section>
+<style>
+    .hero-section {
+        /* Thay đường dẫn ảnh của bạn vào đây */
+        background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/uploads/56c829de-56c5-4e9c-ba11-eae2c44b66e4_Untitled-3-04-2048x2048.jpg');
+        background-size: cover;
+        background-position: center;
+        height: 700px; /* Điều chỉnh chiều cao tùy ý */
+        position: relative;
+        display: flex;
+        align-items: flex-end; /* Đẩy nội dung xuống đáy */
+    }
+
+    .hero-content {
+        width: 100%;
+        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* Làm tối nhẹ phần chân chữ */
+        padding-bottom: 60px !important;
+        padding-left: 10% !important;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+        color: white;
+    }
+
+    .hero-content h1 {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        letter-spacing: -1px;
+    }
+
+    /* Responsive cho mobile */
+    @@media (max-width: 768px) {
+        .hero-section {
+            height: 350px;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/home/GetHeader',
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    // 1. Cập nhật Logo từ mảng footer
+                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
+                    if (logoData) {
+                        $('#main-logo').attr('src', logoData.value);
+                    }
+                }
+            },
+            error: function (err) {
+                console.error("Không thể lấy dữ liệu từ API", err);
+            }
+        });
+    });
+</script>
+
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center text-danger fw-bold mb-4 text-uppercase">Dự án của chúng tôi</h2>
+
+        <div class="d-flex justify-content-center flex-wrap gap-2 mb-5">
+            @* Nút All Projects: Quay về trang danh sách chính *@
+            <a href="/du-an"
+               class="btn btn-light rounded-pill px-4 @(ViewBag.CurrentCategory == null ? "active" : "")">
+                All Projects
+            </a>
+
+            @foreach (var cat in (IEnumerable<VDCD.Entities.Custom.Category>)ViewBag.Categories)
+            {
+                @* Tạo URL thân thiện theo cấu trúc: /danh-muc/slug-id *@
+                var categoryUrl = $"/danh-muc/{cat.Slug}";
+                var isActive = ViewBag.CurrentCategory?.Id == cat.Id ? "active" : "";
+
+                <a href="@categoryUrl"
+                   class="btn btn-light rounded-pill px-4 @isActive">
+                    @cat.CategoryName
+                </a>
+            }
+        </div>
+
+        <div class="row g-4">
+            @foreach (var project in Model.Projects)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="project-card position-relative overflow-hidden rounded shadow-sm">
+
+                        <img src="@project.Image" class="img-fluid w-100" alt="@project.ProjectName" style="height: 350px; object-fit: cover;">
+
+                        <div class="project-overlay d-flex flex-column justify-content-end p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="text-white fw-bold mb-0 pe-3">@project.ProjectName</h5>
+
+                                <a href="/du-an/@project.Plug" class="text-white stretched-link">
+                                    <i class="bi bi-arrow-up-right"></i>
+                                </a>
+                            </div>
+
+                            <div class="position-relative" style="z-index: 3;">
+                                <span class="badge border border-white rounded-pill px-3 py-2 fw-light">
+                                    @Model.Categories.FirstOrDefault(c => c.Id == project.CategoryId)?.CategoryName
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    @if (ViewBag.TotalPages > 1)
+    {
+        <nav aria-label="Page navigation" class="mt-5">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                {
+                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                        <a class="page-link shadow-sm border-0 mx-1 rounded"
+                           href="@Url.Action("Index", new { page = i })">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</section>
+
+<style>
+    /* Container của toàn bộ card */
+    .project-card {
+        position: relative;
+        border-bottom: 5px solid #ff0000; /* Thanh đỏ dưới cùng */
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    /* Lớp phủ để làm tối ảnh, giúp chữ trắng nổi bật */
+    .project-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%);
+        z-index: 1;
+    }
+
+        /* Đảm bảo nội dung nằm trên lớp phủ */
+        .project-overlay > div {
+            z-index: 2;
+        }
+
+    /* Fix màu chữ tiêu đề */
+    .project-card h5 {
+        color: #ffffff !important;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        font-size: 1.2rem;
+        line-height: 1.4;
+    }
+
+    /* Fix màu icon mũi tên */
+    .project-card a i {
+        color: #ffffff !important;
+        font-size: 1.2rem;
+    }
+
+    /* Tùy chỉnh Badge (Nhãn danh mục) */
+    .project-card .badge {
+        background: transparent !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        font-weight: 300;
+    }
+
+    /* Hiệu ứng khi di chuột vào */
+    .project-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+    }
+
+    /* Chỉnh nút filter phía trên cho giống mẫu */
+    .btn-light {
+        background-color: #f1f3f5;
+        border: none;
+        color: #666;
+    }
+
+        .btn-light.active {
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            color: #000;
+        }
+    /* Tùy chỉnh phân trang */
+    .pagination .page-link {
+        color: #333;
+        padding: 10px 18px;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #ff0000; /* Màu đỏ đồng bộ với border-bottom dự án */
+        border-color: #ff0000;
+        color: #fff;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #f1f3f5;
+        color: #ff0000;
+    }
+</style>

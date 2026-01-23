@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VDCD.Business.Service;
 using VDCD.Entities.Custom;
+using VDCD.Helper;
 
 namespace VDCD.Areas.Admin.Controllers
 {
@@ -25,12 +26,35 @@ namespace VDCD.Areas.Admin.Controllers
         {
             try
             {
-                _categoryService.Save(category);
+                category.Slug = SlugHelper.Generate(category.CategoryName);
+                string keywords = GenerateKeywords(category.CategoryName);
+                _categoryService.Save(category,keywords);
                 return new JsonResult(new {success = true });
             }catch (Exception ex)
             {
                 return new JsonResult(new { success = false , message = ex.Message});
             }
+        }
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                _categoryService.Delete(id);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = ex.Message });
+            }
+        }
+        private string GenerateKeywords(string text)
+        {
+            var slug = SlugHelper.Generate(text);
+            return string.Join(", ",
+                slug.Split('-')
+                    .Where(x => x.Length > 2)
+                    .Distinct()
+            );
         }
     }
 }

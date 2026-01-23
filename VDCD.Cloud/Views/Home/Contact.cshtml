@@ -1,0 +1,84 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@functions {
+    string GetSt(string key) => Model.Settings.ContainsKey(key) ? Model.Settings[key] : "";
+}
+<section class="hero-section d-flex align-items-end">
+    <div class="container-fluid px-0">
+        <div class="hero-content text-white p-5">
+
+            <h1 class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <hr class="border-light opacity-50 mb-4" style="width:90%">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active text-white fw-light" aria-current="page">Về chúng tôi</li>
+                </ol>
+            </nav>
+
+        </div>
+    </div>
+</section>
+<style>
+    .hero-section {
+        /* Thay đường dẫn ảnh của bạn vào đây */
+        background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/uploads/1046cdc6-6989-44eb-89ee-49fd85f442fe_bc_page.jpg');
+        background-size: cover;
+        background-position: center;
+        height: 700px; /* Điều chỉnh chiều cao tùy ý */
+        position: relative;
+        display: flex;
+        align-items: flex-end; /* Đẩy nội dung xuống đáy */
+    }
+
+    .hero-content {
+        width: 100%;
+        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* Làm tối nhẹ phần chân chữ */
+        padding-bottom: 60px !important;
+        padding-left: 10% !important;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+        color: white;
+    }
+
+    .hero-content h1 {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        letter-spacing: -1px;
+    }
+
+    /* Responsive cho mobile */
+    @@media (max-width: 768px) {
+        .hero-section {
+            height: 350px;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/home/GetHeader',
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    // 1. Cập nhật Logo từ mảng footer
+                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
+                    if (logoData) {
+                        $('#main-logo').attr('src', logoData.value);
+                    }
+                }
+            },
+            error: function (err) {
+                console.error("Không thể lấy dữ liệu từ API", err);
+            }
+        });
+    });
+</script>
+

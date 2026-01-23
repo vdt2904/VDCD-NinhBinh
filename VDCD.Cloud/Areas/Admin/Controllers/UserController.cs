@@ -11,9 +11,11 @@ namespace VDCD.Areas.Admin.Controllers
     {
         private readonly UserService _userService;
         private readonly UserDepartmentJobtitlePositionService _userDepartmentJobtitlePositionService;
-        public UserController(UserService userService,UserDepartmentJobtitlePositionService userDepartmentJobtitlePositionService) { 
+        private readonly DepartmentService _departmentService;
+        public UserController(UserService userService,UserDepartmentJobtitlePositionService userDepartmentJobtitlePositionService,DepartmentService departmentService) { 
             _userService = userService;
             _userDepartmentJobtitlePositionService = userDepartmentJobtitlePositionService;
+            _departmentService = departmentService;
         }
         public IActionResult Index()
         {
@@ -34,12 +36,20 @@ namespace VDCD.Areas.Admin.Controllers
                 if (user == null) return Json(new { success = false, message = "Không tìm thấy người dùng" });
 
                 var assignments = _userDepartmentJobtitlePositionService.GetByUserId(id).ToList();
-
+                var resultAssignments = assignments.Select(a => new {
+                    a.UserId,
+                    a.DepartmentId,
+                    // Map tên phòng ban dựa vào ID
+                    DepartmentName = _departmentService.Gets().FirstOrDefault(d => d.Id == a.DepartmentId)?.DepartmentName ?? "Phòng " + a.DepartmentId,
+                    a.JobtitleId,
+                    a.PositionId,
+                    a.IsMain
+                }).ToList();
                 return Json(new
                 {
                     success = true,
                     data = user,
-                    assignments = assignments
+                    assignments = resultAssignments
                 });
             }
             catch (Exception ex)

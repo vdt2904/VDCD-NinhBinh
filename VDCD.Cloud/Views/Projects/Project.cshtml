@@ -1,0 +1,256 @@
+﻿@model VDCD.Entities.Custom.Project
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@functions {
+    string GetSt(string key) => ViewBag.Settings.ContainsKey(key) ? ViewBag.Settings[key] : "";
+}
+@{
+    // Tìm tên danh mục từ ViewBag.Categories dựa trên Model.CategoryId
+    var categories = ViewBag.Categories as IEnumerable<dynamic>;
+    var categoryName = categories?.FirstOrDefault(c => c.Id == Model.CategoryId)?.CategoryName ?? "Chưa phân loại";
+    var cateSlug = categories?.FirstOrDefault(c => c.Id == Model.CategoryId)?.Slug ?? "Chưa phân loại";
+}
+<section class="hero-section d-flex align-items-end">
+    <div class="container-fluid px-0">
+        <div class="hero-content text-white p-5">
+
+            <h1 class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <hr class="border-light opacity-50 mb-4" style="width:90%">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active text-white fw-light" aria-current="page"><a href="/du-an" class="text-white text-decoration-none">Dự án</a></li>
+                    <li class="breadcrumb-item active text-white fw-light" aria-current="page"><a href="/danh-muc/@cateSlug" class="text-white text-decoration-none">@categoryName</a></li>
+                    <li class="breadcrumb-item active text-white fw-light" aria-current="page">@ViewData["Title"]</li>
+                </ol>
+            </nav>
+
+        </div>
+    </div>
+</section>
+<style>
+    .hero-section {
+        /* Thay đường dẫn ảnh của bạn vào đây */
+        background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('@Model.Image');
+        background-size: cover;
+        background-position: center;
+        height: 700px; /* Điều chỉnh chiều cao tùy ý */
+        position: relative;
+        display: flex;
+        align-items: flex-end; /* Đẩy nội dung xuống đáy */
+    }
+
+    .hero-content {
+        width: 100%;
+        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* Làm tối nhẹ phần chân chữ */
+        padding-bottom: 60px !important;
+        padding-left: 10% !important;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+        color: white;
+    }
+
+    .hero-content h1 {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        letter-spacing: -1px;
+    }
+
+    /* Responsive cho mobile */
+    @@media (max-width: 768px) {
+        .hero-section {
+            height: 350px;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/home/GetHeader',
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    // 1. Cập nhật Logo từ mảng footer
+                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
+                    if (logoData) {
+                        $('#main-logo').attr('src', logoData.value);
+                    }
+                }
+            },
+            error: function (err) {
+                console.error("Không thể lấy dữ liệu từ API", err);
+            }
+        });
+    });
+</script>
+
+<section class="project-details py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="table-responsive">
+                    <table class="table project-info-table">
+                        <tbody>
+                            <tr>
+                                <td class="label-column">Tên thương mại</td>
+                                <td class="value-column fw-bold">@Model.ProjectName</td>
+                            </tr>
+                            <tr>
+                                <td class="label-column">Chủ đầu tư</td>
+                                <td class="value-column fw-bold">@Model.Investor</td>
+                            </tr>
+                            <tr>
+                                <td class="label-column">Địa điểm</td>
+                                <td class="value-column fw-bold">@Model.Location</td>
+                            </tr>
+                            <tr>
+                                <td class="label-column">Thời gian</td>
+                                <td class="value-column fw-bold">@Model.Time</td>
+                            </tr>
+                            <tr>
+                                <td class="label-column">Danh mục</td>
+                                <td class="value-column fw-bold">
+
+                                    @categoryName
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+<style>
+    /* ... (Giữ các style cũ cho hero-section) ... */
+
+    .project-info-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+        .project-info-table td {
+            /* Tăng kích thước chữ cho toàn bộ bảng */
+            font-size: 1.25rem;
+            /* Giảm padding để thu hẹp khoảng cách các dòng nếu cần */
+            padding: 15px 0;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: middle;
+        }
+
+    .label-column {
+        /* Thu hẹp chiều rộng cột Tiêu đề để gần cột Giá trị hơn */
+        width: 20%;
+        color: #666;
+        white-space: nowrap; /* Giữ tiêu đề trên 1 dòng */
+    }
+
+    .value-column {
+        /* Cột giá trị sẽ tự động chiếm phần còn lại */
+        padding-left: 20px !important; /* Khoảng cách đệm nhỏ giữa tiêu đề và nội dung */
+        color: #000;
+    }
+
+    /* Tăng font chữ riêng cho các tiêu đề lớn nếu cần */
+    .hero-content h1 {
+        font-size: 4rem; /* To hơn mức display-3 mặc định */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        letter-spacing: -1px;
+    }
+
+    /* Responsive cho mobile */
+    @@media (max-width: 768px) {
+        .label-column {
+            width: 40%; /* Trên mobile nên để rộng hơn một chút để tránh tràn chữ */
+        }
+
+        .project-info-table td {
+            font-size: 1.1rem;
+        }
+    }
+</style>
+@using Newtonsoft.Json
+
+<section class="project-json-content py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                @{
+                    // Giải mã chuỗi Json từ Model
+                    var jsonContent = new List<dynamic>();
+                    if (!string.IsNullOrEmpty(Model.Json))
+                    {
+                        jsonContent = JsonConvert.DeserializeObject<List<dynamic>>(Model.Json);
+                    }
+                }
+
+                @foreach (var item in jsonContent)
+                {
+                    <div class="json-item mb-5">
+                        @if (item.title != null && !string.IsNullOrEmpty(item.title.ToString()))
+                        {
+                            <h2 class="json-title fw-bold mb-3">@item.title</h2>
+                        }
+
+                        @if (item.content != null && !string.IsNullOrEmpty(item.content.ToString()))
+                        {
+                            <div class="json-description mb-4 text-muted">
+                                @Html.Raw(item.content)
+                            </div>
+                        }
+
+                        @* Kiểm tra nếu có ảnh thì mới hiển thị thẻ img *@
+                        @if (item.image != null && !string.IsNullOrEmpty(item.image.ToString()))
+                        {
+                            <div class="json-image-wrapper">
+                                <img src="@item.image" class="img-fluid w-100 rounded shadow-sm" alt="@item.title" />
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+<style>
+    /* ... các style cũ của bạn ... */
+
+    .json-title {
+        font-size: 2.2rem; /* Chữ tiêu đề to và đậm */
+        color: #000;
+        line-height: 1.2;
+        margin-top: 2rem;
+    }
+
+    .json-description {
+        font-size: 1.15rem; /* Kích thước chữ nội dung */
+        line-height: 1.8;
+        color: #444;
+        text-align: justify; /* Căn lề đều hai bên cho chuyên nghiệp */
+    }
+
+    .json-image-wrapper img {
+        margin-top: 1rem;
+        object-fit: cover;
+        max-height: 600px; /* Giới hạn chiều cao ảnh nếu cần */
+    }
+
+    /* Responsive cho tiêu đề trên mobile */
+    @@media (max-width: 768px) {
+        .json-title {
+            font-size: 1.6rem;
+        }
+
+        .json-description {
+            font-size: 1rem;
+        }
+    }
+</style>

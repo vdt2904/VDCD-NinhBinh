@@ -1,0 +1,515 @@
+﻿@model VDCD.Models.HomeModelView
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@functions {
+    string GetSt(string key) => Model.Settings.ContainsKey(key) ? Model.Settings[key] : "";
+}
+<section class="hero-section d-flex align-items-end">
+    <div class="container-fluid px-0">
+        <div class="hero-content text-white p-5">
+
+            <h1 class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <hr class="border-light opacity-50 mb-4" style="width:90%">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active text-white fw-light" aria-current="page">Về chúng tôi</li>
+                </ol>
+            </nav>
+
+        </div>
+    </div>
+</section>
+<style>
+    .hero-section {
+        /* Thay đường dẫn ảnh của bạn vào đây */
+        background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/uploads/dcc316a8-6f43-421b-825d-afbf055b652c_slice1.jpg');
+        background-size: cover;
+        background-position: center;
+        height: 700px; /* Điều chỉnh chiều cao tùy ý */
+        position: relative;
+        display: flex;
+        align-items: flex-end; /* Đẩy nội dung xuống đáy */
+    }
+
+    .hero-content {
+        width: 100%;
+        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* Làm tối nhẹ phần chân chữ */
+        padding-bottom: 60px !important;
+        padding-left: 10% !important;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+        color: white;
+    }
+
+    .hero-content h1 {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        letter-spacing: -1px;
+    }
+
+    /* Responsive cho mobile */
+    @@media (max-width: 768px) {
+        .hero-section {
+            height: 350px;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/home/GetHeader',
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    // 1. Cập nhật Logo từ mảng footer
+                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
+                    if (logoData) {
+                        $('#main-logo').attr('src', logoData.value);
+                    }
+                }
+            },
+            error: function (err) {
+                console.error("Không thể lấy dữ liệu từ API", err);
+            }
+        });
+    });
+</script>
+
+<section class="brand-story py-5" style="background-color: #fff;">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h5 class="text-danger text-uppercase fw-bold" style="letter-spacing: 2px;">
+                    <span class="border-top border-danger border-3 me-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
+                    Câu chuyện thương hiệu
+                </h5>
+                <h1 class="display-4 fw-black mt-2" style="font-weight: 900; letter-spacing: -1px;">VDCD NINH BÌNH</h1>
+            </div>
+        </div>
+
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <img src="@GetSt("setting.general.trademark.image")" alt="VDCD Projects Map" class="img-fluid w-100 shadow-sm rounded">
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="brand-info">
+                    <h2 class="text-danger fw-bold mb-3" style="line-height: 1.2;">
+                        CÔNG TY CP TỔNG CÔNG TY CÔNG NGHỆ THIẾT KẾ XÂY DỰNG VIỆT NAM
+                    </h2>
+
+                    <div class="mb-4">
+                        <p class="mb-1"><strong>Tên viết tắt:</strong> @GetSt("setting.general.trademark.initials")</p>
+                        <p><strong>Giấy chứng nhận đăng ký kinh doanh số:</strong> @GetSt("setting.general.trademark.tax")</p>
+                    </div>
+
+                    <div class="description-text text-muted" style="text-align: justify; line-height: 1.8;">
+                        <p>@Html.Raw(GetSt("setting.general.trademark.description").Replace("\n", "<br />"))</p>
+
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Tùy chỉnh thêm để giống hệt thiết kế */
+    .fw-black {
+        font-weight: 900;
+    }
+
+    .brand-story {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .text-danger {
+        color: #e31e24 !important; /* Màu đỏ đặc trưng của thương hiệu */
+    }
+</style>
+
+<style>
+    /* Tổng thể phần Thế mạnh */
+    .strengths-section {
+        background-color: #f8f9fa;
+        padding: 80px 0;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    .section-subtitle {
+        color: #e31e24;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+    }
+
+        .section-subtitle::before {
+            content: "";
+            display: inline-block;
+            width: 30px;
+            height: 2px;
+            background-color: #e31e24;
+            margin-right: 10px;
+        }
+
+    /* Tinh chỉnh thẻ Card */
+    .strengths-carousel .slick-list {
+        padding: 20px 0; /* Tạo không gian cho hiệu ứng hover nhích lên */
+    }
+
+    .card-strength {
+        background: #fff;
+        border: 1px solid #f0f0f0;
+        border-radius: 4px;
+        padding: 40px 30px;
+        margin: 0 10px;
+        transition: all 0.3s ease;
+        display: flex !important;
+        flex-direction: column;
+        height: 450px; /* Độ cao cố định để các slide đều nhau */
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+    }
+
+        /* Hiệu ứng Hover: Hiện dải đỏ ở đáy và nhích lên */
+        .card-strength:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-bottom: 4px solid #e31e24 !important;
+        }
+
+    .strength-number {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #888;
+        border: 1px solid #ddd;
+        padding: 2px 8px;
+        border-radius: 3px;
+        width: fit-content;
+        margin-bottom: 25px;
+    }
+
+    .strength-title {
+        font-weight: 800;
+        font-size: 1.6rem;
+        color: #111;
+        margin-bottom: 20px;
+    }
+
+    /* Xử lý nội dung có xuống dòng từ Database */
+    .strength-description {
+        white-space: pre-line; /* Quan trọng nhất để nhận diện Enter */
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        text-align: justify;
+        overflow: hidden;
+    }
+
+    /* Custom nút điều hướng Carousel */
+    .slick-prev:before, .slick-next:before {
+        color: #e31e24;
+        font-size: 24px;
+    }
+
+    .slick-dots li.slick-active button:before {
+        color: #e31e24;
+    }
+</style>
+
+<section class="strengths-section">
+    <div class="container">
+        <div class="row mb-5 align-items-center">
+            <div class="col-lg-3">
+                <h5 class="section-subtitle">Thế mạnh.</h5>
+            </div>
+            <div class="col-lg-9">
+                <p class="mb-0 fw-bold text-muted" style="max-width: 800px;">
+                    VDCD sở hữu công nghệ lõi và đội ngũ nhân sự là chuyên gia hàng đầu trong lĩnh vực chuyển đổi số,
+                    xử lý dữ liệu theo chuẩn mô hình BIM & GIS và phát triển hệ thống phần mềm chuyên biệt.
+                </p>
+            </div>
+        </div>
+
+        <div class="strengths-carousel">
+            @{
+                int i = 0;
+                // Vòng lặp quét toàn bộ dữ liệu từ setting.general.vision
+                while (Model.Settings.ContainsKey($"setting.general.vision.tab_name.{i}"))
+                {
+                    var tabName = GetSt($"setting.general.vision.tab_name.{i}");
+                    var content = GetSt($"setting.general.vision.content.{i}");
+
+                    if (!string.IsNullOrEmpty(tabName))
+                    {
+                        <div class="slide-item">
+                            <div class="card-strength">
+                                <div class="strength-number">
+                                    @(i + 1 < 10 ? "0" + (i + 1) : (i + 1).ToString()).
+                                </div>
+                                <h3 class="strength-title">@tabName</h3>
+                                <div class="strength-description">
+                                    @content
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    i++;
+                }
+            }
+        </div>
+    </div>
+</section>
+
+
+<script>
+    $(document).ready(function () {
+        $('.strengths-carousel').slick({
+            dots: false,
+            infinite: false,
+            speed: 500,
+            slidesToShow: 4,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 5000,
+            responsive: [
+                {
+                    breakpoint: 1200,
+                    settings: { slidesToShow: 3 }
+                },
+                {
+                    breakpoint: 992,
+                    settings: { slidesToShow: 2 }
+                },
+                {
+                    breakpoint: 768,
+                    settings: { slidesToShow: 1 }
+                }
+            ]
+        });
+    });
+</script>
+
+<style>
+    .solutions-section {
+        padding: 80px 0;
+        background-color: #fff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Tiêu đề chính giữa */
+    .main-title {
+        font-weight: 900;
+        font-size: 3.5rem;
+        text-align: center;
+        margin-bottom: 60px;
+        color: #000;
+        letter-spacing: -1px;
+    }
+
+    .label-solution {
+        color: #e31e24;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+        .label-solution::before {
+            content: "";
+            width: 25px;
+            height: 2px;
+            background: #e31e24;
+        }
+
+    /* Tiêu đề cột (Giải pháp công nghệ, Tư vấn khảo sát...) */
+    .column-title {
+        font-weight: 800;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        color: #000;
+    }
+
+    /* Xử lý danh sách từ nội dung xuống dòng */
+    .solution-list {
+        white-space: pre-line; /* Nhận diện xuống dòng từ DB */
+        list-style: none;
+        padding-left: 0;
+        color: #444;
+        font-size: 0.95rem;
+        line-height: 2;
+    }
+
+    /* Tạo dấu chấm đỏ đầu dòng cho mỗi dòng văn bản */
+    .solution-list-container {
+        /* Trick: Biến text có xuống dòng thành dạng list giả lập */
+    }
+
+        .solution-list-container p {
+            position: relative;
+            padding-left: 20px;
+            margin-bottom: 8px;
+            text-align: justify;
+        }
+
+            /* Vẽ dấu chấm đỏ đầu mỗi dòng */
+            .solution-list-container p::before {
+                content: "•";
+                color: #e31e24;
+                font-weight: bold;
+                position: absolute;
+                left: 0;
+                font-size: 1.2rem;
+            }
+</style>
+
+<section class="solutions-section">
+    <div class="container">
+        <div class="d-flex justify-content-start mb-2">
+            <div class="label-solution">Giải pháp.</div>
+        </div>
+
+        <h2 class="main-title">Lĩnh vực hoạt động</h2>
+
+        <div class="row g-5">
+            @{
+                int i1 = 0;
+                // Vòng lặp lấy dữ liệu từ setting.general.solution (theo ảnh image_0ed966.png)
+                while (Model.Settings.ContainsKey($"setting.general.solution.title.{i1}"))
+                {
+                    var title = GetSt($"setting.general.solution.title.{i1}");
+                    var content = GetSt($"setting.general.solution.content.{i1}");
+
+                    <div class="col-lg-4 col-md-6">
+                        <h3 class="column-title">@title</h3>
+                        <div class="solution-list-container">
+                            @if (!string.IsNullOrEmpty(content))
+                            {
+                                // Tách chuỗi theo dấu xuống dòng và duyệt từng dòng để thêm bullet point
+                                var lines = content.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                                foreach (var line in lines)
+                                {
+                                    <p>@line.Trim()</p>
+                                }
+                            }
+                        </div>
+                    </div>
+                    i1++;
+                }
+            }
+        </div>
+    </div>
+</section>
+<section class="partners-section py-5 bg-light">
+    <div class="container">
+        <div class="row mb-4 align-items-center">
+            <div class="col-md-auto">
+                <div class="d-flex align-items-center">
+                    <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+                    <span class="text-danger fw-bold text-uppercase small" style="white-space: nowrap;">khách hàng & đối tác.</span>
+                </div>
+            </div>
+            <div class="col border-top border-secondary-subtle ms-3 d-none d-md-block">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="customer-slider">
+                    @foreach (var item in Model.Customers)
+                    {
+                        <div class="px-4">
+                            <div class="partner-logo-wrapper d-flex align-items-center justify-content-center">
+                                <img src="@item.Image"
+                                     alt="@item.CustomerName"
+                                     title="@item.CustomerName"
+                                     class="img-fluid partner-logo">
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        $('.customer-slider').slick({
+            slidesToShow: 6,      // Hiển thị 6 logo một lúc trên PC
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 2000,
+            arrows: false,        // Ẩn nút điều hướng để slider chạy tự nhiên
+            dots: false,
+            infinite: true,
+            responsive: [
+                {
+                    breakpoint: 1200,
+                    settings: { slidesToShow: 5 }
+                },
+                {
+                    breakpoint: 992,
+                    settings: { slidesToShow: 4 }
+                },
+                {
+                    breakpoint: 768,
+                    settings: { slidesToShow: 3 }
+                },
+                {
+                    breakpoint: 480,
+                    settings: { slidesToShow: 2 }
+                }
+            ]
+        });
+    });
+</script>
+<style>
+    .partners-section {
+        padding: 60px 0;
+        background-color: #fff; /* Hoặc #f8f9fa nếu muốn nền xám nhạt */
+    }
+
+    .partner-logo-wrapper {
+        height: 150px; /* Tăng chiều cao khung chứa */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 15px;
+        /* XÓA DÒNG filter: grayscale(100%) TẠI ĐÂY ĐỂ HIỆN MÀU */
+        transition: all 0.3s ease;
+    }
+
+        .partner-logo-wrapper:hover {
+            transform: scale(1.1); /* Hiệu ứng phóng to nhẹ khi di chuột */
+        }
+
+    .partner-logo {
+        /* ĐIỀU CHỈNH ĐỘ LỚN TẠI ĐÂY */
+        max-height: 120px; /* Tăng lên 90px hoặc 100px nếu bạn thấy vẫn bé */
+        max-width: 100%;
+        width: auto;
+        object-fit: contain;
+        display: block;
+    }
+
+    /* Đảm bảo khoảng cách giữa các logo trong slider thoáng hơn */
+    .customer-slider .px-4 {
+        padding-left: 25px !important;
+        padding-right: 25px !important;
+    }
+</style>

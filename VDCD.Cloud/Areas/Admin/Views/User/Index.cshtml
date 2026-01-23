@@ -3,6 +3,31 @@
     ViewData["Title"] = "Index";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
+<style>
+    /* Ép textarea Profile rộng 100% */
+    #Profile {
+        width: 100% !important;
+        display: block;
+    }
+
+    /* Tăng độ rộng cột và ô select trong bảng điều động */
+    #tblAssign select.form-select-sm {
+        min-width: 120px; /* Đảm bảo ô chọn không bị quá ngắn */
+        width: 100%;
+    }
+
+    /* Căn chỉnh cột trong bảng cho hợp lý */
+    #tblAssign th:nth-child(2),
+    #tblAssign th:nth-child(3) {
+        width: 150px !important; /* Tăng từ 80px lên 150px */
+    }
+
+    /* Style cho radio button IsMain */
+    .is-main {
+        transform: scale(1.2);
+        cursor: pointer;
+    }
+</style>
 <div class="container-fluid mt-4">
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
@@ -181,7 +206,11 @@
 
 
     <script>
+    let globalJobtitles = [];
+    let globalPositions = [];
         $(document).ready(function () {
+        $.get('/Admin/Department/GetJobtitles', res => { globalJobtitles = res; });
+        $.get('/Admin/Department/GetPositions', res => { globalPositions = res; });
             // Khởi tạo JSTree 1 lần duy nhất
             $('#jstree_dept').jstree({
                 'core': { 'data': { 'url': '/Admin/Department/GetTreeData' } }
@@ -215,24 +244,43 @@
                     $('#IsActive').val(u.isActive.toString());
                     if (u.avatar) $('#avatarPreview').attr('src', u.avatar);
 
-                    res.assignments.forEach(a => addRow(a.departmentId, "Phòng ID: " + a.departmentId, a));
+                    res.assignments.forEach(a => addRow(a.departmentId, a.departmentName,a));
                 }
             });
         }
         new bootstrap.Modal(document.getElementById('userModal')).show();
     }
 
-        function addRow(deptId, name, data = null) {
-            if ($(`#row-assign-${deptId}`).length > 0) return;
-            let html = `<tr id="row-assign-${deptId}" class="assign-row" data-id="${deptId}">
-                        <td>${name}</td>
-                        <td><input type="number" class="form-control form-control-sm job-id" value="${data?.jobtitleId || ''}"></td>
-                        <td><input type="number" class="form-control form-control-sm pos-id" value="${data?.positionId || ''}"></td>
-                        <td class="text-center"><input type="radio" name="mainR" class="is-main" ${data?.isMain ? 'checked' : ''}></td>
-                        <td><button type="button" class="btn btn-link text-danger p-0" onclick="$(this).closest('tr').remove()"><i class="bi bi-x-circle"></i></button></td>
-                    </tr>`;
-            $('#tblAssign tbody').append(html);
-        }
+    function addRow(deptId, name, data = null) {
+        if ($(`#row-assign-${deptId}`).length > 0) return;
+
+        // Tạo danh sách Option cho Jobtitles [cite: 60]
+        let jobOptions = '<option value="0">-- Chọn Job --</option>';
+        globalJobtitles.forEach(j => {
+            jobOptions += `<option value="${j.id}" ${data?.jobtitleId == j.id ? 'selected' : ''}>${j.name}</option>`;
+        });
+
+        // Tạo danh sách Option cho Positions [cite: 60]
+        let posOptions = '<option value="0">-- Chọn Pos --</option>';
+        globalPositions.forEach(p => {
+            posOptions += `<option value="${p.id}" ${data?.positionId == p.id ? 'selected' : ''}>${p.name}</option>`;
+        });
+
+        let html = `<tr id="row-assign-${deptId}" class="assign-row" data-id="${deptId}">
+                    <td>${name}</td>
+                    <td><select class="form-select form-select-sm job-id">${jobOptions}</select></td>
+                    <td><select class="form-select form-select-sm pos-id">${posOptions}</select></td>
+                    <td class="text-center">
+                        <input type="radio" name="mainR" class="form-check-input is-main" ${data?.isMain ? 'checked' : ''}>
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-link text-danger p-0" onclick="$(this).closest('tr').remove()">
+                            <i class="bi bi-x-circle"></i> Xóa
+                        </button>
+                    </td>
+                </tr>`;
+        $('#tblAssign tbody').append(html);
+    }
 
     function saveUser() {
         let assignments = [];
@@ -252,7 +300,6 @@
                 FullName: $('#FullName').val(),
                 Mail: $('#Mail').val(),
                 Avatar: $('#Avatar').val(),
-                // LẤY DỮ LIỆU TỪ FORM
                 Profile: $('#Profile').val(),
                 IsShow: $('#IsShow').is(':checked'),
                 IsActive: $('#IsActive').val() === "true"
@@ -268,7 +315,6 @@
             }
         });
     }
-
         function openFileManager() {
             document.getElementById('fmIframe').src = '/Admin/FileManager/Index';
             new bootstrap.Modal(document.getElementById('fileManagerModal')).show();

@@ -79,7 +79,11 @@ namespace VDCD.Business.Service
 
                     // Lưu User trước để lấy UserId (trong trường hợp Insert)
                     _context.SaveChanges();
-
+                    var oldAssignments = _udjpRepo.Gets(false, x => x.UserId == user.UserId).ToList();
+                    if (oldAssignments.Any())
+                    {
+                        _udjpRepo.DeleteRange(oldAssignments);
+                    }
                     // Lưu bảng trung gian
                     if (assignments != null && assignments.Count > 0)
                     {
@@ -88,9 +92,9 @@ namespace VDCD.Business.Service
                             item.UserId = user.UserId; // Đảm bảo lấy đúng UserId mới sinh
                             _udjpRepo.Create(item);
                         }
-                        _context.SaveChanges();
+                        
                     }
-
+                    _context.SaveChanges();
                     // Nếu mọi thứ OK, Commit dữ liệu
                     transaction.Commit();
                     ClearCache();

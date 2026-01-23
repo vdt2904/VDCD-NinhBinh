@@ -736,6 +736,82 @@
 				</div>
 			</div>
 		</div>
+		<div class="card settings-card">
+			<div class="card-header settings-header p-0">
+				<a class="d-flex justify-content-between align-items-center px-4 py-3 text-decoration-none"
+				   data-bs-toggle="collapse"
+				   data-bs-target="#emailSetting">
+					<span><i class="bi bi-envelope-at me-2"></i>Cấu hình gửi Mail (SMTP)</span>
+					<i class="bi bi-chevron-down toggle-icon"></i>
+				</a>
+			</div>
+
+			<div id="emailSetting" class="collapse show">
+				<div class="card-body p-4">
+					<div class="row">
+						@{
+							var emailSettings = (ViewBag.EmailSettings as IEnumerable<dynamic>) ?? new List<dynamic>();
+
+							// Danh sách các key cần hiển thị theo thứ tự mong muốn
+							var keyMap = new Dictionary<string, string> {
+						{ "setting.email.smtp_server", "SMTP Server (Ví dụ: smtp.gmail.com)" },
+						{ "setting.email.port", "Cổng (Port) (Ví dụ: 587 hoặc 465)" },
+						{ "setting.email.sender_name", "Tên người gửi hiển thị" },
+						{ "setting.email.sender_email", "Email gửi đi" },
+						{ "setting.email.app_password", "Mật khẩu ứng dụng (App Password)" },
+						{ "setting.email.enable_ssl", "Sử dụng SSL/TLS (True/False)" }
+						};
+
+							foreach (var key in keyMap)
+							{
+								var item = emailSettings.FirstOrDefault(x => x.SettingKey == key.Key);
+								if (item != null)
+								{
+									<div class="col-md-6 mb-3">
+										<label class="form-label small fw-bold text-secondary">@key.Value</label>
+
+										@if (key.Key == "setting.email.app_password")
+										{
+											<div class="input-group">
+												<input type="password" class="form-control border-primary"
+													   name="@item.SettingKey" value="@item.Value" id="pass-smtp">
+												<button class="btn btn-outline-primary" type="button" onclick="toggleSmtpPass()">
+													<i class="bi bi-eye" id="eye-icon"></i>
+												</button>
+											</div>
+										}
+										else if (key.Key == "setting.email.enable_ssl")
+										{
+											<select class="form-select border-primary" name="@item.SettingKey">
+												<option value="True" @(item.Value?.ToLower() == "true" ? "selected" : "")>Bật (True)</option>
+												<option value="False" @(item.Value?.ToLower() == "false" ? "selected" : "")>Tắt (False)</option>
+											</select>
+										}
+										else
+										{
+											<input type="text" class="form-control" name="@item.SettingKey" value="@item.Value" placeholder="@key.Value">
+										}
+									</div>
+								}
+							}
+						}
+					</div>
+
+					<div class="mt-2 p-3 border-start border-4 border-warning bg-light">
+						<div class="d-flex">
+							<i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+							<div>
+								<p class="mb-1 fw-bold text-dark">Hướng dẫn quan trọng:</p>
+								<ul class="small mb-0 text-muted">
+									<li>Đối với <strong>Gmail</strong>: Phải bật 2FA và tạo "Mật khẩu ứng dụng".</li>
+									<li>Thông số thông thường: Host: <code>smtp.gmail.com</code> | Port: <code>587</code> | SSL: <code>True</code>.</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 		<div class="mt-4 mb-5 d-flex justify-content-end">
 			<button type="button" class="btn btn-custom btn-save" onclick="saveSetting()">
 				<i class="bi bi-check2-circle"></i> Lưu thay đổi
@@ -1213,5 +1289,16 @@
 			item.querySelector('.sol-title').name = `setting.general.solution.title.${i}`;
 			item.querySelector('.sol-content').name = `setting.general.solution.content.${i}`;
 		});
+	}
+	function toggleSmtpPass() {
+		const passInput = document.getElementById('pass-smtp');
+		const eyeIcon = document.getElementById('eye-icon');
+		if (passInput.type === "password") {
+			passInput.type = "text";
+			eyeIcon.classList.replace('bi-eye', 'bi-eye-slash');
+		} else {
+			passInput.type = "password";
+			eyeIcon.classList.replace('bi-eye-slash', 'bi-eye');
+		}
 	}
 </script>

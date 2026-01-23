@@ -102,6 +102,9 @@
                                     <button type="button" class="btn btn-xs btn-dark mb-1" style="font-size: 12px;" onclick="openFileManager('editor')">
                                         <i class="bi bi-image"></i> Thêm ảnh
                                     </button>
+                                    <button type="button" class="btn btn-xs btn-danger mb-1" style="font-size: 12px;" onclick="insertVideoLink()">
+                                        <i class="bi bi-camera-video"></i> Video
+                                    </button>
                                 </label>
                                 <textarea id="editor" name="Content"></textarea>
                             </div>
@@ -177,18 +180,16 @@
 
             // Khởi tạo ClassicEditor với cấu hình Resize
             ClassicEditor.create(document.querySelector('#editor'), {
-                toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'insertTable', 'undo', 'redo'],
-                image: {
-                    toolbar: ['imageStyle:inline', 'imageStyle:block', 'imageStyle:side', '|', 'toggleImageCaption', 'imageTextAlternative'],
-                    // Bản Classic CDN hỗ trợ Resize qua thanh công cụ (Toolbar)
-                    resizeUnit: '%',
-                    resizeOptions: [
-                        { name: 'resizeImage:original', value: null, label: 'Gốc' },
-                        { name: 'resizeImage:25', value: '25', label: '25%' },
-                        { name: 'resizeImage:50', value: '50', label: '50%' },
-                        { name: 'resizeImage:75', value: '75', label: '75%' }
-                    ]
-                }
+            toolbar: [
+                'heading', '|',
+                'bold', 'italic', 'link',
+                'bulletedList', 'numberedList',
+                'blockQuote', 'insertTable',
+                'undo', 'redo'
+            ],
+            mediaEmbed: {
+                previewsInData: true
+            },
             }).then(editor => { myEditor = editor; }).catch(error => console.error(error));
         });
 
@@ -271,3 +272,33 @@
             }
         }
     </script>
+<script>
+    function insertVideoLink() {
+        if (!myEditor) return;
+
+        const url = prompt("Dán link video (YouTube hoặc mp4):");
+        if (!url) return;
+
+        // Nếu là YouTube / Vimeo → dùng MediaEmbed
+        if (url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com')) {
+            myEditor.model.change(writer => {
+                const mediaElement = writer.createElement('media', { url: url });
+                myEditor.model.insertContent(mediaElement, myEditor.model.document.selection);
+            });
+            return;
+        }
+
+        // Nếu là mp4 → insert thẻ <video>
+        const videoHtml = `
+            <video controls style="max-width:100%">
+                <source src="${url}" type="video/mp4">
+            </video>
+        `;
+
+        myEditor.model.change(writer => {
+            const viewFragment = myEditor.data.processor.toView(videoHtml);
+            const modelFragment = myEditor.data.toModel(viewFragment);
+            myEditor.model.insertContent(modelFragment);
+        });
+    }
+</script>

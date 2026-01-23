@@ -162,8 +162,10 @@ namespace VDCD.Business.Service
 
             _context.SaveChanges();
         }
-       
 
-
+        public Project GetBySlug(string slug)
+        {
+            return _projectRepo.GetReadOnly(x=>x.Plug == slug);
+        }
     }
 }

@@ -44,7 +44,34 @@ namespace VDCD.Business.Service
 
             return data;
         }
+        public IReadOnlyList<Posts> GetAll(string search = "")
+        {
+            // Đảm bảo search không bị null để tránh lỗi khi dùng .Contains
+            search = search ?? "";
 
+            // 1. Kiểm tra Cache
+            if (_cache.TryGet(CacheParam.PostsAll, out List<Posts> cached))
+            {
+                // Phải .ToList() rồi mới cast sang IReadOnlyList
+                return cached.Where(x => x.Title.Contains(search)).ToList();
+            }
+
+            // 2. Nếu không có cache, lấy từ Repo
+            var data = _postsRepo
+                .GetsReadOnly()
+                .Where(x => x.Title.Contains(search))
+                .OrderByDescending(x => x.Id)
+                .ToList();
+
+            // 3. Lưu vào Cache
+            _cache.Set(
+                CacheParam.PostsAll,
+                data,
+                TimeSpan.FromMinutes(CacheParam.PostsAllTimeout)
+            );
+
+            return data;
+        }
         public void Save(Posts model, string keywords)
         {
             if (string.IsNullOrWhiteSpace(model.Title))
@@ -155,5 +182,9 @@ namespace VDCD.Business.Service
             _context.SaveChanges();
         }
 
+        public Posts GetBySlug(string slug)
+        {
+            return _postsRepo.Get(true,x=>x.Slug == slug);
+        }
     }
 }

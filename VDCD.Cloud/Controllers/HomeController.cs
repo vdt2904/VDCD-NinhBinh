@@ -1,9 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Linq;
 using VDCD.Business.Service;
 using VDCD.Cloud.Models;
 using VDCD.Controllers;
+using VDCD.Entities.Custom;
+using VDCD.Entities.DTO;
 using VDCD.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace VDCD.Cloud.Controllers
 {
@@ -17,9 +22,14 @@ namespace VDCD.Cloud.Controllers
         private readonly CategoryService _categoryService;  
         private readonly PostsService _postsService;  
         private readonly CustomerService _customerService;
+        private readonly UserService _userService;
+        private readonly UserDepartmentJobtitlePositionService _userDepartmentJobtitlePositionService;
+        private readonly DepartmentService _departmentService;
+
         public HomeController(ILogger<HomeController> logger,UserBll userBll, SettingService settingService,CenterService centerService
             , SeoMetaService seoMetaService, ProjectService projectService, CategoryService categoryService,PostsService postsService,
-            CustomerService customerService) : base(seoMetaService)
+            CustomerService customerService, UserService service,UserDepartmentJobtitlePositionService userDepartmentJobtitlePositionService,
+            DepartmentService departmentService) : base(seoMetaService)
         {
             _logger = logger;
             userService = userBll;
@@ -29,6 +39,9 @@ namespace VDCD.Cloud.Controllers
             _categoryService = categoryService;
             _postsService = postsService;
             _customerService = customerService;
+            _userService = service;
+            _departmentService = departmentService;
+            _userDepartmentJobtitlePositionService = userDepartmentJobtitlePositionService;
         }
 
         public IActionResult Index()
@@ -51,6 +64,81 @@ namespace VDCD.Cloud.Controllers
             };
 
             return View(homeModel);
+        }
+        public IActionResult Center()
+        {
+            ApplySeo("he-thong-trung-tam");
+            var lstSetting = _settingService.GetAll();
+
+            // Biến toàn bộ list thành Dictionary để tra cứu theo Key
+            // ToDictionary giúp truy cập giá trị cực nhanh, không ảnh hưởng hiệu suất khi dữ liệu lớn
+            var settingsDic = lstSetting.ToDictionary(x => x.SettingKey, x => x.Value);
+            ViewBag.Categories = _categoryService.GetAll();
+            ViewBag.Settings = settingsDic;
+            var Data = new CenterModelView
+            {
+                Settings = settingsDic,
+                Centers = _centerService.GetAll().ToList(),
+            };
+            return View(Data);
+        }
+        public IActionResult Abouts()
+        {
+            ApplySeo("Ve-chung-toi");
+            var lstSetting = _settingService.GetAll();
+
+            // Biến toàn bộ list thành Dictionary để tra cứu theo Key
+            // ToDictionary giúp truy cập giá trị cực nhanh, không ảnh hưởng hiệu suất khi dữ liệu lớn
+            var settingsDic = lstSetting.ToDictionary(x => x.SettingKey, x => x.Value);
+            ViewBag.Categories = _categoryService.GetAll();
+            ViewBag.Settings = settingsDic;
+            var homeModel = new HomeModelView
+            {
+                Settings = settingsDic, // Gán vào một thuộc tính Dictionary trong ViewModel
+                Centers = _centerService.GetAll().ToList(),
+                Projects = _projectService.GetAll().ToList(),
+                Blogs = _postsService.GetAll().Take(6).ToList(),
+                Customers = _customerService.GetAll().Where(x => x.IsShow == true).ToList(),
+            };
+
+            return View(homeModel);
+        }
+        public IActionResult Organizational()
+        {
+            ApplySeo("co-cau-to-chuc");
+            var lstSetting = _settingService.GetAll();
+
+            // Biến toàn bộ list thành Dictionary để tra cứu theo Key
+            // ToDictionary giúp truy cập giá trị cực nhanh, không ảnh hưởng hiệu suất khi dữ liệu lớn
+            var settingsDic = lstSetting.ToDictionary(x => x.SettingKey, x => x.Value);
+            ViewBag.Categories = _categoryService.GetAll();
+            ViewBag.Settings = settingsDic;
+            var allUsers = _userService.GetUsers().ToList();
+            var allDepts = _departmentService.Gets();
+            var allUserDepts = _userDepartmentJobtitlePositionService.Gets();
+            var joinedUsers = (from u in allUsers
+                               join ud in allUserDepts on u.UserId equals ud.UserId into userDeptGroup
+                               from ud in userDeptGroup.DefaultIfEmpty() // Left Join để không mất User nếu chưa gán phòng ban
+                               join d in allDepts on ud?.DepartmentId equals d.Id into deptGroup
+                               from d in deptGroup.DefaultIfEmpty()
+                               where ud == null || ud.IsMain == true // Chỉ lấy phòng ban chính (IsMain)
+                               select new UserResponse
+                               {
+                                   UserId = u.UserId,
+                                   FullName = u.FullName,
+                                   Avatar = u.Avatar,
+                                   Profile = u.Profile,
+                                   IsShow = u.IsShow,
+                                   IsActive = u.IsActive,
+                                   // Gán DepartmentName từ bảng Department
+                                   DepartmentName = d?.DepartmentName ?? "N/A"
+                               }).ToList();
+            var Data = new OrganizationalModelView
+            {
+                Settings= settingsDic,
+                Users = joinedUsers,   
+            };
+            return View(Data);
         }
         public JsonResult GetUsers()
         {
@@ -84,5 +172,78 @@ namespace VDCD.Cloud.Controllers
                 slice = slice
             });
         }
+        public IActionResult News()
+        {
+            ApplySeo("tin-tuc");
+            var lstSetting = _settingService.GetAll();
+
+            // Biến toàn bộ list thành Dictionary để tra cứu theo Key
+            // ToDictionary giúp truy cập giá trị cực nhanh, không ảnh hưởng hiệu suất khi dữ liệu lớn
+            var settingsDic = lstSetting.ToDictionary(x => x.SettingKey, x => x.Value);
+            ViewBag.Categories = _categoryService.GetAll();
+            ViewBag.Settings = settingsDic;
+            return View();
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetListNews(string search = "", int page = 1, int pageSize = 6, bool getAll = false)
+        {
+            try
+            {
+                // 1. Lấy Query cơ sở (chưa thực thi xuống DB)
+                var query = _postsService.GetAll(search);
+
+                // 2. Tính toán tổng số lượng để phân trang
+                int totalItems = query.Count();
+
+                // 3. Xử lý logic lấy toàn bộ hoặc lấy theo trang
+                if (!getAll)
+                {
+                    query = (IReadOnlyList<Posts>)query.Skip((page - 1) * pageSize).Take(pageSize);
+                }
+
+                // 4. Lấy danh sách Categories một lần duy nhất để map (Tránh N+1)
+                var categories = _categoryService.GetAll().ToDictionary(x => x.Id, x => x.CategoryName);
+
+                // 5. Thực thi truy vấn và Map dữ liệu
+                var data = query.ToList().Select(a => new
+                {
+                    Title = a.Title,
+                    Summary = a.Summary, // Sửa từ Description để khớp với view cũ của bạn
+                    Thumbnail = a.Thumbnail,
+                    CategoryName = categories.ContainsKey((int)a.CategoryId) ? categories[(int)a.CategoryId] : "TỔNG HỢP",
+                    PublishedDate = a.PublishedDate,
+                    // Giả sử bạn cần Slug để làm link chi tiết
+                    Slug = a.Slug
+                }).ToList();
+
+                // 6. Trả về kết quả kèm thông tin phân trang
+                return Ok(new
+                {
+                    success = true,
+                    data = data,
+                    totalItems = totalItems,
+                    totalPages = (int)Math.Ceiling((double)totalItems / pageSize),
+                    currentPage = page,
+                    pageSize = pageSize
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        public IActionResult Contact()
+        {
+            ApplySeo("lien-he");
+            var lstSetting = _settingService.GetAll();
+
+            // Biến toàn bộ list thành Dictionary để tra cứu theo Key
+            // ToDictionary giúp truy cập giá trị cực nhanh, không ảnh hưởng hiệu suất khi dữ liệu lớn
+            var settingsDic = lstSetting.ToDictionary(x => x.SettingKey, x => x.Value);
+            ViewBag.Categories = _categoryService.GetAll();
+            ViewBag.Settings = settingsDic;
+            return View();
+        }
+
     }
 }

@@ -1,0 +1,283 @@
+﻿@model VDCD.Entities.Custom.Category
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@functions {
+    string GetSt(string key) => ViewBag.Settings.ContainsKey(key) ? ViewBag.Settings[key] : "";
+}
+<section class="hero-section d-flex align-items-end">
+    <div class="container-fluid px-0">
+        <div class="hero-content text-white p-5">
+
+            <h1 class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <hr class="border-light opacity-50 mb-4" style="width:90%">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active text-white fw-light" aria-current="page">Danh mục</li>
+                </ol>
+            </nav>
+
+        </div>
+    </div>
+</section>
+<style>
+    .hero-section {
+        /* Thay đường dẫn ảnh của bạn vào đây */
+        background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/uploads/ecf7ece6-7c1c-4c43-9935-410097547556_bc_blog.jpg');
+        background-size: cover;
+        background-position: center;
+        height: 700px; /* Điều chỉnh chiều cao tùy ý */
+        position: relative;
+        display: flex;
+        align-items: flex-end; /* Đẩy nội dung xuống đáy */
+    }
+
+    .hero-content {
+        width: 100%;
+        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* Làm tối nhẹ phần chân chữ */
+        padding-bottom: 60px !important;
+        padding-left: 10% !important;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+        color: white;
+    }
+
+    .hero-content h1 {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        letter-spacing: -1px;
+    }
+
+    /* Responsive cho mobile */
+    @@media (max-width: 768px) {
+        .hero-section {
+            height: 350px;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/home/GetHeader',
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    // 1. Cập nhật Logo từ mảng footer
+                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
+                    if (logoData) {
+                        $('#main-logo').attr('src', logoData.value);
+                    }
+                }
+            },
+            error: function (err) {
+                console.error("Không thể lấy dữ liệu từ API", err);
+            }
+        });
+    });
+</script>
+
+<section class="project-list py-5">
+    <div class="container">
+        <div id="project-container" class="row g-4">
+        </div>
+
+        <nav class="mt-5">
+            <ul id="pagination-list" class="pagination justify-content-center"></ul>
+        </nav>
+    </div>
+</section>
+<script>
+    $(document).ready(function () {
+        let allProjects = []; // Biến lưu trữ toàn bộ dữ liệu
+        let currentPage = 1;
+        const pageSize = 4; // Số lượng dự án mỗi trang
+
+        // 1. Lấy toàn bộ dữ liệu một lần duy nhất
+        function initData() {
+            const categoryId = "@Model.Id";
+            $.ajax({
+                url: `/Category/ListProject?Id=${categoryId}`,
+                type: 'GET',
+                success: function (response) {
+                    if (response.success) {
+                        allProjects = response.data; // Lưu toàn bộ vào mảng [cite: 14]
+                        renderPage(1); // Hiển thị trang đầu tiên
+                    }
+                }
+            });
+        }
+
+        // 2. Hàm cắt mảng và render giao diện
+        function renderPage(page) {
+            currentPage = page;
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize;
+            const projectsToShow = allProjects.slice(start, end); // Cắt mảng trên JS
+
+            let html = '';
+            projectsToShow.forEach(p => {
+                html += `
+            <div class="col-md-6 mb-4">
+                <a href="/du-an/${p.plug}" class="project-card d-flex align-items-end text-decoration-none"
+                   style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.7)), url('${p.image}');">
+
+                    <div class="project-overlay w-100 p-4 d-flex justify-content-between align-items-end">
+                        <div>
+                            <h3 class="text-white mb-3 fw-bold">${p.projectName}</h3>
+                            <span class="btn-fake-pill">@Model.CategoryName</span>
+                        </div>
+                        <div class="text-white fs-3">
+                            <i class="bi bi-arrow-up-right"></i> <span style="font-size: 1.5rem;"></span>
+                        </div>
+                    </div>
+
+                </a>
+            </div>`;
+            });
+
+            $('#project-container').html(html);
+            renderPagination();
+        }
+
+        // 3. Hàm tạo các nút bấm số trang
+        function renderPagination() {
+            const totalPages = Math.ceil(allProjects.length / pageSize);
+            let html = '';
+
+            for (let i = 1; i <= totalPages; i++) {
+                html += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="javascript:void(0)" data-page="${i}">${i}</a>
+                    </li>`;
+            }
+            $('#pagination-list').html(html);
+        }
+
+        // Sự kiện khi click vào số trang
+        $(document).on('click', '.page-link', function () {
+            const page = $(this).data('page');
+            if (page) {
+                renderPage(page);
+                // Cuộn lên đầu danh sách cho mượt
+                $('html, body').animate({ scrollTop: $("#project-container").offset().top - 100 }, 200);
+            }
+        });
+
+        initData();
+    });
+</script>
+<style>
+    .project-card {
+        height: 400px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        border-radius: 4px;
+        overflow: hidden;
+        display: flex;
+        align-items: flex-end;
+        transition: transform 0.3s ease;
+    }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .project-overlay {
+        width: 100%;
+        padding: 30px;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+
+    .project-title {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .btn-digital-map {
+        display: inline-block;
+        padding: 5px 20px;
+        border: 1px solid white;
+        border-radius: 20px;
+        color: white;
+        text-decoration: none;
+        font-size: 0.9rem;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+        .btn-digital-map:hover {
+            background: white;
+            color: black;
+        }
+
+    .project-icon {
+        color: white;
+        font-size: 1.2rem;
+    }
+    /* Tùy chỉnh màu sắc nút phân trang giống giao diện của bạn */
+    /* Card chính */
+    .project-card {
+        height: 450px; /* Độ cao tùy chỉnh [cite: 5] */
+        background-size: cover;
+        background-position: center;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex; /* Sử dụng flex để đẩy nội dung xuống [cite: 6] */
+        align-items: flex-end; /* Đẩy nội dung xuống đáy card [cite: 6] */
+    }
+
+        .project-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        }
+
+    /* Phần phủ nội dung phía dưới */
+    .project-overlay {
+        background: linear-gradient(transparent, rgba(0,0,0,0.8)); /* Làm tối vùng chữ để dễ đọc [cite: 7] */
+        padding-bottom: 30px !important;
+    }
+
+    /* Giả lập nút bấm bên trong thẻ a */
+    .btn-fake-pill {
+        display: inline-block;
+        padding: 6px 20px;
+        border: 1px solid rgba(255,255,255,0.8);
+        border-radius: 50px;
+        color: white;
+        font-size: 0.85rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(4px);
+        transition: 0.3s;
+    }
+
+    .project-card:hover .btn-fake-pill {
+        background: white;
+        color: black;
+    }
+
+    /* Style cho các nút phân trang JS */
+    .pagination .page-link {
+        border: none;
+        color: #666;
+        margin: 0 5px;
+        border-radius: 5px !important;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #000;
+        color: #fff;
+    }
+    </style>

@@ -1,0 +1,209 @@
+﻿@model VDCD.Entities.Custom.Posts
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@functions {
+    string GetSt(string key) => ViewBag.Settings.ContainsKey(key) ? ViewBag.Settings[key] : "";
+}
+@{
+    // Tìm tên danh mục từ ViewBag.Categories dựa trên Model.CategoryId
+    var categories = ViewBag.Categories as IEnumerable<dynamic>;
+    var categoryName = categories?.FirstOrDefault(c => c.Id == Model.CategoryId)?.CategoryName ?? "Chưa phân loại";
+    var cateSlug = categories?.FirstOrDefault(c => c.Id == Model.CategoryId)?.Slug ?? "Chưa phân loại";
+}
+<section class="hero-section d-flex align-items-end">
+    <div class="container-fluid px-0">
+        <div class="hero-content text-white p-5">
+
+            <h1 class="display-3 fw-bold mb-0" style="color:white">@ViewData["Title"]</h1>
+            <hr class="border-light opacity-50 mb-4" style="width:90%">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active text-white fw-light" aria-current="page"><a href="/tin-tuc" class="text-white text-decoration-none">Tin tức</a></li>
+                    <li class="breadcrumb-item active text-white fw-light" aria-current="page">@ViewData["Title"]</li>
+                </ol>
+            </nav>
+
+        </div>
+    </div>
+</section>
+<style>
+    .hero-section {
+        /* Thay đường dẫn ảnh của bạn vào đây */
+        background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/uploads/ecf7ece6-7c1c-4c43-9935-410097547556_bc_blog.jpg');
+        background-size: cover;
+        background-position: center;
+        height: 700px; /* Điều chỉnh chiều cao tùy ý */
+        position: relative;
+        display: flex;
+        align-items: flex-end; /* Đẩy nội dung xuống đáy */
+    }
+
+    .hero-content {
+        width: 100%;
+        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* Làm tối nhẹ phần chân chữ */
+        padding-bottom: 60px !important;
+        padding-left: 10% !important;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: ">";
+        color: white;
+    }
+
+    .hero-content h1 {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        letter-spacing: -1px;
+    }
+
+    /* Responsive cho mobile */
+    @@media (max-width: 768px) {
+        .hero-section {
+            height: 350px;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+        }
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/home/GetHeader',
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    // 1. Cập nhật Logo từ mảng footer
+                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
+                    if (logoData) {
+                        $('#main-logo').attr('src', logoData.value);
+                    }
+                }
+            },
+            error: function (err) {
+                console.error("Không thể lấy dữ liệu từ API", err);
+            }
+        });
+    });
+</script>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <article class="post-details">
+                <header class="post-header mb-4">
+                    <div class="post-meta text-muted text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">
+                        @categoryName • @Model.PublishedDate?.ToString("MMMM d, yyyy", new System.Globalization.CultureInfo("vi-VN"))
+                    </div>
+                    <h1 class="fw-bold mb-4" style="font-size: 2.5rem; line-height: 1.2;">
+                        @Model.Title
+                    </h1>
+                </header>
+
+                @if (!string.IsNullOrEmpty(Model.Thumbnail))
+                {
+                    <div class="post-thumbnail mb-4">
+                        <img src="@Model.Thumbnail" class="img-fluid rounded shadow-sm w-100" alt="@Model.Title" style="max-height: 500px; object-fit: cover;">
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.Summary))
+                {
+                    <div class="post-summary mb-4 ps-3 border-start border-4 border-primary italic">
+                        <em class="text-muted">@Model.Summary</em>
+                    </div>
+                }
+
+                <div class="post-content ck-content">
+                    @Html.Raw(Model.Content)
+                </div>
+            </article>
+        </div>
+
+        <div class="col-lg-4 ps-lg-5">
+            <aside class="sidebar">
+                <div class="mb-5">
+                    <h5 class="sidebar-title fw-bold mb-3">CATEGORIES</h5>
+                    <ul class="list-unstyled">
+                        @if (ViewBag.Categories != null)
+                        {
+                            foreach (var cat in ViewBag.Categories)
+                            {
+                                <li class="py-2 border-bottom">
+                                    <a href="/Danh-muc/@cat.Slug" class="text-decoration-none text-dark hover-red">@cat.CategoryName</a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+
+                <div>
+                    <h5 class="sidebar-title fw-bold mb-3">LATEST POST</h5>
+                    @if (ViewBag.LatestPosts != null)
+                    {
+                        foreach (var post in ViewBag.LatestPosts)
+                        {
+                            <div class="d-flex mb-4">
+                                <img src="@post.Thumbnail" class="rounded" style="width: 80px; height: 60px; object-fit: cover;">
+                                <div class="ms-3">
+                                    <small class="text-muted d-block">@post.PublishedDate?.ToString("MMMM d, yyyy")</small>
+                                    <a href="/tin-tuc/@post.Slug" class="text-decoration-none text-dark fw-bold small line-clamp-2">@post.Title</a>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+<style>
+    /* Font và màu sắc chủ đạo */
+    h1, h2, h3, .sidebar-title {
+        color: #111;
+        font-family: 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .sidebar-title {
+        font-size: 0.9rem;
+        letter-spacing: 1.5px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    /* Hiệu ứng hover cho link */
+    .hover-red:hover {
+        color: #dc3545 !important;
+        padding-left: 5px;
+        transition: all 0.3s;
+    }
+
+    /* Hiển thị nội dung từ CKEditor */
+    .ck-content img {
+        max-width: 100%;
+        height: auto !important;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+
+    .ck-content video {
+        max-width: 100%;
+        border-radius: 8px;
+    }
+
+    /* Giới hạn dòng cho tiêu đề bài viết mới */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .post-content {
+        line-height: 1.8;
+        font-size: 1.1rem;
+        color: #333;
+    }
+</style>

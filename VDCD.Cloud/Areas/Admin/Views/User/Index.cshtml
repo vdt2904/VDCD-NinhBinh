@@ -1,0 +1,335 @@
+﻿@model IEnumerable<VDCD.Entities.Custom.User>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<style>
+    /* Ép textarea Profile rộng 100% */
+    #Profile {
+        width: 100% !important;
+        display: block;
+    }
+
+    /* Tăng độ rộng cột và ô select trong bảng điều động */
+    #tblAssign select.form-select-sm {
+        min-width: 120px; /* Đảm bảo ô chọn không bị quá ngắn */
+        width: 100%;
+    }
+
+    /* Căn chỉnh cột trong bảng cho hợp lý */
+    #tblAssign th:nth-child(2),
+    #tblAssign th:nth-child(3) {
+        width: 150px !important; /* Tăng từ 80px lên 150px */
+    }
+
+    /* Style cho radio button IsMain */
+    .is-main {
+        transform: scale(1.2);
+        cursor: pointer;
+    }
+</style>
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-person-lines-fill me-2"></i>Quản lý người dùng</h5>
+            <button class="btn btn-primary" onclick="openUserModal(0)">
+                <i class="bi bi-plus-lg"></i> Thêm nhân sự
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" id="txtSearch" class="form-control border-start-0 ps-0" placeholder="Nhập tên hoặc tài khoản để lọc nhanh...">
+                    </div>
+                </div>
+                <div class="col-md-8 text-end text-muted">
+                    <small>Hiển thị: <span id="rowCount" class="fw-bold text-dark">@Model.Count()</span> bản ghi</small>
+                </div>
+            </div>
+
+            <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                <table class="table table-hover align-middle" id="userTable">
+                    <thead class="table-light sticky-top">
+                        <tr>
+                            <th class="ps-3">UserName</th>
+                            <th>FullName</th>
+                            <th>Email</th>
+                            <th>Trạng thái</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="user-row">
+                                <td class="ps-3 fw-bold">@item.UserName</td>
+                                <td>@item.FullName</td>
+                                <td>@item.Mail</td>
+                                <td>
+                                    @if (item.IsActive == true)
+                                    {
+                                        <span class="badge rounded-pill bg-success-subtle text-success">Hoạt động</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill bg-danger-subtle text-danger">Khóa</span>
+                                    }
+                                </td>
+                                <td class="text-center px-3">
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button asp-action="Save" onclick="openUserModal(@item.UserId)"
+                                           class="btn btn-primary btn-sm d-inline-flex align-items-center shadow-sm">
+                                            <i class="bi bi-pencil-square me-1"></i> Sửa
+                                        </button>
+
+                                        <button type="button" onclick="deleteUser(@item.UserId)"
+                                                class="btn btn-danger btn-sm d-inline-flex align-items-center shadow-sm">
+                                            <i class="bi bi-trash me-1"></i> Xóa
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-primary"><i class="bi bi-person-badge me-2"></i>THÔNG TIN NHÂN SỰ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="userForm">
+                    <input type="hidden" id="UserId" name="UserId" value="0" />
+
+                    <ul class="nav nav-pills mb-4 bg-light p-1 rounded" id="userTabs">
+                        <li class="nav-item w-50">
+                            <button class="nav-link active w-100" data-bs-toggle="tab" data-bs-target="#tab1" type="button">1. Thông tin cá nhân</button>
+                        </li>
+                        <li class="nav-item w-50">
+                            <button class="nav-link w-100" data-bs-toggle="tab" data-bs-target="#tab2" type="button">2. Điều động phòng ban</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tab1">
+                            <div class="row">
+                                <div class="col-md-3 text-center border-end">
+                                    <label class="fw-bold d-block mb-2">Ảnh đại diện</label>
+                                    <img id="avatarPreview" src="https://placehold.co/150x150" class="rounded-circle border mb-3 shadow-sm" style="width:140px; height:140px; object-fit:cover" />
+                                    <div class="input-group input-group-sm mb-3">
+                                        <input type="text" id="Avatar" name="Avatar" class="form-control" placeholder="URL ảnh...">
+                                        <button class="btn btn-dark" type="button" onclick="openFileManager()">Chọn</button>
+                                    </div>
+
+                                    <div class="form-check form-switch d-inline-block text-start p-2 border rounded bg-light w-100">
+                                        <input class="form-check-input ms-0 me-2" type="checkbox" id="IsShow" name="IsShow">
+                                        <label class="form-check-label fw-bold text-primary" for="IsShow">Hiện trên Profile</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-9 row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Tài khoản (UserName)</label>
+                                        <input id="UserName" name="UserName" class="form-control" placeholder="vd: nva_01" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Họ và tên</label>
+                                        <input id="FullName" name="FullName" class="form-control" placeholder="Nguyễn Văn A" />
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold text-info">Giới thiệu ngắn (Profile)</label>
+                                        <textarea id="Profile" name="Profile" class="form-control" rows="3" placeholder="Nhập tóm tắt tiểu sử hoặc kỹ năng chuyên môn..."></textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Email</label>
+                                        <input id="Mail" name="Mail" class="form-control" placeholder="email@company.com" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">Trạng thái</label>
+                                        <select class="form-select" id="IsActive" name="IsActive">
+                                            <option value="true">Đang làm việc</option>
+                                            <option value="false">Đã nghỉ việc / Khóa</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="tab2">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="border rounded p-2 bg-white shadow-sm" style="min-height: 300px;">
+                                        <h6 class="fw-bold p-2 border-bottom bg-light">Sơ đồ tổ chức</h6>
+                                        <div id="jstree_dept"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <table class="table table-bordered align-middle" id="tblAssign">
+                                        <thead class="table-info">
+                                            <tr>
+                                                <th>Phòng ban</th>
+                                                <th style="width: 80px;">Job</th>
+                                                <th style="width: 80px;">Pos</th>
+                                                <th class="text-center">Chính</th>
+                                                <th>#</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary px-5 fw-bold" onclick="saveUser()">LƯU NHÂN SỰ</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="fileManagerModal" tabindex="-1" style="z-index:1080;">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="height:80vh;">
+        <div class="modal-content h-100"><div class="modal-body p-0 h-100"><iframe id="fmIframe" src="" style="width:100%; height:100%; border:none;"></iframe></div></div>
+    </div>
+</div>
+
+
+    <script>
+    let globalJobtitles = [];
+    let globalPositions = [];
+        $(document).ready(function () {
+        $.get('/Admin/Department/GetJobtitles', res => { globalJobtitles = res; });
+        $.get('/Admin/Department/GetPositions', res => { globalPositions = res; });
+            // Khởi tạo JSTree 1 lần duy nhất
+            $('#jstree_dept').jstree({
+                'core': { 'data': { 'url': '/Admin/Department/GetTreeData' } }
+            }).on("select_node.jstree", (e, d) => addRow(d.node.id, d.node.text));
+
+            // Tìm kiếm nhanh Client-side
+            $("#txtSearch").on("keyup", function () {
+                var val = $(this).val().toLowerCase();
+                $("#userTable tbody tr").filter(function () { $(this).toggle($(this).text().toLowerCase().indexOf(val) > -1); });
+            });
+        });
+
+    function openUserModal(id) {
+        $('#userForm')[0].reset();
+        $('#tblAssign tbody').empty();
+        $('#UserId').val(id);
+        $('#avatarPreview').attr('src', 'https://placehold.co/150x150?text=No+Avatar');
+
+        if (id > 0) {
+            $.get('/Admin/User/GetById/' + id, function (res) {
+                if (res.success) {
+                    var u = res.data;
+                    $('#UserName').val(u.userName);
+                    $('#FullName').val(u.fullName);
+                    $('#Mail').val(u.mail);
+                    $('#Avatar').val(u.avatar);
+                    // NẠP THÊM 2 TRƯỜNG MỚI
+                    $('#Profile').val(u.profile);
+                    $('#IsShow').prop('checked', u.isShow === true);
+
+                    $('#IsActive').val(u.isActive.toString());
+                    if (u.avatar) $('#avatarPreview').attr('src', u.avatar);
+
+                    res.assignments.forEach(a => addRow(a.departmentId, a.departmentName,a));
+                }
+            });
+        }
+        new bootstrap.Modal(document.getElementById('userModal')).show();
+    }
+
+    function addRow(deptId, name, data = null) {
+        if ($(`#row-assign-${deptId}`).length > 0) return;
+
+        // Tạo danh sách Option cho Jobtitles [cite: 60]
+        let jobOptions = '<option value="0">-- Chọn Job --</option>';
+        globalJobtitles.forEach(j => {
+            jobOptions += `<option value="${j.id}" ${data?.jobtitleId == j.id ? 'selected' : ''}>${j.name}</option>`;
+        });
+
+        // Tạo danh sách Option cho Positions [cite: 60]
+        let posOptions = '<option value="0">-- Chọn Pos --</option>';
+        globalPositions.forEach(p => {
+            posOptions += `<option value="${p.id}" ${data?.positionId == p.id ? 'selected' : ''}>${p.name}</option>`;
+        });
+
+        let html = `<tr id="row-assign-${deptId}" class="assign-row" data-id="${deptId}">
+                    <td>${name}</td>
+                    <td><select class="form-select form-select-sm job-id">${jobOptions}</select></td>
+                    <td><select class="form-select form-select-sm pos-id">${posOptions}</select></td>
+                    <td class="text-center">
+                        <input type="radio" name="mainR" class="form-check-input is-main" ${data?.isMain ? 'checked' : ''}>
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-link text-danger p-0" onclick="$(this).closest('tr').remove()">
+                            <i class="bi bi-x-circle"></i> Xóa
+                        </button>
+                    </td>
+                </tr>`;
+        $('#tblAssign tbody').append(html);
+    }
+
+    function saveUser() {
+        let assignments = [];
+        $('.assign-row').each(function () {
+            assignments.push({
+                DepartmentId: $(this).data('id'),
+                JobtitleId: parseInt($(this).find('.job-id').val()) || 0,
+                PositionId: parseInt($(this).find('.pos-id').val()) || 0,
+                IsMain: $(this).find('.is-main').is(':checked')
+            });
+        });
+
+        let formData = {
+            user: {
+                UserId: $('#UserId').val(),
+                UserName: $('#UserName').val(),
+                FullName: $('#FullName').val(),
+                Mail: $('#Mail').val(),
+                Avatar: $('#Avatar').val(),
+                Profile: $('#Profile').val(),
+                IsShow: $('#IsShow').is(':checked'),
+                IsActive: $('#IsActive').val() === "true"
+            },
+            SelectedPositionsJson: JSON.stringify(assignments)
+        };
+
+        $.post('/Admin/User/Save', formData, function (res) {
+            if (res.success) {
+                location.reload();
+            } else {
+                alert("Lỗi: " + res.message);
+            }
+        });
+    }
+        function openFileManager() {
+            document.getElementById('fmIframe').src = '/Admin/FileManager/Index';
+            new bootstrap.Modal(document.getElementById('fileManagerModal')).show();
+        }
+
+        window.addEventListener('message', function (e) {
+            if (e.data && e.data.type === 'getFileUrl') {
+                $('#Avatar').val(e.data.url);
+                $('#avatarPreview').attr('src', e.data.url);
+                bootstrap.Modal.getInstance(document.getElementById('fileManagerModal')).hide();
+            }
+        });
+
+        function deleteUser(id) {
+            if (confirm("Xác nhận xóa?")) $.post('/Admin/User/Delete/' + id, r => location.reload());
+        }
+    </script>
+

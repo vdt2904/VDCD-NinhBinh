@@ -41,6 +41,9 @@ namespace VDCD.Entities.Cache
 
         public const string PostsAll = "$domain.posts.all";
         public const int PostsAllTimeout = 30;
+
+        public const string UsersAll = "$domain.users.all";
+        public const int UsersAllTimeout = 30;
         /* ================== COMMON ================== */
 
         public const int OneMinute = 1;

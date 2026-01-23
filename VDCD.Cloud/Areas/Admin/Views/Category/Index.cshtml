@@ -58,6 +58,9 @@
                                             onclick="openEditModal(this)">
                                         Sửa
                                     </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteCategory('@item.Id')">
+                                        Xóa
+                                    </button>
                                 </td>
                             </tr>
                             stt++;
@@ -135,6 +138,31 @@
 </div>
 <script>
     const categorySaveUrl = '@Url.Action("Save", "Category", new { area = "Admin" })';
+    function deleteCategory(id) {
+        if (confirm('Bạn có chắc chắn muốn xóa danh mục này không?')) {
+            // Lấy Token chống giả mạo (Anti-forgery token) nếu cần
+            const token = $('input[name="__RequestVerificationToken"]').val();
+
+            fetch(`/Admin/Category/Delete?id=${id}`, {
+                method: 'DELETE', // Hoặc 'POST' tùy thuộc vào cấu hình Controller của bạn
+                headers: {
+                    'RequestVerificationToken': token
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Xóa thành công!');
+                        location.reload(); // Tải lại trang để cập nhật danh sách
+                    } else {
+                        alert('Có lỗi xảy ra khi xóa.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Không thể kết nối đến máy chủ.');
+                });
+        }
+    }
 </script>
 
 <script src="~/js/admin/category/index.js" asp-append-version="true"></script>

@@ -1,0 +1,313 @@
+﻿@model IEnumerable<VDCD.Entities.Custom.Department>
+@{
+	ViewData["Title"] = "Quản lý Phòng ban";
+	Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<style>
+    .jstree-anchor {
+        font-size: 14px;
+    }
+
+    .table-custom thead {
+        background-color: #f8f9fa;
+        border-top: 2px solid #dee2e6;
+    }
+
+    .sticky-tree {
+        position: sticky;
+        top: 20px;
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+
+    .select2-container--bootstrap-5 {
+        width: 100% !important;
+    }
+
+    textarea{
+        width: 100% !important;
+    }
+    /* CSS lại ô thêm người dùng */
+    .select2-container--bootstrap-5 .select2-selection {
+        min-height: 45px;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+    }
+
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__rendered {
+        padding: 4px 8px;
+    }
+
+    /* CSS nút xóa bằng chữ */
+    .btn-remove-user {
+        color: #dc3545;
+        font-weight: 600;
+        text-decoration: none;
+        font-size: 13px;
+        border: 1px solid #dc3545;
+        padding: 2px 8px;
+        border-radius: 4px;
+        transition: all 0.2s;
+        background: #fff;
+    }
+
+        .btn-remove-user:hover {
+            background: #dc3545;
+            color: #fff !important;
+        }
+</style>
+<div class="row">
+	<div class="col-md-3 border-end">
+		<div class="sticky-tree">
+			<div class="d-flex gap-2 mb-3">
+				<button class="btn btn-outline-success btn-sm w-100" onclick="createNewNode()">
+					<i class="bi bi-plus-circle"></i> Thêm phòng gốc
+				</button>
+			</div>
+			<div id="deptTree" class="border p-2 rounded bg-white"></div>
+		</div>
+	</div>
+
+	<div class="col-md-9 px-4">
+		<div id="detailContainer" class="d-none">
+			<h5 class="fw-bold mb-4 text-uppercase border-bottom pb-2 text-primary" id="panelTitle">Thông tin phòng ban</h5>
+
+			<form id="deptForm">
+				<input type="hidden" id="Id" name="Id" value="0" />
+				<input type="hidden" id="ParentId" name="ParentId" />
+
+				<div class="row mb-3">
+					<label class="col-md-2 col-form-label fw-bold small">Tên phòng ban <span class="text-danger">*</span>:</label>
+					<div class="col-md-10">
+						<input type="text" id="DepartmentName" name="DepartmentName" class="form-control" placeholder="Nhập tên phòng ban..." />
+					</div>
+				</div>
+
+				<div class="row mb-3">
+					<label class="col-md-2 col-form-label fw-bold small">Trạng thái:</label>
+					<div class="col-md-10 d-flex align-items-center">
+						<div class="form-check form-switch me-4">
+							<input class="form-check-input" type="checkbox" id="IsActive" checked>
+							<label class="form-check-label" for="IsActive">Hoạt động</label>
+						</div>
+						<div class="form-check form-switch">
+							<input class="form-check-input" type="checkbox" id="AllowMail">
+							<label class="form-check-label" for="AllowMail">Cho phép nhận mail cảnh báo</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="row mb-3">
+					<label class="col-md-2 col-form-label fw-bold small">Thêm nhân sự:</label>
+					<div class="col-md-10">
+						<select id="userPicker" class="form-select select2-user" multiple></select>
+						<div class="form-text text-muted mt-1">Gõ tên hoặc tài khoản để tìm nhân viên</div>
+					</div>
+				</div>
+
+				<h6 class="fw-bold mt-5 mb-3 text-secondary"><i class="bi bi-people-fill me-2"></i>DANH SÁCH CÁN BỘ THUỘC PHÒNG BAN</h6>
+				<div class="table-responsive">
+					<table class="table table-bordered align-middle table-custom" id="tblUserAssign">
+						<thead>
+							<tr class="text-center small fw-bold">
+								<th style="width: 50px;">STT</th>
+								<th>Họ tên</th>
+								<th style="width: 180px;">Chức danh</th>
+								<th style="width: 180px;">Chức vụ</th>
+								<th style="width: 80px;">Chính</th>
+								<th style="width: 60px;">Xóa</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+
+				<div class="mt-4 border-top pt-3">
+					<button type="button" class="btn btn-warning fw-bold text-white px-4 shadow-sm" onclick="saveDept()">
+						<i class="bi bi-save me-2"></i>LƯU THÔNG TIN
+					</button>
+					<button type="button" class="btn btn-outline-danger ms-2" onclick="deleteDept()">
+						<i class="bi bi-trash"></i> Xóa phòng
+					</button>
+				</div>
+			</form>
+		</div>
+
+		<div id="emptyState" class="text-center py-5">
+			<img src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png" width="80" class="opacity-25 mb-3">
+			<h6 class="text-muted">Chọn một phòng ban từ sơ đồ bên trái để xem hoặc thêm mới</h6>
+		</div>
+	</div>
+</div>
+
+<script>
+    let globalJobtitles = [];
+    let globalPositions = [];
+
+    $(function () {
+        loadMasterData();
+        initTree();
+        initUserPicker();
+    });
+
+    function loadMasterData() {
+        $.get('/Admin/Department/GetJobtitles', function (res) { globalJobtitles = res; });
+        $.get('/Admin/Department/GetPositions', function (res) { globalPositions = res; });
+    }
+
+    function initTree() {
+        $('#deptTree').jstree({
+            'core': { 'data': { 'url': '/Admin/Department/GetTreeData' }, 'check_callback': true },
+            'plugins': ["wholerow", "contextmenu"],
+            'contextmenu': {
+                'items': function (node) {
+                    return {
+                        "Create": { "label": "Thêm phòng con", "action": function (obj) { prepareCreateSub(node); } },
+                        "Delete": { "label": "Xóa phòng ban", "action": function (obj) { deleteDept(node.id); } }
+                    };
+                }
+            }
+        }).on("select_node.jstree", (e, d) => loadDeptDetail(d.node.id));
+    }
+
+    function prepareCreateSub(parentNode) {
+        $('#emptyState').addClass('d-none');
+        $('#detailContainer').removeClass('d-none');
+        $('#deptForm')[0].reset();
+        $('#tblUserAssign tbody').html('<tr class="empty-row"><td colspan="6" class="text-center text-muted py-3">Chưa có nhân sự</td></tr>');
+        $('#Id').val(0);
+        $('#ParentId').val(parentNode.id);
+        $('#panelTitle').html(`Thêm phòng con cho: ${parentNode.text}`);
+    }
+
+    function loadDeptDetail(id) {
+        if (!id || id === "#") return;
+        $('#emptyState').addClass('d-none');
+        $('#detailContainer').removeClass('d-none');
+
+        $.get('/Admin/Department/GetDetailWithUsers/' + id, function (res) {
+            if (res.success) {
+                $('#Id').val(res.data.Id || res.data.id);
+                $('#ParentId').val(res.data.ParentId || res.data.parentId);
+                $('#DepartmentName').val(res.data.DepartmentName || res.data.departmentName);
+                $('#IsActive').prop('checked', res.data.IsActive || res.data.isActive);
+                renderUserTable(res.users);
+            }
+        });
+    }
+
+    function renderUserTable(users) {
+        if (users && users.length > 0) {
+            let html = '';
+            users.forEach((u, index) => {
+                html += generateUserRowHTML(index + 1, u.UserId || u.userId, u.Fullname || u.fullname, u.JobtitleId || u.jobtitleId, u.PositionId || u.positionId, u.IsMain || u.isMain);
+            });
+            $('#tblUserAssign tbody').html(html);
+        } else {
+            $('#tblUserAssign tbody').html('<tr class="empty-row"><td colspan="6" class="text-center text-muted py-3">Chưa có nhân sự</td></tr>');
+        }
+    }
+
+    function initUserPicker() {
+        $('.select2-user').select2({
+            theme: 'bootstrap-5',
+            ajax: {
+                url: '/Admin/User/SearchUsers',
+                dataType: 'json',
+                delay: 250,
+                processResults: data => ({ results: data.data.map(u => ({ id: u.userId, text: u.fullName })) })
+            }
+        }).on('select2:select', function (e) {
+            addUserToTable(e.params.data.id, e.params.data.text);
+            $(this).val(null).trigger('change');
+        });
+    }
+
+    function addUserToTable(id, name) {
+        if ($(`.user-row[data-userid="${id}"]`).length > 0) return;
+
+        // XÓA DÒNG "CHƯA CÓ NHÂN SỰ" NẾU ĐANG TỒN TẠI
+        $('#tblUserAssign tbody .empty-row').remove();
+
+        const idx = $('#tblUserAssign tbody tr').length + 1;
+        const newRow = generateUserRowHTML(idx, id, name, null, null, false);
+        $('#tblUserAssign tbody').append(newRow);
+    }
+
+    function generateUserRowHTML(idx, userId, name, jId, pId, isMain) {
+        let jobOptions = '<option value="">-- Chọn chức danh --</option>';
+        globalJobtitles.forEach(j => { jobOptions += `<option value="${j.id}" ${j.id == jId ? 'selected' : ''}>${j.name}</option>`; });
+
+        let posOptions = '<option value="">-- Chọn chức vụ --</option>';
+        globalPositions.forEach(p => { posOptions += `<option value="${p.id}" ${p.id == pId ? 'selected' : ''}>${p.name}</option>`; });
+
+        return `
+                <tr class="user-row" data-userid="${userId}">
+                    <td class="text-center">${idx}</td>
+                    <td class="fw-bold text-primary">${name}</td>
+                    <td><select class="form-select form-select-sm job-title">${jobOptions}</select></td>
+                    <td><select class="form-select form-select-sm position">${posOptions}</select></td>
+                    <td class="text-center"><input type="checkbox" name="MainDept" class="form-check-input is-main" ${isMain ? 'checked' : ''}></td>
+                        <td class="text-center">
+                            <a href="javascript:void(0)" class="btn-remove-user" onclick="removeUserRow(this)">Xóa</a>
+                    </td>
+                </tr>`;
+    }
+
+    function removeUserRow(btn) {
+        $(btn).closest('tr').remove();
+        // NẾU XÓA HẾT THÌ HIỆN LẠI DÒNG THÔNG BÁO
+        if ($('#tblUserAssign tbody tr').length === 0) {
+            $('#tblUserAssign tbody').html('<tr class="empty-row"><td colspan="6" class="text-center text-muted py-3">Chưa có nhân sự</td></tr>');
+        }
+    }
+
+    function saveDept() {
+        let assignments = [];
+        $('.user-row').each(function () {
+            assignments.push({
+                UserId: $(this).data('userid'),
+                JobtitleId: parseInt($(this).find('.job-title').val()) || null,
+                PositionId: parseInt($(this).find('.position').val()) || null,
+                IsMain: $(this).find('.is-main').is(':checked')
+            });
+        });
+
+        const data = {
+            dept: {
+                Id: parseInt($('#Id').val()),
+                DepartmentName: $('#DepartmentName').val(),
+                ParentId: $('#ParentId').val() ? parseInt($('#ParentId').val()) : null,
+                IsActive: $('#IsActive').is(':checked')
+            },
+            AssignmentsJson: JSON.stringify(assignments)
+        };
+
+        $.post('/Admin/Department/Save', data, function (res) {
+            if (res.success) {
+                alert("Đã lưu dữ liệu thành công!");
+                $('#deptTree').jstree(true).refresh();
+            } else {
+                alert("Lỗi: " + res.message);
+            }
+        });
+    }
+
+    function createNewNode() {
+        $('#detailContainer').removeClass('d-none');
+        $('#emptyState').addClass('d-none');
+        $('#deptForm')[0].reset();
+        $('#tblUserAssign tbody').html('<tr class="empty-row"><td colspan="6" class="text-center text-muted py-3">Chưa có nhân sự</td></tr>');
+        $('#Id').val(0);
+        $('#ParentId').val("");
+        $('#panelTitle').text("Thêm phòng ban gốc");
+    }
+
+    function deleteDept(id) {
+        id = id || $('#Id').val();
+        if (id != 0 && confirm("Xác nhận xóa phòng ban này?")) {
+            $.post('/Admin/Department/Delete/' + id, function (res) { if (res.success) location.reload(); });
+        }
+    }
+</script>

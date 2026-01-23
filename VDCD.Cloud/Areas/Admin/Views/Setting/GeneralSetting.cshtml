@@ -401,11 +401,19 @@
 						<input type="text" class="form-control" name="setting.general.vision.main_title"
 							   value="@(ViewBag.VisionMainTitle ?? "TẦM NHÌN CHO KỶ NGUYÊN CHUYỂN ĐỔI SỐ")">
 					</div>
-
+					@{
+						var visions = (ViewBag.Visions as IEnumerable<dynamic>) ?? new List<dynamic>();
+						var qua = visions.FirstOrDefault(x => x.SettingKey == $"setting.general.vision.quantity")?.Value ?? "0";
+					}
+					<div class="form-group mb-4">
+						<label>Số lượng hiển thị</label>
+						<input type="number" class="form-control" name="setting.general.vision.quantity"
+							   value="@qua">
+					</div>
 					<hr>
 					<div id="vision-list">
 						@{
-							var visions = (ViewBag.Visions as IEnumerable<dynamic>) ?? new List<dynamic>();
+							
 
 							// Sửa lỗi: Ép kiểu rõ ràng và sử dụng chỉ số mảng thay vì .Last()
 							var visionIndices = visions
@@ -547,7 +555,187 @@
 				</div>
 			</div>
 		</div>
+		<div class="card settings-card">
+			<div class="card-header settings-header p-0">
+				<a class="d-flex justify-content-between align-items-center px-4 py-3 text-decoration-none"
+				   data-bs-toggle="collapse"
+				   data-bs-target="#operationSetting">
+					<span>Cách thức vận hành</span>
+					<i class="bi bi-chevron-down toggle-icon"></i>
+				</a>
+			</div>
 
+			<div id="operationSetting" class="collapse show">
+				<div class="card-body p-4">
+					<div class="form-group mb-4">
+						<label>Tiêu đề chính (Ví dụ: HỢP TÁC CÙNG PHÁT TRIỂN)</label>
+						<input type="text" class="form-control" name="setting.general.operation.main_title"
+							   value="@(ViewBag.OperationMainTitle ?? "HỢP TÁC CÙNG PHÁT TRIỂN")">
+					</div>
+
+					<hr>
+					<div id="operation-list">
+						@{
+							var operations = (ViewBag.Operations as IEnumerable<dynamic>) ?? new List<dynamic>();
+							// Lấy index dựa trên key title
+							var opIndices = operations
+							.Where(x => ((string)x.SettingKey).Contains("setting.general.operation.title"))
+							.Select(x =>
+							{
+								var parts = ((string)x.SettingKey).Split('.');
+								return int.Parse(parts[parts.Length - 1]);
+							})
+							.OrderBy(i => i).ToList();
+
+							int opCount = 0;
+							foreach (int i in opIndices)
+							{
+								var titleVal = operations.FirstOrDefault(x => x.SettingKey == $"setting.general.operation.title.{i}")?.Value ?? "";
+								var contentVal = operations.FirstOrDefault(x => x.SettingKey == $"setting.general.operation.content.{i}")?.Value ?? "";
+								var imageVal = operations.FirstOrDefault(x => x.SettingKey == $"setting.general.operation.image.{i}")?.Value ?? "";
+
+								<div class="operation-item border rounded p-3 mb-3 bg-light">
+									<div class="d-flex justify-content-between align-items-center mb-3">
+										<span class="badge bg-info text-dark">Bước #<span class="op-index-label">@(opCount + 1)</span></span>
+										<div class="btn-group">
+											<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveOp(this, 'up')"><i class="bi bi-arrow-up"></i></button>
+											<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveOp(this, 'down')"><i class="bi bi-arrow-down"></i></button>
+											<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeOp(this)"><i class="bi bi-trash"></i></button>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-6 mb-2">
+											<label class="form-label small fw-bold">Tiêu đề bước</label>
+											<input type="text" class="form-control op-title" name="setting.general.operation.title.@opCount" value="@titleVal">
+										</div>
+										<div class="col-md-6 mb-2">
+											<label class="form-label small fw-bold">Hình ảnh minh họa</label>
+											<div class="input-group">
+												<input type="text" class="form-control op-image" id="input-op-image-@opCount" name="setting.general.operation.image.@opCount" value="@imageVal">
+												<button class="btn btn-outline-secondary" type="button" onclick="openFileManagerOp('@opCount')">
+													<i class="bi bi-image"></i>
+												</button>
+											</div>
+										</div>
+										<div class="col-md-12 mb-2">
+											<label class="form-label small fw-bold">Nội dung chi tiết</label>
+											<textarea class="form-control op-content" name="setting.general.operation.content.@opCount" rows="3">@contentVal</textarea>
+										</div>
+									</div>
+								</div>
+								opCount++;
+							}
+						}
+					</div>
+					<button type="button" class="btn btn-outline-info w-100 mt-2" onclick="addNewOperation()">
+						<i class="bi bi-plus-circle"></i> Thêm bước vận hành mới
+					</button>
+				</div>
+			</div>
+		</div>
+		<div class="card settings-card">
+			<div class="card-header settings-header p-0">
+				<a class="d-flex justify-content-between align-items-center px-4 py-3 text-decoration-none"
+				   data-bs-toggle="collapse"
+				   data-bs-target="#orgSetting">
+					<span>Cơ cấu tổ chức</span>
+					<i class="bi bi-chevron-down toggle-icon"></i>
+				</a>
+			</div>
+
+			<div id="orgSetting" class="collapse show">
+				<div class="card-body p-4">
+					@if (ViewBag.OrgStructure != null)
+					{
+						foreach (var item in ViewBag.OrgStructure)
+						{
+							<div class="form-group mb-3">
+								<label>@item.Description</label>
+								<div class="input-group">
+									<input type="text" class="form-control"
+										   id="input-@item.SettingKey.Replace(".", "-")"
+										   name="@item.SettingKey" value="@item.Value" />
+
+									@if (item.SettingKey.Contains("image"))
+									{
+										<button class="btn btn-outline-secondary" type="button"
+												onclick="openFileManager('@item.SettingKey')">
+											<i class="bi bi-image"></i> Chọn ảnh sơ đồ
+										</button>
+									}
+								</div>
+							</div>
+						}
+					}
+					else
+					{
+						<p class="text-muted small">Chưa có cấu hình cho mục này trong Cơ sở dữ liệu.</p>
+					}
+				</div>
+			</div>
+		</div>
+		<div class="card settings-card">
+			<div class="card-header settings-header p-0">
+				<a class="d-flex justify-content-between align-items-center px-4 py-3 text-decoration-none"
+				   data-bs-toggle="collapse"
+				   data-bs-target="#solutionSetting">
+					<span>Giải pháp</span>
+					<i class="bi bi-chevron-down toggle-icon"></i>
+				</a>
+			</div>
+
+			<div id="solutionSetting" class="collapse show">
+				<div class="card-body p-4">
+					<div id="solution-list">
+						@{
+							var solutions = (ViewBag.Solutions as IEnumerable<dynamic>) ?? new List<dynamic>();
+
+							// Lấy index dựa trên key title tương tự cách xử lý strengths và sliders [cite: 46, 68]
+							var solIndices = solutions
+							.Where(x => ((string)x.SettingKey).Contains("setting.general.solution.title"))
+							.Select(x =>
+							{
+								var parts = ((string)x.SettingKey).Split('.');
+								return int.Parse(parts[parts.Length - 1]);
+							})
+							.OrderBy(i => i).ToList();
+
+							int solCount = 0;
+							foreach (int i in solIndices)
+							{
+								var titleVal = solutions.FirstOrDefault(x => x.SettingKey == $"setting.general.solution.title.{i}")?.Value ?? "";
+								var contentVal = solutions.FirstOrDefault(x => x.SettingKey == $"setting.general.solution.content.{i}")?.Value ?? "";
+
+								<div class="solution-item border rounded p-3 mb-3 bg-light">
+									<div class="d-flex justify-content-between align-items-center mb-3">
+										<span class="badge bg-warning text-dark">Giải pháp #<span class="sol-index-label">@(solCount + 1)</span></span>
+										<div class="btn-group">
+											<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSol(this, 'up')"><i class="bi bi-arrow-up"></i></button>
+											<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSol(this, 'down')"><i class="bi bi-arrow-down"></i></button>
+											<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSol(this)"><i class="bi bi-trash"></i></button>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 mb-2">
+											<label class="form-label small fw-bold">Tiêu đề giải pháp</label>
+											<input type="text" class="form-control sol-title" name="setting.general.solution.title.@solCount" value="@titleVal">
+										</div>
+										<div class="col-md-12 mb-2">
+											<label class="form-label small fw-bold">Nội dung giải pháp</label>
+											<textarea class="form-control sol-content" name="setting.general.solution.content.@solCount" rows="3">@contentVal</textarea>
+										</div>
+									</div>
+								</div>
+								solCount++;
+							}
+						}
+					</div>
+					<button type="button" class="btn btn-outline-warning w-100 mt-2" onclick="addNewSolution()">
+						<i class="bi bi-plus-circle"></i> Thêm giải pháp mới
+					</button>
+				</div>
+			</div>
+		</div>
 		<div class="mt-4 mb-5 d-flex justify-content-end">
 			<button type="button" class="btn btn-custom btn-save" onclick="saveSetting()">
 				<i class="bi bi-check2-circle"></i> Lưu thay đổi
@@ -642,26 +830,26 @@
 		const index = list.querySelectorAll('.strength-item').length;
 
 		const html = `
-				<div class="strength-item border rounded p-3 mb-3 bg-light">
-					<div class="d-flex justify-content-between align-items-center mb-3">
-						<span class="badge bg-primary">Thế mạnh #<span class="index-label">${index + 1}</span></span>
-						<div class="btn-group">
-							<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveItem(this, 'up')"><i class="bi bi-arrow-up"></i></button>
-							<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveItem(this, 'down')"><i class="bi bi-arrow-down"></i></button>
-							<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeItem(this)"><i class="bi bi-trash"></i></button>
+					<div class="strength-item border rounded p-3 mb-3 bg-light">
+						<div class="d-flex justify-content-between align-items-center mb-3">
+							<span class="badge bg-primary">Thế mạnh #<span class="index-label">${index + 1}</span></span>
+							<div class="btn-group">
+								<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveItem(this, 'up')"><i class="bi bi-arrow-up"></i></button>
+								<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveItem(this, 'down')"><i class="bi bi-arrow-down"></i></button>
+								<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeItem(this)"><i class="bi bi-trash"></i></button>
+							</div>
 						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-4 mb-2">
-							<label class="form-label small fw-bold">Định hướng</label>
-							<input type="text" class="form-control strength-orient" name="setting.general.strengths.orientation.${index}">
+						<div class="row">
+							<div class="col-md-4 mb-2">
+								<label class="form-label small fw-bold">Định hướng</label>
+								<input type="text" class="form-control strength-orient" name="setting.general.strengths.orientation.${index}">
+							</div>
+							<div class="col-md-8 mb-2">
+								<label class="form-label small fw-bold">Nội dung</label>
+								<input type="text" class="form-control strength-title" name="setting.general.strengths.title.${index}">
+							</div>
 						</div>
-						<div class="col-md-8 mb-2">
-							<label class="form-label small fw-bold">Nội dung</label>
-							<input type="text" class="form-control strength-title" name="setting.general.strengths.title.${index}">
-						</div>
-					</div>
-				</div>`;
+					</div>`;
 		list.insertAdjacentHTML('beforeend', html);
 	}
 
@@ -696,31 +884,31 @@
 		const list = document.getElementById('slider-list');
 		const index = list.querySelectorAll('.slider-item').length;
 		const html = `
-				<div class="slider-item border rounded p-3 mb-3 bg-light">
-					<div class="d-flex justify-content-between align-items-center mb-3">
-						<span class="badge bg-success">Slider #<span class="slider-index-label">${index + 1}</span></span>
-						<div class="btn-group">
-							<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSlider(this, 'up')"><i class="bi bi-arrow-up"></i></button>
-							<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSlider(this, 'down')"><i class="bi bi-arrow-down"></i></button>
-							<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSlider(this)"><i class="bi bi-trash"></i></button>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-5 mb-2">
-							<label class="form-label small fw-bold">Tiêu đề slider</label>
-							<input type="text" class="form-control slider-title" name="setting.general.sliders.title.${index}">
-						</div>
-						<div class="col-md-7 mb-2">
-							<label class="form-label small fw-bold">Hình ảnh</label>
-							<div class="input-group">
-								<input type="text" class="form-control slider-image" id="input-slider-image-${index}" name="setting.general.sliders.image.${index}">
-								<button class="btn btn-outline-secondary" type="button" onclick="openFileManagerSlider('${index}')">
-									<i class="bi bi-image"></i> Chọn ảnh
-								</button>
+					<div class="slider-item border rounded p-3 mb-3 bg-light">
+						<div class="d-flex justify-content-between align-items-center mb-3">
+							<span class="badge bg-success">Slider #<span class="slider-index-label">${index + 1}</span></span>
+							<div class="btn-group">
+								<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSlider(this, 'up')"><i class="bi bi-arrow-up"></i></button>
+								<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSlider(this, 'down')"><i class="bi bi-arrow-down"></i></button>
+								<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSlider(this)"><i class="bi bi-trash"></i></button>
 							</div>
 						</div>
-					</div>
-				</div>`;
+						<div class="row">
+							<div class="col-md-5 mb-2">
+								<label class="form-label small fw-bold">Tiêu đề slider</label>
+								<input type="text" class="form-control slider-title" name="setting.general.sliders.title.${index}">
+							</div>
+							<div class="col-md-7 mb-2">
+								<label class="form-label small fw-bold">Hình ảnh</label>
+								<div class="input-group">
+									<input type="text" class="form-control slider-image" id="input-slider-image-${index}" name="setting.general.sliders.image.${index}">
+									<button class="btn btn-outline-secondary" type="button" onclick="openFileManagerSlider('${index}')">
+										<i class="bi bi-image"></i> Chọn ảnh
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>`;
 		list.insertAdjacentHTML('beforeend', html);
 	}
 
@@ -764,43 +952,43 @@
 		const list = document.getElementById('vision-list');
 		const index = list.querySelectorAll('.vision-item').length;
 		const html = `
-				<div class="vision-item border rounded p-3 mb-3 bg-light">
-					<div class="d-flex justify-content-between align-items-center mb-3">
-						<span class="badge bg-dark">Tab #<span class="vision-index-label">${index + 1}</span></span>
-						<div class="btn-group">
-							<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveVision(this, 'up')"><i class="bi bi-arrow-up"></i></button>
-							<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveVision(this, 'down')"><i class="bi bi-arrow-down"></i></button>
-							<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeVision(this)"><i class="bi bi-trash"></i></button>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-4 mb-2">
-							<label class="form-label small fw-bold">Tên Tab</label>
-							<input type="text" class="form-control vision-tab-name" name="setting.general.vision.tab_name.${index}">
-						</div>
-						<div class="col-md-8 mb-2">
-							<label class="form-label small fw-bold">Tiêu đề nội dung</label>
-							<input type="text" class="form-control vision-title" name="setting.general.vision.title.${index}">
-						</div>
-						<div class="col-md-12 mb-2">
-							<label class="form-label small fw-bold">Mô tả ngắn</label>
-							<textarea class="form-control vision-content" name="setting.general.vision.content.${index}" rows="2"></textarea>
-						</div>
-						<div class="col-md-6 mb-2">
-							<label class="form-label small fw-bold">Hình ảnh</label>
-							<div class="input-group">
-								<input type="text" class="form-control vision-image" id="input-vision-image-${index}" name="setting.general.vision.image.${index}">
-								<button class="btn btn-outline-secondary" type="button" onclick="openFileManagerVision('${index}')">
-									<i class="bi bi-image"></i>
-								</button>
+					<div class="vision-item border rounded p-3 mb-3 bg-light">
+						<div class="d-flex justify-content-between align-items-center mb-3">
+							<span class="badge bg-dark">Tab #<span class="vision-index-label">${index + 1}</span></span>
+							<div class="btn-group">
+								<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveVision(this, 'up')"><i class="bi bi-arrow-up"></i></button>
+								<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveVision(this, 'down')"><i class="bi bi-arrow-down"></i></button>
+								<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeVision(this)"><i class="bi bi-trash"></i></button>
 							</div>
 						</div>
-						<div class="col-md-6 mb-2">
-							<label class="form-label small fw-bold">Danh sách dòng (Mỗi dòng một ý)</label>
-							<textarea class="form-control vision-lines" name="setting.general.vision.lines.${index}" rows="2"></textarea>
+						<div class="row">
+							<div class="col-md-4 mb-2">
+								<label class="form-label small fw-bold">Tên Tab</label>
+								<input type="text" class="form-control vision-tab-name" name="setting.general.vision.tab_name.${index}">
+							</div>
+							<div class="col-md-8 mb-2">
+								<label class="form-label small fw-bold">Tiêu đề nội dung</label>
+								<input type="text" class="form-control vision-title" name="setting.general.vision.title.${index}">
+							</div>
+							<div class="col-md-12 mb-2">
+								<label class="form-label small fw-bold">Mô tả ngắn</label>
+								<textarea class="form-control vision-content" name="setting.general.vision.content.${index}" rows="2"></textarea>
+							</div>
+							<div class="col-md-6 mb-2">
+								<label class="form-label small fw-bold">Hình ảnh</label>
+								<div class="input-group">
+									<input type="text" class="form-control vision-image" id="input-vision-image-${index}" name="setting.general.vision.image.${index}">
+									<button class="btn btn-outline-secondary" type="button" onclick="openFileManagerVision('${index}')">
+										<i class="bi bi-image"></i>
+									</button>
+								</div>
+							</div>
+							<div class="col-md-6 mb-2">
+								<label class="form-label small fw-bold">Danh sách dòng (Mỗi dòng một ý)</label>
+								<textarea class="form-control vision-lines" name="setting.general.vision.lines.${index}" rows="2"></textarea>
+							</div>
 						</div>
-					</div>
-				</div>`;
+					</div>`;
 		list.insertAdjacentHTML('beforeend', html);
 	}
 
@@ -847,26 +1035,26 @@
 		const list = document.getElementById('service-list');
 		const index = list.querySelectorAll('.service-item').length;
 		const html = `
-			<div class="service-item border rounded p-3 mb-3 bg-light">
-				<div class="d-flex justify-content-between align-items-center mb-3">
-					<span class="badge bg-info text-dark">Dịch vụ #<span class="service-index-label">${index + 1}</span></span>
-					<div class="btn-group">
-						<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveService(this, 'up')"><i class="bi bi-arrow-up"></i></button>
-						<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveService(this, 'down')"><i class="bi bi-arrow-down"></i></button>
-						<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeService(this)"><i class="bi bi-trash"></i></button>
+				<div class="service-item border rounded p-3 mb-3 bg-light">
+					<div class="d-flex justify-content-between align-items-center mb-3">
+						<span class="badge bg-info text-dark">Dịch vụ #<span class="service-index-label">${index + 1}</span></span>
+						<div class="btn-group">
+							<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveService(this, 'up')"><i class="bi bi-arrow-up"></i></button>
+							<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveService(this, 'down')"><i class="bi bi-arrow-down"></i></button>
+							<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeService(this)"><i class="bi bi-trash"></i></button>
+						</div>
 					</div>
-				</div>
-				<div class="row">
-					<div class="col-12 mb-2">
-						<label class="form-label small fw-bold">Tên dịch vụ</label>
-						<input type="text" class="form-control service-title" name="setting.general.services.title.${index}">
+					<div class="row">
+						<div class="col-12 mb-2">
+							<label class="form-label small fw-bold">Tên dịch vụ</label>
+							<input type="text" class="form-control service-title" name="setting.general.services.title.${index}">
+						</div>
+						<div class="col-12">
+							<label class="form-label small fw-bold">Nội dung mô tả</label>
+							<textarea class="form-control service-content" rows="3" name="setting.general.services.content.${index}"></textarea>
+						</div>
 					</div>
-					<div class="col-12">
-						<label class="form-label small fw-bold">Nội dung mô tả</label>
-						<textarea class="form-control service-content" rows="3" name="setting.general.services.content.${index}"></textarea>
-					</div>
-				</div>
-			</div>`;
+				</div>`;
 		list.insertAdjacentHTML('beforeend', html);
 	}
 
@@ -893,6 +1081,137 @@
 			item.querySelector('.service-index-label').innerText = i + 1;
 			item.querySelector('.service-title').name = `setting.general.services.title.${i}`;
 			item.querySelector('.service-content').name = `setting.general.services.content.${i}`;
+		});
+	}
+</script>
+<script>
+	function addNewOperation() {
+		const list = document.getElementById('operation-list');
+		const index = list.querySelectorAll('.operation-item').length;
+		const html = `
+			<div class="operation-item border rounded p-3 mb-3 bg-light">
+				<div class="d-flex justify-content-between align-items-center mb-3">
+					<span class="badge bg-info text-dark">Bước #<span class="op-index-label">${index + 1}</span></span>
+					<div class="btn-group">
+						<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveOp(this, 'up')"><i class="bi bi-arrow-up"></i></button>
+						<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveOp(this, 'down')"><i class="bi bi-arrow-down"></i></button>
+						<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeOp(this)"><i class="bi bi-trash"></i></button>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6 mb-2">
+						<label class="form-label small fw-bold">Tiêu đề bước</label>
+						<input type="text" class="form-control op-title" name="setting.general.operation.title.${index}">
+					</div>
+					<div class="col-md-6 mb-2">
+						<label class="form-label small fw-bold">Hình ảnh minh họa</label>
+						<div class="input-group">
+							<input type="text" class="form-control op-image" id="input-op-image-${index}" name="setting.general.operation.image.${index}">
+							<button class="btn btn-outline-secondary" type="button" onclick="openFileManagerOp('${index}')">
+								<i class="bi bi-image"></i>
+							</button>
+						</div>
+					</div>
+					<div class="col-md-12 mb-2">
+						<label class="form-label small fw-bold">Nội dung chi tiết</label>
+						<textarea class="form-control op-content" name="setting.general.operation.content.${index}" rows="3"></textarea>
+					</div>
+				</div>
+			</div>`;
+		list.insertAdjacentHTML('beforeend', html);
+	}
+
+	function openFileManagerOp(index) {
+		currentTargetInput = 'input-op-image-' + index;
+		document.getElementById('fileManagerIframe').src = '/Admin/FileManager/Index';
+		var myModal = new bootstrap.Modal(document.getElementById('fileManagerModal'));
+		myModal.show();
+	}
+
+	function removeOp(btn) {
+		if (confirm("Bạn có chắc muốn xóa bước này?")) {
+
+			btn.closest('.operation-item').remove();
+			refreshOpIndices();
+		}
+	}
+
+	function moveOp(btn, direction) {
+		const item = btn.closest('.operation-item');
+		if (direction === 'up' && item.previousElementSibling) {
+
+			item.parentNode.insertBefore(item, item.previousElementSibling);
+		} else if (direction === 'down' && item.nextElementSibling) {
+
+			item.parentNode.insertBefore(item.nextElementSibling, item);
+		}
+		refreshOpIndices();
+	}
+
+	function refreshOpIndices() {
+		const items = document.querySelectorAll('.operation-item');
+		items.forEach((item, i) => {
+
+			item.querySelector('.op-index-label').innerText = i + 1;
+			item.querySelector('.op-title').name = `setting.general.operation.title.${i}`;
+			item.querySelector('.op-content').name = `setting.general.operation.content.${i}`;
+			const imgInput = item.querySelector('.op-image');
+			imgInput.name = `setting.general.operation.image.${i}`;
+			imgInput.id = `input-op-image-${i}`;
+		});
+	}
+</script>
+<script>
+	function addNewSolution() {
+		const list = document.getElementById('solution-list');
+		const index = list.querySelectorAll('.solution-item').length;
+		const html = `
+			<div class="solution-item border rounded p-3 mb-3 bg-light">
+				<div class="d-flex justify-content-between align-items-center mb-3">
+					<span class="badge bg-warning text-dark">Giải pháp #<span class="sol-index-label">${index + 1}</span></span>
+					<div class="btn-group">
+						<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSol(this, 'up')"><i class="bi bi-arrow-up"></i></button>
+						<button type="button" class="btn btn-sm btn-outline-secondary" onclick="moveSol(this, 'down')"><i class="bi bi-arrow-down"></i></button>
+						<button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSol(this)"><i class="bi bi-trash"></i></button>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 mb-2">
+						<label class="form-label small fw-bold">Tiêu đề giải pháp</label>
+						<input type="text" class="form-control sol-title" name="setting.general.solution.title.${index}">
+					</div>
+					<div class="col-md-12 mb-2">
+						<label class="form-label small fw-bold">Nội dung giải pháp</label>
+						<textarea class="form-control sol-content" name="setting.general.solution.content.${index}" rows="3"></textarea>
+					</div>
+				</div>
+			</div>`;
+		list.insertAdjacentHTML('beforeend', html);
+	}
+
+	function removeSol(btn) {
+		if (confirm("Xóa giải pháp này?")) {
+			btn.closest('.solution-item').remove();
+			refreshSolIndices();
+		}
+	}
+
+	function moveSol(btn, direction) {
+		const item = btn.closest('.solution-item');
+		if (direction === 'up' && item.previousElementSibling) {
+			item.parentNode.insertBefore(item, item.previousElementSibling);
+		} else if (direction === 'down' && item.nextElementSibling) {
+			item.parentNode.insertBefore(item.nextElementSibling, item);
+		}
+		refreshSolIndices();
+	}
+
+	function refreshSolIndices() {
+		const items = document.querySelectorAll('.solution-item');
+		items.forEach((item, i) => {
+			item.querySelector('.sol-index-label').innerText = i + 1;
+			item.querySelector('.sol-title').name = `setting.general.solution.title.${i}`;
+			item.querySelector('.sol-content').name = `setting.general.solution.content.${i}`;
 		});
 	}
 </script>

@@ -11,6 +11,7 @@ using System.IO;
 using MailKit.Net.Imap;
 using static System.Environment;
 using MailKit;
+using SpecialFolder = MailKit.SpecialFolder;
 
 namespace VDCD.Business.Service
 {
@@ -93,53 +94,7 @@ namespace VDCD.Business.Service
                     throw; // Hangfire sẽ nhận lỗi này để thực hiện Retry
                 }
             }
-            using (var imap = new ImapClient())
-            {
-                imap.Connect(imapServer, imapPort, SecureSocketOptions.SslOnConnect);
-                imap.Authenticate(senderEmail, appPassword);
 
-                IMailFolder sentFolder = null;
-
-                // 1. Thử các tên phổ biến
-                string[] sentFolderNames = new[]
-                {
-        "Đã gửi",
-        "Sent",
-        "Sent Items",
-        "Sent Messages"
-    };
-
-                foreach (var name in sentFolderNames)
-                {
-                    try
-                    {
-                        sentFolder = imap.GetFolder(name);
-                        break;
-                    }
-                    catch { }
-                }
-
-                // 2. Fallback: tìm trong namespace cá nhân
-                if (sentFolder == null && imap.PersonalNamespaces.Any())
-                {
-                    var root = imap.GetFolder(imap.PersonalNamespaces[0]);
-                    foreach (var folder in root.GetSubfolders(false))
-                    {
-                        if (folder.Name.ToLower().Contains("gửi") ||
-                            folder.Name.ToLower().Contains("sent"))
-                        {
-                            sentFolder = folder;
-                            break;
-                        }
-                    }
-                }
-
-                if (sentFolder == null)
-                    throw new Exception("Không tìm thấy folder 'Đã gửi' trên Bizfly.");
-
-                sentFolder.Append(message);
-                imap.Disconnect(true);
-            }
 
         }
         private void DeleteTempFiles(List<string> filePaths)

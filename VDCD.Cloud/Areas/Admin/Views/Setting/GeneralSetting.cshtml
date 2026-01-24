@@ -124,7 +124,7 @@
 								<input type="text" class="form-control"
 									   id="input-@item.SettingKey.Replace(".", "-")"
 									   name="@item.SettingKey" value="@item.Value" />
-								@if (item.SettingKey == "setting.general.footer.logo")
+								@if (item.SettingKey == "setting.general.footer.logo" || item.SettingKey == "setting.general.footer.image")
 								{
 									<button class="btn btn-outline-secondary" type="button" onclick="openFileManager('@item.SettingKey')">
 										<i class="bi bi-image"></i> Chọn ảnh

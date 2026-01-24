@@ -3,7 +3,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 @functions {
-    string GetSt(string key) => Model.Settings.ContainsKey(key) ? Model.Settings[key] : "";
+    string GetSt(string key) => ViewBag.Settings.ContainsKey(key) ? ViewBag.Settings[key] : "";
 }
 <section class="hero-section d-flex align-items-end">
     <div class="container-fluid px-0">
@@ -87,22 +87,22 @@
         <div class="row g-5">
             <div class="col-lg-7">
                 <h2 class="fw-bold mb-4">Liên hệ với chúng tôi</h2>
-                <form class="contact-form mt-5">
+                <form class="contact-form mt-5" id="contactForm">
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <input type="text" class="form-control-custom" placeholder="Tên *">
+                            <input name="name" type="text" class="form-control-custom" placeholder="Tên *" required>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" class="form-control-custom" placeholder="Số Điện Thoại *">
+                            <input name="phone" type="text" class="form-control-custom" placeholder="Số Điện Thoại *" required>
                         </div>
                         <div class="col-md-6">
-                            <input type="email" class="form-control-custom" placeholder="Email *">
+                            <input name="email" type="email" class="form-control-custom" placeholder="Email *" required>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" class="form-control-custom" placeholder="Tiêu Đề *">
+                            <input name="title" type="text" class="form-control-custom" placeholder="Tiêu Đề *" required>
                         </div>
                         <div class="col-12">
-                            <textarea class="form-control-custom" rows="1" placeholder="Nội Dung *"></textarea>
+                            <textarea name="content" class="form-control-custom" rows="3" placeholder="Nội Dung *" required></textarea>
                         </div>
                     </div>
                     <button type="submit" class="btn-submit-circle mt-5">
@@ -117,13 +117,13 @@
                 <p class="text-muted small mb-4">Chúng tôi sẽ phản hồi Quý khách hàng trong thời gian sớm nhất!</p>
 
                 <div class="fixed-image-container mb-4">
-                    <img src="/path-to-your-building-image.jpg" alt="Văn phòng VDCD">
+                    <img src="@GetSt("setting.general.footer.image")" alt="Văn phòng VDCD">
                 </div>
 
                 <div class="contact-info">
-                    <p class="mb-2 fw-bold">18 Hồ Đắc Di, Phường Đống Đa, TP Hà Nội</p>
-                    <p class="mb-1 fw-bold text-danger fs-4">(+84) 888133335</p>
-                    <p class="text-muted">vipcare@vdcd.vn</p>
+                    <p class="mb-2 fw-bold">@GetSt("setting.general.footer.address")</p>
+                    <p class="mb-1 fw-bold text-danger fs-4">@GetSt("setting.general.footer.phone")</p>
+                    <p class="text-muted">@GetSt("setting.general.footer.mail")</p>
                 </div>
             </div>
         </div>
@@ -207,3 +207,33 @@
         font-family: 'Inter', sans-serif;
     }
 </style>
+
+<script>
+    document.getElementById("contactForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const data = {
+            name: form.name.value,
+            phone: form.phone.value,
+            email: form.email.value,
+            title: form.title.value,
+            content: form.content.value
+        };
+
+        const res = await fetch("/contact/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            alert("Gửi liên hệ thành công!");
+            form.reset();
+        } else {
+            alert("Có lỗi xảy ra!");
+        }
+    });
+</script>

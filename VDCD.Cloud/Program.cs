@@ -9,6 +9,7 @@ using VDCD.Business;
 using VDCD.Business.Infrastructure;
 using VDCD.Business.Service;
 using VDCD.DataAccess;
+using VDCD.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,9 @@ builder.Services.AddScoped<CategoryService>();*/
 
 builder.Services.AddControllersWithViews();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddSignalR();
+// Realtime adapter
+builder.Services.AddScoped<IRealtimeNotifier, SignalRNotifier>();
 
 // 2. Cấu hình Hangfire sử dụng MySQL
 builder.Services.AddHangfire(configuration => configuration
@@ -54,7 +58,12 @@ builder.Services.AddHangfire(configuration => configuration
         })));
 
 // 3. Chạy Hangfire Server (đối tượng xử lý các Job chạy ngầm)
-builder.Services.AddHangfireServer();
+builder.Services.AddHangfireServer(options =>
+{
+    options.WorkerCount = 1;
+});
+
+
 // authen riêng cho admin
 builder.Services.AddAuthentication("AdminAuth")
     .AddCookie("AdminAuth", options =>
@@ -140,5 +149,5 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
+app.MapHub<NotificationHub>("/hub/notification");
 app.Run();

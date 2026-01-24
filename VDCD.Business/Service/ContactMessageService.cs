@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.SignalR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using VDCD.Business.Infrastructure;
 using VDCD.DataAccess;
 using VDCD.Entities.Custom;
+using VDCD.Entities.DTO;
 
 namespace VDCD.Business.Service
 {
@@ -14,7 +16,8 @@ namespace VDCD.Business.Service
         private readonly IRepository<ContactMessages> _contactMessagesRepo;
         private readonly ICacheService _cache;
         protected readonly AppDbContext _context;
-        public ContactMessageService(IRepository<ContactMessages> customRepo,
+        private readonly IRealtimeNotifier _notifier;
+        public ContactMessageService(IRepository<ContactMessages> customRepo,IRealtimeNotifier notifier,
                               ICacheService cache,
                               AppDbContext context
                               )
@@ -22,6 +25,7 @@ namespace VDCD.Business.Service
             _contactMessagesRepo = customRepo;
             _cache = cache;
             _context = context;
+            _notifier = notifier;
         }
         public IEnumerable<ContactMessages> GetContactMessages()
         {
@@ -66,6 +70,32 @@ namespace VDCD.Business.Service
                 _contactMessagesRepo.Update(contact);
                 _context.SaveChanges();
             }
+        }
+        public async Task Create(ContactCreateDto contact)
+        {
+            var ct = new ContactMessages
+            {
+                Email = contact.Email,
+                Name = contact.Name,
+                Content = contact.Content,
+                Subject = contact.Title,
+                Phone = contact.Phone,
+                CreatedAt = DateTime.Now,
+                IsRead = false
+            };
+            _contactMessagesRepo.Create(ct);
+            await _context.SaveChangesAsync();
+            // xử lý nghiệp vụ + DB
+            await _notifier.Notify("NewContact", new
+            {
+/*                contact.Name,
+                contact.Phone,
+                contact.Email,
+                contact.Title,
+                Time = DateTime.Now.ToString("HH:mm:ss")*/
+                name = contact.Name,
+                time = DateTime.Now.ToString("HH:mm dd/MM")
+            });
         }
     }
 }

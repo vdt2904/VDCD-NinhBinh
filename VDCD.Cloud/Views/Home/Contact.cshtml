@@ -3,7 +3,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 @functions {
-    string GetSt(string key) => Model.Settings.ContainsKey(key) ? Model.Settings[key] : "";
+    string GetSt(string key) => ViewBag.Settings.ContainsKey(key) ? ViewBag.Settings[key] : "";
 }
 <section class="hero-section d-flex align-items-end">
     <div class="container-fluid px-0">
@@ -82,3 +82,158 @@
     });
 </script>
 
+<section class="contact-section py-5 bg-light">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-7">
+                <h2 class="fw-bold mb-4">Liên hệ với chúng tôi</h2>
+                <form class="contact-form mt-5" id="contactForm">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <input name="name" type="text" class="form-control-custom" placeholder="Tên *" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input name="phone" type="text" class="form-control-custom" placeholder="Số Điện Thoại *" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input name="email" type="email" class="form-control-custom" placeholder="Email *" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input name="title" type="text" class="form-control-custom" placeholder="Tiêu Đề *" required>
+                        </div>
+                        <div class="col-12">
+                            <textarea name="content" class="form-control-custom" rows="3" placeholder="Nội Dung *" required></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit-circle mt-5">
+                        <span>Gửi</span>
+                        <div class="icon-circle"><i class="bi bi-arrow-up-right"></i></div>
+                    </button>
+                </form>
+            </div>
+
+            <div class="col-lg-5 ps-lg-5">
+                <h3 class="fw-bold">Thông tin liên hệ</h3>
+                <p class="text-muted small mb-4">Chúng tôi sẽ phản hồi Quý khách hàng trong thời gian sớm nhất!</p>
+
+                <div class="fixed-image-container mb-4">
+                    <img src="@GetSt("setting.general.footer.image")" alt="Văn phòng VDCD">
+                </div>
+
+                <div class="contact-info">
+                    <p class="mb-2 fw-bold">@GetSt("setting.general.footer.address")</p>
+                    <p class="mb-1 fw-bold text-danger fs-4">@GetSt("setting.general.footer.phone")</p>
+                    <p class="text-muted">@GetSt("setting.general.footer.mail")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<style>
+    /* Reset & General */
+    .contact-section {
+        background-color: #f8f9fc !important; /* Màu nền xám nhạt như ảnh */
+    }
+
+    /* Tinh chỉnh Input: Chỉ có đường kẻ dưới */
+    .form-control-custom {
+        width: 100%;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid #ced4da; /* Màu xám nhẹ cho đường kẻ */
+        padding: 12px 0;
+        outline: none;
+        font-size: 0.95rem;
+        transition: all 0.3s;
+    }
+
+        .form-control-custom:focus {
+            border-bottom-color: #000; /* Đổi màu khi focus */
+        }
+
+    /* Cố định size ảnh tòa nhà (Tỷ lệ chữ nhật ngang) */
+    .fixed-image-container {
+        width: 100%;
+        height: 250px; /* Độ cao phù hợp */
+        overflow: hidden;
+        border-radius: 4px;
+    }
+
+        .fixed-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    /* Custom Button Gửi */
+    .btn-submit-circle {
+        display: inline-flex;
+        align-items: center;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 50px;
+        padding: 4px 4px 4px 20px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+
+        .btn-submit-circle .icon-circle {
+            width: 35px;
+            height: 35px;
+            background: black;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-size: 1.1rem;
+        }
+
+        .btn-submit-circle:hover {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+            .btn-submit-circle:hover .icon-circle {
+                background: #fff;
+                color: #000;
+            }
+
+    /* Contact Text Style */
+    .contact-info p {
+        font-family: 'Inter', sans-serif;
+    }
+</style>
+
+<script>
+    document.getElementById("contactForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const data = {
+            name: form.name.value,
+            phone: form.phone.value,
+            email: form.email.value,
+            title: form.title.value,
+            content: form.content.value
+        };
+
+        const res = await fetch("/contact/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            alert("Gửi liên hệ thành công!");
+            form.reset();
+        } else {
+            alert("Có lỗi xảy ra!");
+        }
+    });
+</script>

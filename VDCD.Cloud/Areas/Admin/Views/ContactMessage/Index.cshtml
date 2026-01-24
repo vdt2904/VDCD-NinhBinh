@@ -1,0 +1,358 @@
+﻿@model IEnumerable<VDCD.Entities.Custom.ContactMessages>
+@{
+    ViewData["Title"] = "Contact";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-4">
+            <h2>Quản lý tin nhắn</h2>
+        </div>
+        <div class="col-md-4">
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Tìm tên, email, nội dung..." onkeyup="debounceSearch()">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group" role="group">
+                <input type="radio" class="btn-check" name="filter" id="filterAll" value="all" checked onchange="resetAndLoad()">
+                <label class="btn btn-outline-primary" for="filterAll">Tất cả</label>
+
+                <input type="radio" class="btn-check" name="filter" id="filterUnread" value="unread" onchange="resetAndLoad()">
+                <label class="btn btn-outline-primary" for="filterUnread">Chưa đọc</label>
+            </div>
+        </div>
+    </div>
+
+    <div id="contact-container" class="list-group">
+        @await Html.PartialAsync("_ContactListPartial", Model)
+    </div>
+
+    <div id="loading" class="text-center my-3" style="display:none;">
+        <div class="spinner-border text-primary" role="status"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">Chi tiết tin nhắn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detailBody"></div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    let page = 2; // Bắt đầu từ trang 2 vì trang 1 đã load từ Server Render
+    let loading = false;
+    let endOfData = false;
+    let searchTimer;
+
+    function resetAndLoad() {
+        if (loading) return;
+        page = 1;
+        endOfData = false;
+        document.getElementById('contact-container').innerHTML = '';
+        loadMoreData();
+    }
+
+    function debounceSearch() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(resetAndLoad, 500);
+    }
+
+    function loadMoreData() {
+        if (loading || endOfData) return;
+
+        loading = true; // Khóa ngay lập tức để chống lặp
+        document.getElementById('loading').style.display = 'block';
+
+        const filterType = document.querySelector('input[name="filter"]:checked').value;
+        const searchTerm = document.getElementById('searchInput').value;
+
+        fetch(`/admin/ContactMessage/Index?page=${page}&searchTerm=${encodeURIComponent(searchTerm)}&filterType=${filterType}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(res => res.text())
+            .then(html => {
+                const container = document.getElementById('contact-container');
+                if (html.trim() === "") {
+                    endOfData = true;
+                    if (page === 1) {
+                        container.innerHTML = '<p class="text-center text-muted p-4">Không tìm thấy tin nhắn nào.</p>';
+                    }
+                } else {
+                    // Sử dụng DOMParser để kiểm tra xem html trả về có bị lặp ID cũ không
+                    container.insertAdjacentHTML('beforeend', html);
+                    page++;
+                }
+            })
+            .finally(() => {
+                loading = false; // Mở khóa sau khi đã nhận dữ liệu
+                document.getElementById('loading').style.display = 'none';
+            });
+    }
+
+    window.onscroll = function () {
+        // Kiểm tra khoảng cách cuộn nhạy hơn để tránh trigger nhiều lần
+        if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight - 50) {
+            loadMoreData();
+        }
+    };
+
+    function showDetail(id, name, email, subject, content, phone) {
+        const body = `
+                <div class="p-2">
+                    <p><strong>Người gửi:</strong> ${name}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Số ĐT:</strong> ${phone}</p>
+                    <p><strong>Tiêu đề:</strong> ${subject}</p>
+                    <hr>
+                    <div class="bg-light p-3 rounded">
+                        <strong>Nội dung:</strong><br>${content.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            `;
+        document.getElementById('detailBody').innerHTML = body;
+        new bootstrap.Modal(document.getElementById('detailModal')).show();
+
+        // Đánh dấu đã đọc
+        fetch(`/admin/ContactMessage/IsRead/${id}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const row = document.getElementById(`row-${id}`);
+                    if (row) {
+                        const badge = row.querySelector('.badge-status');
+                        badge.classList.replace('bg-primary', 'bg-secondary');
+                        badge.innerText = 'Đã đọc';
+                        row.classList.remove('border-primary');
+                    }
+                }
+            });
+    }
+
+    function openReplyModal(id, email) {
+        document.getElementById('replyTargetId').value = id;
+        document.getElementById('replyTargetEmail').innerText = email;
+        document.getElementById('replyContent').value = '';
+        new bootstrap.Modal(document.getElementById('replyModal')).show();
+    }
+
+    function submitReply() {
+        const id = document.getElementById('replyTargetId').value;
+        const content = document.getElementById('replyContent').value;
+        const btn = document.getElementById('btnConfirmReply');
+
+        if (!content.trim()) return alert("Vui lòng nhập nội dung!");
+
+        btn.disabled = true;
+        btn.innerText = 'Đang gửi...';
+
+        fetch(`/admin/ContactMessage/ReplyMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `id=${id}&content=${encodeURIComponent(content)}`
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Đã xếp hàng gửi mail thành công!");
+                    location.reload();
+                }
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerText = 'Gửi ngay';
+            });
+    }
+
+    function deleteContact(id) {
+        if (confirm("Bạn có chắc chắn muốn xóa tin nhắn này?")) {
+            fetch(`/admin/ContactMessage/Delete/${id}`, { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const row = document.getElementById(`row-${id}`);
+                        row.style.opacity = '0';
+                        setTimeout(() => row.remove(), 300);
+                    }
+                });
+        }
+    }
+</script>
+@* Thêm vào đầu trang hoặc phần Scripts *@
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+<div class="modal fade" id="replyModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl shadow-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-envelope-paper-fill me-2"></i>Soạn phản hồi gửi tới khách hàng
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-3 border-end">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                <input type="hidden" id="replyTargetId">
+                                <label class="text-uppercase small fw-bold text-muted mb-1">Người nhận</label>
+                                <p id="replyTargetName" class="fw-bold mb-0 text-primary"></p>
+                                <p id="replyTargetEmail" class="small text-muted mb-3 text-break"></p>
+
+                                <label class="text-uppercase small fw-bold text-muted mb-1">Tiêu đề gốc</label>
+                                <p id="replyTargetSubject" class="small fst-italic mb-3"></p>
+
+                                <hr />
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold small"><i class="bi bi-paperclip"></i> Đính kèm File</label>
+                                    @* Quan trọng: phải có thuộc tính multiple để chọn nhiều file *@
+                                    <input type="file" id="fileAttachments" class="form-control form-control-sm" multiple onchange="previewFiles()">
+
+                                    @* Nơi hiển thị danh sách các file đã chọn để người dùng kiểm tra *@
+                                    <div id="fileListPreview" class="mt-2 small text-muted overflow-auto" style="max-height: 150px;">
+                                        <span class="text-muted italic">Chưa có file nào được chọn.</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold" style="color:red">Chú thích:</label>
+                                        <div class="small text-muted mb-1">
+                                            Dùng các từ khóa: <br />
+                                            <p class="badge bg-secondary">{name}</p>: Tên khách<br />
+                                            <p class="badge bg-secondary">{time}</p>: Giờ hiện tại<br />
+                                            <p class="badge bg-secondary">{email}</p>: Email khách<br />
+                                        </div>
+                                       
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-9 mt-3 mt-lg-0">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nội dung phản hồi (HTML)</label>
+                            <textarea id="replyContentEditor" name="replyContentEditor"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-primary px-4" id="btnConfirmReply" onclick="submitReply()">
+                    <i class="bi bi-send-check-fill me-1"></i>Xác nhận & Gửi (Hangfire)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // 1. Khởi tạo CKEditor khi trang load xong
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof CKEDITOR !== 'undefined') {
+            CKEDITOR.replace('replyContentEditor', {
+                height: 350,
+                // ẨN CẢNH BÁO BẢO MẬT VÀ LICENSE
+                versionCheck: false,
+
+                // Các cấu hình khác
+                placeholder: 'Nhập nội dung phản hồi...',
+                removeButtons: 'Print,NewPage,Preview,Save',
+                // Đảm bảo link ảnh là link tuyệt đối để khách xem được trong email
+                baseHref: window.location.origin
+            });
+        }
+    });
+
+    // 2. Hàm mở Modal và nạp dữ liệu khách hàng
+    function openReplyModal(id, name, email, subject) {
+        document.getElementById('replyTargetId').value = id;
+        document.getElementById('replyTargetName').innerText = name;
+        document.getElementById('replyTargetEmail').innerText = email;
+        document.getElementById('replyTargetSubject').innerText = subject;
+
+        // Reset form
+        if (CKEDITOR.instances.replyContentEditor) {
+            CKEDITOR.instances.replyContentEditor.setData('');
+        }
+        document.getElementById('fileAttachments').value = '';
+        document.getElementById('fileListPreview').innerHTML = '<span class="text-muted italic">Chưa có file nào được chọn.</span>';
+
+        // Show modal
+        var myModal = new bootstrap.Modal(document.getElementById('replyModal'));
+        myModal.show();
+    }
+
+    // 3. Xem trước file (giúp Admin biết đã chọn đúng file chưa)
+    function previewFiles() {
+        const input = document.getElementById('fileAttachments');
+        const preview = document.getElementById('fileListPreview');
+        preview.innerHTML = '';
+
+        if (input.files.length > 0) {
+            let html = '<ul class="list-unstyled mb-0">';
+            for (let i = 0; i < input.files.length; i++) {
+                html += `<li class="mb-1"><i class="bi bi-file-earmark-check text-success"></i> ${input.files[i].name} <span class="text-muted">(${(input.files[i].size / 1024).toFixed(1)} KB)</span></li>`;
+            }
+            html += '</ul>';
+            preview.innerHTML = html;
+        }
+    }
+
+    // 4. Gửi dữ liệu tới Controller
+    function submitReply() {
+        const id = document.getElementById('replyTargetId').value;
+        const content = CKEDITOR.instances.replyContentEditor.getData();
+        const fileInput = document.getElementById('fileAttachments');
+        const btn = document.getElementById('btnConfirmReply');
+
+        if (!content.trim()) {
+            alert("Bạn chưa nhập nội dung phản hồi!");
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang đẩy vào hàng đợi...';
+
+        const formData = new FormData();
+
+        formData.append('id', id);
+        formData.append('content', content);
+
+        // DUYỆT QUA DANH SÁCH FILE VÀ ĐƯA VÀO FORM DATA
+        if (fileInput.files.length > 0) {
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append('attachments', fileInput.files[i]); // 'attachments' phải khớp với tên tham số ở Controller
+            }
+        }
+
+        fetch('/admin/ContactMessage/ReplyMessage', {
+            method: 'POST',
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert("Lỗi: " + data.message);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-send-check-fill me-1"></i>Thử lại';
+                }
+            })
+            .catch(err => {
+                alert("Lỗi kết nối Server!");
+                btn.disabled = false;
+            });
+    }
+</script>

@@ -1,9 +1,15 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Hangfire;
 using System;
+using Hangfire.MySql;
+using System.Transactions;
+using Microsoft.EntityFrameworkCore;
+
+
 using VDCD.Business;
 using VDCD.Business.Infrastructure;
 using VDCD.Business.Service;
 using VDCD.DataAccess;
+using VDCD.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +34,37 @@ builder.Services.AddScoped<CacheSevice>();
 builder.Services.AddScoped<CategoryService>();*/
 
 builder.Services.AddControllersWithViews();
-// authen ri�ng cho admin
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddSignalR();
+// Realtime adapter
+builder.Services.AddScoped<IRealtimeNotifier, SignalRNotifier>();
+
+// 2. Cấu hình Hangfire sử dụng MySQL
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseStorage(new MySqlStorage(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        new MySqlStorageOptions
+        {
+            // Chỉ giữ lại các thuộc tính cơ bản và ổn định nhất
+            TransactionIsolationLevel = System.Transactions.IsolationLevel.ReadCommitted,
+            QueuePollInterval = TimeSpan.FromSeconds(15),
+            JobExpirationCheckInterval = TimeSpan.FromHours(1),
+            CountersAggregateInterval = TimeSpan.FromMinutes(5),
+            PrepareSchemaIfNecessary = true,
+            TablesPrefix = "Hangfire_"
+        })));
+
+// 3. Chạy Hangfire Server (đối tượng xử lý các Job chạy ngầm)
+builder.Services.AddHangfireServer(options =>
+{
+    options.WorkerCount = 1;
+});
+
+
+// authen riêng cho admin
 builder.Services.AddAuthentication("AdminAuth")
     .AddCookie("AdminAuth", options =>
     {
@@ -54,7 +90,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseHangfireDashboard("/admin/hangfire", new DashboardOptions
+{
+    // Cho phép tất cả mọi người truy cập (Chỉ dùng khi test, sau này nên thêm Filter)
+    Authorization = new[] { new Hangfire.Dashboard.LocalRequestsOnlyAuthorizationFilter() }
+});
 app.UseAuthorization();
 app.MapControllerRoute(
     name: "center",
@@ -109,5 +149,5 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
+app.MapHub<NotificationHub>("/hub/notification");
 app.Run();

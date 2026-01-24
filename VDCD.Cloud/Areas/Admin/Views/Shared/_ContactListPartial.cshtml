@@ -1,0 +1,96 @@
+﻿@model IEnumerable<VDCD.Entities.Custom.ContactMessages>
+
+@foreach (var item in Model)
+{
+    <div class="list-group-item list-group-item-action mb-2 shadow-sm border rounded contact-item @(item.IsRead ? "" : "border-primary")" id="row-@item.Id">
+        <div class="d-flex justify-content-between align-items-center">
+            <div onclick="showDetail('@item.Id','@item.Name', '@item.Email', '@item.Subject', '@item.Content', '@item.Phone')" style="cursor:pointer; flex-grow:1;">
+                <h6 class="mb-1 fw-bold">
+                    @item.Name
+                    <small class="text-muted fw-normal">(@item.CreatedAt?.ToString("dd/MM/yyyy HH:mm"))</small>
+                </h6>
+                <p class="mb-1 text-truncate" style="max-width: 500px;">@item.Subject</p>
+
+                <div class="mt-1 d-flex align-items-center" id="badge-container-@item.Id">
+                    @* Bổ sung class badge-status ở đây *@
+                    <span class="badge badge-status @(item.IsRead ? "bg-secondary" : "bg-primary")">
+                        @(item.IsRead ? "Đã đọc" : "Mới")
+                    </span>
+
+                    @* Nơi chứa badge Đã phản hồi *@
+                    @if (!string.IsNullOrEmpty(item.ReplyContent))
+                    {
+                        <span class="badge bg-success ms-1 badge-replied">
+                            <i class="bi bi-check2-all"></i> Đã phản hồi
+                        </span>
+                    }
+                </div>
+            </div>
+
+            <div class="btn-group shadow-sm">
+                <button class="btn btn-outline-primary btn-sm"
+                        onclick="event.stopPropagation(); openReplyModal('@item.Id', '@item.Name', '@item.Email', '@item.Subject')">
+                    Phản hồi
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="deleteContact(@item.Id)" title="Xóa tin nhắn">
+                    Xóa
+                </button>
+            </div>
+        </div>
+
+        @* Bọc vùng này trong một ID cụ thể để chèn nội dung sau khi gửi *@
+        <div id="reply-content-@item.Id">
+            @if (!string.IsNullOrEmpty(item.ReplyContent))
+            {
+                <div class="mt-2 p-2 bg-light border-start border-4 border-success small shadow-sm rounded">
+                    <div class="text-success fw-bold">
+                        <i class="bi bi-chat-left-dots"></i> Bạn đã phản hồi:
+                    </div>
+
+                    <div class="text-muted mt-1 reply-text collapsed" id="reply-text-@item.Id">
+                        @Html.Raw(item.ReplyContent)
+                    </div>
+
+                    <a href="javascript:void(0)"
+                       class="toggle-reply text-primary small"
+                       onclick="toggleReply(@item.Id)">
+                        Xem thêm
+                    </a>
+
+                    <div class="text-end text-muted mt-1" style="font-size: 0.75rem;">
+                        @item.RepliedAt?.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+            }
+        </div>
+
+    </div>
+}
+<style>
+    .reply-text.collapsed {
+        max-height: 4em; /* ~4-5 dòng */
+        overflow: hidden;
+        position: relative;
+    }
+
+        .reply-text.collapsed::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2em;
+            background: linear-gradient(transparent, #f8f9fa);
+        }
+</style>
+<script>
+    function toggleReply(id) {
+        const el = document.getElementById('reply-text-' + id);
+        const btn = event.target;
+
+        el.classList.toggle('collapsed');
+        btn.innerText = el.classList.contains('collapsed')
+            ? 'Xem thêm'
+            : 'Thu gọn';
+    }
+</script>

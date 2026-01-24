@@ -244,6 +244,10 @@ namespace VDCD.Cloud.Controllers
             ViewBag.Settings = settingsDic;
             return View();
         }
+        public IActionResult Careers()
+        {
+            return View();
+        }
 
     }
 }

@@ -1,10 +1,84 @@
-﻿<form method="post">
-    <input name="username" placeholder="Admin user" />
-    <input name="password" type="password" />
-    <button type="submit">Login</button>
+﻿<div class="login-container">
+    <form method="post" class="login-form">
+        <h2 class="text-center mb-4 fw-bold">HỆ THỐNG QUẢN TRỊ</h2>
+        <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
 
-    @if (ViewBag.Error != null)
-    {
-        <p style="color:red">@ViewBag.Error</p>
+        <div class="mb-3">
+            <label class="form-label">Tài khoản</label>
+            <input name="username" class="form-control custom-input" placeholder="Nhập tên đăng nhập..." required />
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Mật khẩu</label>
+            <input name="password" type="password" class="form-control custom-input" placeholder="••••••••" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 btn-login mb-3">ĐĂNG NHẬP</button>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger py-2 text-center" style="font-size: 0.9rem;">
+                <i class="bi bi-exclamation-triangle me-2"></i> @ViewBag.Error
+            </div>
+        }
+    </form>
+</div>
+<style>
+    /* Nền giả định nếu bạn chưa có ảnh nền */
+    body {
+        background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('your-background-image.jpg');
+        background-size: cover;
+        background-position: center;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-</form>
+
+    .login-form {
+        background: rgba(255, 255, 255, 0.15); /* Hiệu ứng trong suốt */
+        backdrop-filter: blur(15px); /* Làm mờ hậu cảnh */
+        padding: 40px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        width: 100%;
+        max-width: 400px;
+        color: white;
+    }
+
+    .custom-input {
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 10px;
+        padding: 12px 15px;
+        transition: all 0.3s;
+    }
+
+        .custom-input:focus {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+    .btn-login {
+        background: #e63946; /* Màu đỏ thương hiệu của bạn */
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        transition: 0.3s;
+    }
+
+        .btn-login:hover {
+            background: #c1121f;
+            transform: scale(1.02);
+        }
+
+    .form-label {
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+</style>

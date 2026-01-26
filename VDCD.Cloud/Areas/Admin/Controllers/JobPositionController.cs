@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using VDCD.Business.Service;
 using VDCD.Entities.Custom;
 using VDCD.Helper;
@@ -8,30 +9,26 @@ namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
 	[Authorize(AuthenticationSchemes = "AdminAuth")]
-	public class PostsController : Controller
+	public class JobPositionController : Controller
     {
-        private readonly PostsService _postsService;
-        private readonly CategoryService _categoryService;
-
-        public PostsController(PostsService postsService,
-                                 CategoryService categoryService)
+        private readonly JobPositionService _jobPositionService;
+        public JobPositionController(JobPositionService jobPositionService)
         {
-            _postsService = postsService;
-            _categoryService = categoryService;
+            _jobPositionService = jobPositionService;
         }
         public IActionResult Index()
         {
-            var lst = _postsService.GetAll();
-            ViewBag.Categories = _categoryService.GetAll();
+            var lst = _jobPositionService.GetAll();
             return View(lst);
         }
-        public IActionResult Save(Posts model)
+        [HttpPost]
+        public IActionResult Save(JobPosition model)
         {
             try
             {
                 model.Slug = SlugHelper.Generate(model.Title);
-                string keywords = GenerateKeywords(model.Title);
-                _postsService.Save(model, keywords);
+                var keywords = GenerateKeywords(model.Title);
+                _jobPositionService.Save(model, keywords);
                 return Json(new { success = true });
             }
             catch (Exception ex)
@@ -43,24 +40,22 @@ namespace VDCD.Areas.Admin.Controllers
         {
             try
             {
-                var model = _postsService.GetById(id);  
-                return Json(new { success = true,data = model });
-            }
-            catch (Exception ex)
+                var data = _jobPositionService.GetById(id);
+                return Json(new { success = true , data = data });
+            }catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
             }
         }
-        public IActionResult Delete(int id)
-        {
+        public IActionResult Delete(int id) {
             try
             {
-                _postsService.Delete(id);
-                return Json(new { success = true });
+                _jobPositionService.Delete(id);
+                return Json(new { success = true, message = "Xóa thành công" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, error = ex.Message });
+                return Json(new { success = false, message = ex.Message });
             }
         }
         private string GenerateKeywords(string text)

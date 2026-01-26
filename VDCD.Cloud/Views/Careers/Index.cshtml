@@ -1,0 +1,116 @@
+﻿@model IEnumerable<VDCD.Entities.Custom.JobPosition>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@functions {
+    string GetSt(string key) => ViewBag.Settings.ContainsKey(key) ? ViewBag.Settings[key] : "";
+}
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/home/GetHeader',
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    // 1. Cập nhật Logo từ mảng footer
+                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
+                    if (logoData) {
+                        $('#main-logo').attr('src', logoData.value);
+                    }
+                }
+            },
+            error: function (err) {
+                console.error("Không thể lấy dữ liệu từ API", err);
+            }
+        });
+    });
+</script>
+
+<div class="container py-5">
+    <h2 class="text-center mb-5 fw-bold">Cơ hội nghề nghiệp</h2>
+
+    <div class="row g-4" id="job-list">
+        @foreach (var job in Model)
+        {
+            <div class="col-md-6 col-lg-4 job-item">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <span class="badge bg-light text-primary mb-2">@job.EmploymentType</span>
+                        <h5 class="card-title fw-bold">@job.Title</h5>
+                        <p class="text-muted small"><i class="bi bi-geo-alt"></i> @job.Location</p>
+                        <p class="card-text text-truncate">@System.Text.RegularExpressions.Regex.Replace(job.Description ?? "", "<.*?>", string.Empty)</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pb-3">
+                        <a href="/tuyen-dung/@job.Slug" class="btn btn-sm btn-outline-primary">Chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center" id="pagination">
+        </ul>
+    </nav>
+</div>
+
+
+    <script>
+        const pageSize = 6; // Số lượng tin trên 1 trang
+        const items = document.querySelectorAll('.job-item');
+        const paginationElement = document.getElementById('pagination');
+        let currentPage = 1;
+
+        function displayJobs(page) {
+            currentPage = page;
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize;
+
+            items.forEach((item, index) => {
+                if (index >= start && index < end) {
+                    item.classList.remove('d-none');
+                } else {
+                    item.classList.add('d-none');
+                }
+            });
+
+            setupPagination();
+        }
+
+        function setupPagination() {
+            paginationElement.innerHTML = "";
+            const pageCount = Math.ceil(items.length / pageSize);
+
+            if (pageCount <= 1) return; // Không hiện nếu chỉ có 1 trang
+
+            for (let i = 1; i <= pageCount; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<button class="page-link" onclick="displayJobs(${i})">${i}</button>`;
+                paginationElement.appendChild(li);
+            }
+        }
+
+        // Khởi tạo lần đầu
+        document.addEventListener('DOMContentLoaded', () => {
+            displayJobs(1);
+        });
+    </script>
+
+<style>
+    .job-item {
+        transition: opacity 0.4s ease-in-out;
+    }
+
+    .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .page-link {
+        cursor: pointer;
+        border-radius: 8px !important;
+        margin: 0 3px;
+    }
+</style>

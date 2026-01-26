@@ -13,9 +13,14 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
             _cacheSevice = cacheSevice;
         }
         [HttpGet]
-        public IActionResult Login() => View();
-        [HttpPost]
-        public async Task<IActionResult> Login(string username, string password)
+		public IActionResult Login(string returnUrl = "/admin")
+		{
+			ViewBag.ReturnUrl = returnUrl;
+			return View();
+		}
+
+		[HttpPost]
+        public async Task<IActionResult> Login(string username, string password, string returnUrl = "/admin")
         {
             // TODO: check DB
             if (username != "admin" || password != "123")
@@ -38,7 +43,10 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
                 "AdminAuth",
                 new ClaimsPrincipal(identity));
 
-            return RedirectToAction("Index", "Dashboard");
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+
+            return Redirect("/Admin");
         }
         public IActionResult RemoveCache()
         {

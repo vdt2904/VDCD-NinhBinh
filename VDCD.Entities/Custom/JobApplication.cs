@@ -25,6 +25,7 @@ namespace VDCD.Entities.Custom
 
         // New / Reviewed
         public string? Status { get; set; }
+        public string? Review { get; set; }
 
         public DateTime? ApplyDate { get; set; }
 

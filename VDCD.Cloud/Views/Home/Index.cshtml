@@ -51,13 +51,14 @@
 						// Tạo Slide Content với cấu trúc Zoom-bg
 						slidesHtml += `<div class="carousel-item ${activeClass}">
 		<div class="zoom-bg" style="background-image: url('${item.image}');"></div>
-			<div class="carousel-caption custom-caption d-flex flex-column justify-content-center align-items-center" style="padding-bottom: 30rem;">
-				<h1 class="hero-title">
+		<div class="carousel-caption custom-caption d-flex flex-column justify-content-start align-items-center"
+			 style="top: 10%; bottom: auto; padding-top: 0;">
+			<h1 class="hero-title">
 				${item.title.split(' ')[0]} <span class="text-red">${item.title.split(' ').slice(1).join(' ')}</span>
 			</h1>
-				<h2 class="hero-subtitle text-white mt-3 text-center">Trung Tâm Đổi Mới Sáng Tạo Ninh Bình</h2>
+			<h2 class="hero-subtitle text-white mt-3 text-center">Trung Tâm Đổi Mới Sáng Tạo Ninh Bình</h2>
 		</div>
-	</div>`;;
+	</div>`;
 					});
 
 					$('#slider-indicators').html(indicatorsHtml);
@@ -76,6 +77,13 @@
 		});
 	});
 </script>
+<style>
+	.carousel-caption.custom-caption {
+		top: 10% !important; /* Đưa lên cách mép trên 10% chiều cao ảnh */
+		bottom: auto !important; /* Hủy bỏ việc dính vào đáy */
+		transform: none !important;
+	}
+</style>
 <script>
 	$(document).ready(function () {
 		// Khởi tạo Carousel với hiệu ứng fade

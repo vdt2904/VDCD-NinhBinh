@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using VDCD.Business.Service;
 
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class FileManagerController : Controller
+	[Authorize(AuthenticationSchemes = "AdminAuth")]
+	public class FileManagerController : Controller
     {
         private readonly FileManagerService _fileManager;
         public FileManagerController(FileManagerService fileManager)

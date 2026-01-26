@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using VDCD.Business.Service;
 using VDCD.Cloud.Controllers;
 using VDCD.Entities.Custom;
@@ -6,7 +7,8 @@ using VDCD.Entities.Custom;
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class SettingController : Controller
+	[Authorize(AuthenticationSchemes = "AdminAuth")]
+	public class SettingController : Controller
     {
         private readonly SettingService _settingService;
         private readonly ILogger<SettingController> _logger;

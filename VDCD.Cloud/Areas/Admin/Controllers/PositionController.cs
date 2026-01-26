@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using VDCD.Business.Service;
 using VDCD.Entities.Custom;
 
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class PositionController : Controller
+	[Authorize(AuthenticationSchemes = "AdminAuth")]
+	public class PositionController : Controller
     {
         private readonly PositionService _positionService;
         public PositionController(PositionService positionService) { 

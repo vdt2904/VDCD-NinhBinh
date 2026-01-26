@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using VDCD.Business.Service;
@@ -6,7 +7,8 @@ using VDCD.Business.Service;
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class ContactMessageController : Controller
+	[Authorize(AuthenticationSchemes = "AdminAuth")]
+	public class ContactMessageController : Controller
     {
         private readonly ContactMessageService _contactService;
         public ContactMessageController(ContactMessageService contactMessage)

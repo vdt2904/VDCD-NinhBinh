@@ -21,6 +21,7 @@ namespace VDCD.Entities.Custom
 
         // Full-time / Part-time
         public string? EmploymentType { get; set; }
+        public string? Salary { get; set; }
 
         public bool? IsActive { get; set; }
 

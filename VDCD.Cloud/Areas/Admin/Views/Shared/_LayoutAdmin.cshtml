@@ -88,45 +88,56 @@
     <script>
         const container = document.getElementById("notify-container");
 
-        function showNotification(data) {
+        function showNotification(data, type) {
             const div = document.createElement("div");
             div.className = "notify-item";
 
-            div.innerHTML = `
-                <div class="notify-title">
-                    📩 Liên hệ mới từ ${data.name}
-                </div>
-                <div class="notify-time">
-                    ${data.time || "Vừa xong"}
-                </div>
-            `;
+            let title = "";
+            let url = "#";
 
-            // Click → chuyển trang
+            if (type === "contact") {
+                title = `📩 Liên hệ mới từ ${data.name}`;
+                url = "/admin/ContactMessage/index";
+            }
+
+            if (type === "cv") {
+                title = `📄 CV mới cho vị trí ${data.name}`;
+                url = "/admin/JobApplication/index";
+            }
+
+            div.innerHTML = `
+                    <div class="notify-title">${title}</div>
+                    <div class="notify-time">${data.time || "Vừa xong"}</div>
+                `;
+
             div.addEventListener("click", function () {
-                window.location.href = "/admin/ContactMessage/index";
+                window.location.href = url;
             });
 
             container.appendChild(div);
 
-            // Tự ẩn sau 8s
-            setTimeout(() => {
-                div.remove();
-            }, 8000);
+            setTimeout(() => div.remove(), 8000);
         }
 
-        // SignalR
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/hub/notification")
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
+        // 🔔 Liên hệ mới
         connection.on("NewContact", function (data) {
-            showNotification(data);
+            showNotification(data, "contact");
+        });
+
+        // 📄 CV mới
+        connection.on("NewCV", function (data) {
+            showNotification(data, "cv");
         });
 
         connection.start()
             .catch(err => console.error(err));
     </script>
+
 
 
 </body>

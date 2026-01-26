@@ -1,0 +1,233 @@
+﻿@model IEnumerable<VDCD.Entities.Custom.JobApplication>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                                    @{
+    var jobs = ViewBag.Job as List<VDCD.Entities.Custom.JobPosition>;
+}
+<style>
+    /* Tối ưu giao diện bảng và modal */
+    #cvTable shadow-sm { border-radius: 10px; overflow: hidden; }
+    .table thead { background-color: #f8f9fa; }
+    .status-badge { width: 100px; display: inline-block; text-align: center; }
+    /* Khung preview CV */
+    .preview-container { background: #525659; height: 100%; min-height: 500px; display: flex; align-items: center; justify-content: center; }
+    .modal-fullscreen .modal-body { overflow: hidden; }
+</style>
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-primary fw-bold"><i class="bi bi-person-lines-fill me-2"></i>QUẢN LÝ HỒ SƠ ỨNG VIÊN</h5>
+                    <span class="badge bg-primary">Tổng số: @Model.Count()</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="cvTable" class="table table-hover align-middle w-100">
+                            <thead>
+                                <tr>
+                                    <th>Ngày nộp</th>
+                                    <th>Ứng viên</th>
+                                    <th>Liên hệ</th>
+                                    <th>Vị trí ID</th>
+                                    <th>Trạng thái</th>
+                                    <th class="text-end">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+
+                                    var job = jobs?.FirstOrDefault(x => x.Id == item.JobId);
+
+                                    <tr>
+                                        <td>@item.ApplyDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            <div class="fw-bold">@item.FullName</div>
+                                            <div class="text-muted small">@item.Email</div>
+                                        </td>
+                                        <td>@item.Phone</td>
+                                        <td><span class="badge border text-dark"></span>@job?.Title</td>
+                                        <td>
+                                            @if (item.Status == "New")
+                                            {
+                                                <span class="badge bg-warning text-dark status-badge">Mới</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success status-badge">Đã xem</span>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-outline-primary" onclick="viewCV(@item.Id)" title="Xem chi tiết">
+                                                    <i class="bi bi-eye-fill"></i> Xem CV
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteCV(@item.Id)" title="Xóa">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cvModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="bi bi-file-earmark-person me-2"></i>Chi tiết hồ sơ: <span id="modal_name"></span></h5>
+                <div class="ms-auto">
+                    <a id="modal_download" href="#" class="btn btn-light btn-sm me-2" download>
+                        <i class="bi bi-download me-1"></i> Tải xuống file gốc
+                    </a>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+            <div class="modal-body p-0">
+                <div class="row g-0 h-100">
+                    <div class="col-md-3 border-end bg-light p-4 overflow-auto">
+                        <h6 class="fw-bold text-primary mb-3">THÔNG TIN CÁ NHÂN</h6>
+                        <div class="mb-3">
+                            <label class="text-muted small d-block">Họ và tên</label>
+                            <span id="info_name" class="fw-bold"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small d-block">Email</label>
+                            <span id="info_email"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small d-block">Điện thoại</label>
+                            <span id="info_phone"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted small d-block">Lời nhắn</label>
+                            <div id="info_message" class="p-2 border rounded bg-white small" style="min-height: 100px;"></div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Ghi chú tuyển dụng</label>
+                            <textarea class="form-control" id="admin_note" rows="5" placeholder="Nhập nhận xét về ứng viên..."></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary w-100 py-2 fw-bold" onclick="saveAndReview()">
+                            <i class="bi bi-check-circle me-2"></i> XÁC NHẬN ĐÃ XEM
+                        </button>
+                    </div>
+
+                    <div class="col-md-9 d-flex flex-column h-100">
+                        <div id="preview_loading" class="preview-container text-white flex-column d-none">
+                            <div class="spinner-border mb-2"></div>
+                            <span>Đang tải tài liệu...</span>
+                        </div>
+                        <iframe id="cv_iframe" src="" style="width:100%; height:100%; border:none;"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    let currentId = 0;
+
+    $(document).ready(function () {
+        // Phân trang và tìm kiếm phía Front-end
+        $('#cvTable').DataTable({
+            language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' },
+            order: [[0, 'desc']], // Mới nhất hiện lên đầu
+            pageLength: 10
+        });
+    });
+
+    // Hàm mở modal và load dữ liệu
+    function viewCV(id) {
+        currentId = id;
+        $('#cv_iframe').attr('src', '');
+        $('#preview_loading').removeClass('d-none');
+
+        $.get(`/Admin/JobApplication/GetById/${id}`, function (data) {
+            // Điền text
+            $('#modal_name, #info_name').text(data.fullName);
+            $('#info_email').text(data.email);
+            $('#info_phone').text(data.phone);
+            $('#admin_note').text(data.review);
+            $('#info_message').text(data.message || '(Không có lời nhắn)');
+            $('#modal_download').attr('href', data.cvFile);
+
+            // Xử lý xem file (PDF mở trực tiếp, Word qua Office Viewer)
+            const fileUrl = window.location.origin + data.cvFile;
+            const ext = data.cvFile.split('.').pop().toLowerCase();
+            let previewUrl = "";
+
+            if (ext === "pdf") {
+                previewUrl = fileUrl;
+            } else if (["doc", "docx", "xls", "xlsx"].includes(ext)) {
+                previewUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
+            }
+
+            if (previewUrl) {
+                $('#cv_iframe').attr('src', previewUrl).removeClass('d-none');
+                $('#preview_loading').addClass('d-none');
+            } else {
+                $('#preview_loading').addClass('d-none');
+                alert("File này không hỗ trợ xem trực tiếp, hãy nhấn 'Tải xuống'.");
+            }
+
+            $('#cvModal').modal('show');
+        });
+    }
+
+    // Cập nhật trạng thái "Đã xem"
+    function saveAndReview() {
+        var review = $("#admin_note").val();
+        $.post('/Admin/JobApplication/UpdateStatus', { id: currentId,review: review ,status: 'Reviewed' }, function (res) {
+            if (res.success) {
+                Swal.fire('Thành công', 'Đã cập nhật trạng thái hồ sơ.', 'success')
+                    .then(() => location.reload());
+            }
+        });
+    }
+
+    // Xóa CV
+    function deleteCV(id) {
+        Swal.fire({
+            title: 'Xác nhận xóa?',
+            text: "Dữ liệu hồ sơ này sẽ bị xóa vĩnh viễn!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Xóa ngay',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post(`/Admin/JobApplication/Delete/${id}`, function (res) {
+                    if (res.success) {
+                        Swal.fire('Đã xóa!', 'Hồ sơ đã được loại bỏ.', 'success')
+                            .then(() => location.reload());
+                    }
+                });
+            }
+        });
+    }
+</script>
+

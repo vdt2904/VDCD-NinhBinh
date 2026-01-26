@@ -44,6 +44,12 @@ namespace VDCD.Entities.Cache
 
         public const string UsersAll = "$domain.users.all";
         public const int UsersAllTimeout = 30;
+
+        public const string JobPositionAll = "$domain.jd.all";
+        public const int JobPositionAllTimeout = 30;
+
+        public const string JobApplyAll = "$domain.cv.all";
+        public const int JobApplyAllTimeout = 30;
         /* ================== COMMON ================== */
 
         public const int OneMinute = 1;

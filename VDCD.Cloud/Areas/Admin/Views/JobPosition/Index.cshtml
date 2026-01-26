@@ -1,0 +1,223 @@
+﻿@model IEnumerable<VDCD.Entities.Custom.JobPosition>
+@{
+    ViewData["Title"] = "Quản lý Job Descriptions";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<style>
+    /* Làm cho vùng soạn thảo CKEditor cao hơn */
+    .ck-editor__editable_inline {
+        min-height: 400px;
+    }
+
+    .modal-xl {
+        max-width: 90%;
+    }
+</style>
+<div class="container-fluid py-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0"><i class="bi bi-briefcase-fill me-2"></i> Danh sách vị trí tuyển dụng</h5>
+            <button class="btn btn-light btn-sm" onclick="openModal()">
+                <i class="bi bi-plus-circle-fill"></i> Thêm mới JD
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="jobTable" class="table table-hover w-100">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Vị trí</th>
+                            <th>Địa điểm</th>
+                            <th>Loại hình</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th class="text-end">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td><strong>@item.Title</strong></td>
+                                <td>@item.Location</td>
+                                <td>@item.EmploymentType</td>
+                                <td>
+                                    @if (item.IsActive == true)
+                                    {
+                                        <span class="badge bg-success">Đang tuyển</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Tạm dừng</span>
+                                    }
+                                </td>
+                                <td>@(item.CreateDate?.ToString("dd/MM/yyyy"))</td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editJob(@item.Id)">
+                                        Sửa
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteJob(@item.Id)">
+                                        Xóa
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="jobModal" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <form id="jobForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Thông tin tuyển dụng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="JobId" name="Id" />
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">Tiêu đề công việc</label>
+                            <input type="text" class="form-control form-control-lg" id="Title" name="Title" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Loại hình</label>
+                            <select class="form-select form-select-lg" id="EmploymentType" name="EmploymentType">
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Địa điểm làm việc</label>
+                            <input type="text" class="form-control" id="Location" name="Location" placeholder="Hà Nội, Toàn quốc...">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Mức lương</label>
+                            <input type="text" class="form-control" id="Salary" name="Salary" placeholder="VD: 15 - 20 triệu, Thỏa thuận...">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Ngày hết hạn</label>
+                            <input type="date" class="form-control" id="ExpiredDate" name="ExpiredDate">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="IsActive" name="IsActive" checked>
+                                <label class="form-check-label">Kích hoạt tin tuyển dụng</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Mô tả chi tiết công việc</label>
+                            <textarea id="Description" name="Description"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success px-4">Lưu lại</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.ckeditor.com/ckeditor5/40.0.0/classic/ckeditor.js"></script>
+
+<script>
+    let editor;
+
+    $(document).ready(function () {
+        // 1. Khởi tạo DataTables (Phân trang FE)
+        $('#jobTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json'
+            },
+            pageLength: 10,
+            order: [[0, 'desc']]
+        });
+
+        // 2. Khởi tạo CKEditor
+        ClassicEditor.create(document.querySelector('#Description'))
+            .then(newEditor => { editor = newEditor; })
+            .catch(error => { console.error(error); });
+    });
+
+    function openModal() {
+        $('#jobForm')[0].reset();
+        $('#JobId').val(0);
+        editor.setData('');
+        $('#modalTitle').text('Thêm vị trí mới');
+        $('#jobModal').modal('show');
+    }
+
+    // Hàm mở Modal để sửa
+    function editJob(id) {
+        $('#modalTitle').text('Chỉnh sửa tin tuyển dụng');
+        // 1. Gọi AJAX lấy data theo ID
+        $.get(`/Admin/JobPosition/GetById/${id}`, function (result) {
+            if (!result.success) {
+                alert(result.message);
+            }
+            var data = result.data;
+            $('#JobId').val(data.id);
+            $('#Title').val(data.title);
+            $('#Location').val(data.location);
+            $('#EmploymentType').val(data.employmentType);
+            $('#IsActive').prop('checked', data.isActive);
+            $('#Salary').val(data.salary);
+
+            // Load ngày (format yyyy-MM-dd để input date hiểu)
+            if (data.expiredDate) {
+                $('#ExpiredDate').val(data.expiredDate.split('T')[0]);
+            }
+
+            // Đổ dữ liệu vào CKEditor
+            editor.setData(data.description || '');
+
+            $('#jobModal').modal('show');
+        });
+    }
+
+    // Xử lý gửi Form
+    $('#jobForm').on('submit', function (e) {
+        e.preventDefault();
+
+        const formData = {
+            Id: $('#JobId').val() || 0,
+            Title: $('#Title').val(),
+            Salary: $('#Salary').val(),
+            Location: $('#Location').val(),
+            EmploymentType: $('#EmploymentType').val(),
+            ExpiredDate: $('#ExpiredDate').val(),
+            IsActive: $('#IsActive').is(':checked'),
+            Description: editor.getData() // Lấy từ CKEditor instance
+        };
+
+        $.post('/Admin/JobPosition/Save', formData, function (res) {
+            if (res.success) {
+                alert("Lưu thành công!");
+                location.reload();
+            } else {
+                alert("Có lỗi xảy ra: " + res.message);
+            }
+        });
+    });
+
+    function deleteJob(id) {
+        if (confirm('Bạn có chắc chắn muốn xóa tin tuyển dụng này?')) {
+            $.get(`/Admin/JobPosition/Delete/${id}`, function (result) {
+                    alert(result.message);
+            });
+        }
+    }
+</script>
+

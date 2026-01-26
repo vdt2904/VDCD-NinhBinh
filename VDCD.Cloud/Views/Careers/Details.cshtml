@@ -1,0 +1,224 @@
+﻿@model VDCD.Entities.Custom.JobPosition
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@functions {
+    string GetSt(string key) => ViewBag.Settings.ContainsKey(key) ? ViewBag.Settings[key] : "";
+}
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/home/GetHeader',
+            type: 'GET',
+            success: function (response) {
+                if (response.success) {
+                    // 1. Cập nhật Logo từ mảng footer
+                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
+                    if (logoData) {
+                        $('#main-logo').attr('src', logoData.value);
+                    }
+                }
+            },
+            error: function (err) {
+                console.error("Không thể lấy dữ liệu từ API", err);
+            }
+        });
+    });
+</script>
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm p-4 p-md-5">
+                    <nav aria-label="breadcrumb" class="mb-4">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Tuyển dụng</a></li>
+                            <li class="breadcrumb-item active">@Model.Title</li>
+                        </ol>
+                    </nav>
+
+                    <h1 class="fw-bold mb-3">@Model.Title</h1>
+
+                    <div class="d-flex flex-wrap gap-3 mb-4 text-muted">
+                        <span><i class="bi bi-geo-alt-fill text-danger"></i> @Model.Location</span>
+                        <span><i class="bi bi-briefcase-fill text-primary"></i> @Model.EmploymentType</span>
+                        <span><i class="bi bi-clock-fill text-warning"></i> Đăng ngày: @Model.CreateDate?.ToString("dd/MM/yyyy")</span>
+                    </div>
+
+                    <hr class="my-4 opacity-25">
+
+                    <div class="job-content">
+                        @Html.Raw(Model.Description)
+                    </div>
+
+                    <div class="mt-5 p-4 bg-light rounded-3 border-start border-primary border-4">
+                        <h5>Bạn thấy mình phù hợp?</h5>
+                        <p class="mb-0 text-muted">Đừng ngần ngại gửi hồ sơ cho chúng tôi. Chúng tôi luôn tìm kiếm những tài năng như bạn.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 mt-4 mt-lg-0">
+                <div class="sticky-top" style="top: 2rem; z-index: 10;">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold mb-3">Tóm tắt công việc</h5>
+                            <ul class="list-unstyled mb-4">
+                                <li class="mb-3 d-flex justify-content-between">
+                                    <span class="text-muted">Mức lương:</span>
+                                    <span class="fw-bold text-success">@Model.Salary</span>
+                                </li>
+                                <li class="mb-3 d-flex justify-content-between">
+                                    <span class="text-muted">Hình thức:</span>
+                                    <span class="badge bg-primary">@Model.EmploymentType</span>
+                                </li>
+                                <li class="mb-3 d-flex justify-content-between">
+                                    <span class="text-muted">Hạn nộp:</span>
+                                    <span class="text-danger fw-bold">@Model.ExpiredDate?.ToString("dd/MM/yyyy")</span>
+                                </li>
+                            </ul>
+
+                            <button class="btn btn-primary w-100 btn-lg fw-bold mb-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#applyModal">
+                                Ứng tuyển ngay
+                            </button>
+@*                             <button class="btn btn-outline-secondary w-100 fw-bold">
+                                <i class="bi bi-share me-2"></i>Chia sẻ tin
+                            </button> *@
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm bg-dark text-white p-4">
+                        <h6>Bạn cần hỗ trợ?</h6>
+                        <p class="small opacity-75">Liên hệ bộ phận nhân sự nếu bạn có bất kỳ thắc mắc nào về vị trí này.</p>
+                        <a href="mailto:hr@yourcompany.com" class="text-white fw-bold text-decoration-none">hr@yourcompany.com</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="applyModal" tabindex="-1" aria-labelledby="applyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="applyModalLabel">Ứng tuyển: @Model.Title</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="applyJobForm" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="JobId" value="@Model.Id" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Họ và tên <span class="text-danger">*</span></label>
+                        <input type="text" name="FullName" class="form-control" placeholder="Nguyễn Văn A" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Email <span class="text-danger">*</span></label>
+                            <input type="email" name="Email" class="form-control" placeholder="name@example.com" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Số điện thoại <span class="text-danger">*</span></label>
+                            <input type="tel" name="Phone" class="form-control" placeholder="090..." required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Đính kèm CV (PDF/Docx) <span class="text-danger">*</span></label>
+                        <input type="file" name="CVFileUpdate" class="form-control" accept=".pdf,.docx,.doc" required>
+                        <div class="form-text">Dung lượng tối đa 5MB.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Lời nhắn</label>
+                        <textarea name="Message" class="form-control" rows="3" placeholder="Giới thiệu ngắn về bản thân..."></textarea>
+                    </div>
+
+                    <div id="applyMessage" class="mb-3 d-none"></div>
+
+                    <button type="submit" id="btnSubmitApply" class="btn btn-primary w-100 py-2 fw-bold">
+                        <span id="btnText">Gửi hồ sơ ngay</span>
+                        <span id="btnLoading" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .job-content {
+        line-height: 1.8;
+        font-size: 1.05rem;
+        color: #333;
+    }
+
+        .job-content h2, .job-content h3 {
+            margin-top: 1.5rem;
+            font-weight: 700;
+            color: #000;
+        }
+
+        .job-content ul {
+            padding-left: 1.2rem;
+        }
+
+        .job-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+    /* Hiệu ứng cho thanh sidebar dính (sticky) */
+    .sticky-top {
+        transition: top 0.3s ease;
+    }
+</style>
+<script>
+    document.getElementById('applyJobForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const form = this;
+        const formData = new FormData(form);
+        const btnSubmit = document.getElementById('btnSubmitApply');
+        const btnText = document.getElementById('btnText');
+        const btnLoading = document.getElementById('btnLoading');
+        const msgDiv = document.getElementById('applyMessage');
+
+        // Hiệu ứng loading
+        btnSubmit.disabled = true;
+        btnText.innerText = "Đang gửi...";
+        btnLoading.classList.remove('d-none');
+
+        fetch('/Careers/PostApply', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    msgDiv.className = "alert alert-success";
+                    msgDiv.innerText = "Gửi hồ sơ thành công! Chúng tôi sẽ liên hệ lại sớm.";
+                    msgDiv.classList.remove('d-none');
+                    form.reset();
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('applyModal')).hide();
+                        msgDiv.classList.add('d-none');
+                    }, 3000);
+                } else {
+                    msgDiv.className = "alert alert-danger";
+                    msgDiv.innerText = data.message || "Có lỗi xảy ra, vui lòng thử lại.";
+                    msgDiv.classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                btnSubmit.disabled = false;
+                btnText.innerText = "Gửi hồ sơ ngay";
+                btnLoading.classList.add('d-none');
+            });
+    });
+</script>
+

@@ -102,6 +102,16 @@ app.MapControllerRoute(
     defaults: new { controller = "Home", action = "Center" }
 );
 app.MapControllerRoute(
+    name: "carees",
+    pattern: "tuyen-dung",
+    defaults: new { controller = "Careers", action = "index" }
+);
+app.MapControllerRoute(
+    name: "carees_detail",
+    pattern: "tuyen-dung/{slug}",
+    defaults: new { controller = "Careers", action = "Details" }
+);
+app.MapControllerRoute(
     name: "category_detail",
     pattern: "danh-muc/{slug}",
     defaults: new { controller = "Category", action = "Index" }

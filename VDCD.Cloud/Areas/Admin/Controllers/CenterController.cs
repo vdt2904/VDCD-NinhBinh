@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using VDCD.Business.Service;
 using VDCD.Entities.Custom;
 
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class CenterController : Controller
+	[Authorize(AuthenticationSchemes = "AdminAuth")]
+	public class CenterController : Controller
     {
         private readonly CenterService _centerService;
         public CenterController(CenterService centerService) => _centerService = centerService;

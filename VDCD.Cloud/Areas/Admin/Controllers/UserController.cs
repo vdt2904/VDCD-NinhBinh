@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using VDCD.Business.Service;
@@ -7,7 +8,8 @@ using VDCD.Entities.Custom;
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class UserController : Controller
+	[Authorize(AuthenticationSchemes = "AdminAuth")]
+	public class UserController : Controller
     {
         private readonly UserService _userService;
         private readonly UserDepartmentJobtitlePositionService _userDepartmentJobtitlePositionService;

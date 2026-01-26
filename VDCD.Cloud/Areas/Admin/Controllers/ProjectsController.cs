@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using VDCD.Business.Service;
 using VDCD.Entities.Custom;
 using VDCD.Helper;
@@ -6,7 +7,8 @@ using VDCD.Helper;
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class ProjectsController : Controller
+	[Authorize(AuthenticationSchemes = "AdminAuth")]
+	public class ProjectsController : Controller
     {
         private readonly ProjectService _projectService;
         private readonly CategoryService _categoryService;

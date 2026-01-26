@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using VDCD.Business.Service;
 
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class JobApplicationController : Controller
+	[Authorize(AuthenticationSchemes = "AdminAuth")]
+	public class JobApplicationController : Controller
     {
         private readonly JobApplicationService _jobApplicationService;
         private readonly JobPositionService _jobPositionService;

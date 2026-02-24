@@ -99,5 +99,17 @@ namespace VDCD.Business.Service
                 }
             }
         }
+
+        public void Delete(int id)
+        {
+            var lst = _depRepo.Gets(false,x=>(x.ParentId == id) || x.Id == id);
+            foreach (var item in lst)
+            {
+                _udjpRepo.DeleteRange(_udjpRepo.Gets(false,x=>x.DepartmentId == item.Id));
+            }
+            _context.SaveChanges();
+            _depRepo.DeleteRange(lst);
+            _context.SaveChanges();
+        }
     }
 }

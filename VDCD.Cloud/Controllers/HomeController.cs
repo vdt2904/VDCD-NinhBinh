@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Diagnostics;
 using System.Linq;
+using System.Xml.Linq;
 using VDCD.Business.Service;
 using VDCD.Cloud.Models;
 using VDCD.Controllers;
@@ -25,11 +27,12 @@ namespace VDCD.Cloud.Controllers
         private readonly UserService _userService;
         private readonly UserDepartmentJobtitlePositionService _userDepartmentJobtitlePositionService;
         private readonly DepartmentService _departmentService;
+        private readonly SeoMetaService _seoMetaService;
 
         public HomeController(ILogger<HomeController> logger,UserBll userBll, SettingService settingService,CenterService centerService
             , SeoMetaService seoMetaService, ProjectService projectService, CategoryService categoryService,PostsService postsService,
             CustomerService customerService, UserService service,UserDepartmentJobtitlePositionService userDepartmentJobtitlePositionService,
-            DepartmentService departmentService) : base(seoMetaService)
+            DepartmentService departmentService,SeoMetaService metaService) : base(seoMetaService)
         {
             _logger = logger;
             userService = userBll;
@@ -42,6 +45,7 @@ namespace VDCD.Cloud.Controllers
             _userService = service;
             _departmentService = departmentService;
             _userDepartmentJobtitlePositionService = userDepartmentJobtitlePositionService;
+            _seoMetaService = seoMetaService;
         }
 
         public IActionResult Index()
@@ -248,6 +252,59 @@ namespace VDCD.Cloud.Controllers
         {
             return View();
         }
+        public IActionResult Sitemap()
+        {
+            var seos = _seoMetaService.Gets();
 
+            var map = new Dictionary<string, string>
+    {
+        { "project", "du-an" },
+        { "jobposition", "tuyen-dung" },
+        { "post", "tin-tuc" }
+    };
+
+            var urls = seos
+                .Where(x => x.Is_Index)
+                .Select(x =>
+                {
+                    var key = x.Seo_Key;
+
+                    foreach (var m in map)
+                    {
+                        if (key.StartsWith(m.Key + ":"))
+                        {
+                            key = key.Replace(m.Key + ":", m.Value + "/");
+                            break;
+                        }
+                    }
+
+                    return $"https://vdcd.site/{key}";
+                })
+                .ToList();
+
+            XNamespace ns = "http://www.sitemaps.org/schemas/sitemap/0.9";
+
+            var xml = new XDocument(
+                new XElement(ns + "urlset",
+                    urls.Select(url =>
+                        new XElement(ns + "url",
+                            new XElement(ns + "loc", url),
+                            new XElement(ns + "lastmod", DateTime.UtcNow.ToString("yyyy-MM-dd")),
+                            new XElement(ns + "priority", "0.8")
+                        )
+                    )
+                )
+            );
+
+            return Content(xml.ToString(), "application/xml");
+        }
+        public IActionResult privacypolicy()
+        {
+            return View();
+        }
+        public IActionResult datadeletion()
+        {
+            return View();
+        }
     }
 }

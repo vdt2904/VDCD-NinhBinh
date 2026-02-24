@@ -116,5 +116,18 @@ namespace VDCD.Areas.Admin.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+		public IActionResult Delete(int id)
+		{
+			try
+			{
+                _departmentService.Delete(id);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+			{
+				return Json(new {success = false, message = ex.Message});
+			}
+
+		}
     }
 }

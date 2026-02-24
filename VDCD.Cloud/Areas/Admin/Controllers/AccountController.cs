@@ -23,7 +23,7 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
         public async Task<IActionResult> Login(string username, string password, string returnUrl = "/admin")
         {
             // TODO: check DB
-            if (username != "admin" || password != "123")
+            if (username != "admin" || password != "123abc@A!")
             {
                 ViewBag.Error = "Sai tài khoản";
                 return View();

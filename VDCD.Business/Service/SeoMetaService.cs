@@ -24,7 +24,10 @@ namespace VDCD.Business.Service
         {
             return _seoService.Get(true,x=>x.Seo_Key == key);
         }
-
+        public IEnumerable<SeoMeta> Gets()
+        {
+            return _seoService.Gets(true);
+        }
         public void Save(SeoMeta model)
         {
             if (string.IsNullOrWhiteSpace(model.Seo_Key))

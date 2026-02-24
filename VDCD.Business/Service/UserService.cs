@@ -89,6 +89,10 @@ namespace VDCD.Business.Service
                     {
                         foreach (var item in assignments)
                         {
+                            if(item.JobtitleId == 0) item.JobtitleId = null;
+                            if(item.UserId == 0) item.UserId = null;
+                            if(item.PositionId == 0) item.PositionId = null;
+                            if (item.DepartmentId == 0) item.DepartmentId = null;
                             item.UserId = user.UserId; // Đảm bảo lấy đúng UserId mới sinh
                             _udjpRepo.Create(item);
                         }
@@ -111,6 +115,18 @@ namespace VDCD.Business.Service
         private void ClearCache()
         {
             _cache.Remove(CacheParam.UsersAll);
+        }
+
+        public void Delete(int id)
+        {
+            var user = _userRepo.Get(false,x=>x.UserId == id);
+            if (user == null) { throw new Exception("Nhân viên không tồn tại"); }
+            var udjp =  _udjpRepo.Gets(false,x=>x.UserId == id);
+            _udjpRepo.DeleteRange(udjp);
+            _context.SaveChanges();
+            _userRepo.Delete(user);
+            _context.SaveChanges();
+            ClearCache();
         }
     }
 }

@@ -75,7 +75,7 @@ builder.Services.AddAuthentication("AdminAuth")
     });
 
 builder.Services.AddAuthorization();
-
+builder.Services.AddHttpClient();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -100,6 +100,21 @@ app.MapControllerRoute(
     name: "center",
     pattern: "he-thong-trung-tam",
     defaults: new { controller = "Home", action = "Center" }
+);
+app.MapControllerRoute(
+    name: "sitemap",
+    pattern: "sitemap.xml",
+    defaults: new { controller = "Home", action = "sitemap" }
+);
+app.MapControllerRoute(
+    name: "privacy-policy",
+    pattern: "privacy-policy",
+    defaults: new { controller = "Home", action = "privacypolicy" }
+);
+app.MapControllerRoute(
+    name: "data-deletion",
+    pattern: "data-deletion",
+    defaults: new { controller = "Home", action = "datadeletion" }
 );
 app.MapControllerRoute(
     name: "carees",

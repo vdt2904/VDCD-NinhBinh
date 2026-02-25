@@ -34,6 +34,7 @@ namespace VDCD.Areas.Admin.Controllers
 			ViewBag.OrgStructure = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.OrgStructure."));
 			ViewBag.Solutions = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.solution."));
 			ViewBag.EmailSettings = lstSetting.Where(x => x.SettingKey.StartsWith("setting.email."));
+			ViewBag.FacebookSettings = lstSetting.Where(x => x.SettingKey.StartsWith("setting.facebook."));
             return View();
         }
         [HttpPost]

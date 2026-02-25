@@ -812,6 +812,73 @@
 				</div>
 			</div>
 		</div>
+		<div class="card settings-card">
+			<div class="card-header settings-header p-0">
+				<a class="d-flex justify-content-between align-items-center px-4 py-3 text-decoration-none"
+				   data-bs-toggle="collapse"
+				   data-bs-target="#facebookSetting">
+					<span><i class="bi bi-facebook me-2"></i>Cấu hình Facebook API (Auto Post)</span>
+					<i class="bi bi-chevron-down toggle-icon"></i>
+				</a>
+			</div>
+
+			<div id="facebookSetting" class="collapse show">
+				<div class="card-body p-4">
+					<div class="row">
+						@{
+							var fbSettings = (ViewBag.FacebookSettings as IEnumerable<dynamic>) ?? new List<dynamic>();
+
+							// Định nghĩa danh sách các trường cần thiết
+							var fbKeyMap = new Dictionary<string, string> {
+						{ "setting.facebook.app_id", "Facebook App ID" },
+						{ "setting.facebook.app_secret", "Facebook App Secret" },
+						{ "setting.facebook.page_id", "Facebook Page ID" },
+						{ "setting.facebook.page_token", "Facebook Page Access Token" }
+						};
+
+							foreach (var key in fbKeyMap)
+							{
+								var item = fbSettings.FirstOrDefault(x => x.SettingKey == key.Key);
+								<div class="col-md-6 mb-3">
+									<label class="form-label small fw-bold text-primary">@key.Value</label>
+
+									@if (key.Key.Contains("secret") || key.Key.Contains("token"))
+									{
+										<div class="input-group">
+											<input type="password" class="form-control"
+												   name="@key.Key"
+												   value="@(item?.Value ?? "")"
+												   id="pass-@key.Key.Replace(".","-")">
+											<button class="btn btn-outline-secondary" type="button"
+													onclick="toggleFbVisibility('pass-@key.Key.Replace(".","-")')">
+												<i class="bi bi-eye"></i>
+											</button>
+										</div>
+									}
+									else
+									{
+										<input type="text" class="form-control"
+											   name="@key.Key"
+											   value="@(item?.Value ?? "")"
+											   placeholder="Nhập @key.Value">
+									}
+								</div>
+							}
+						}
+					</div>
+
+					<div class="mt-2 p-3 border-start border-4 border-info bg-light">
+						<div class="d-flex">
+							<i class="bi bi-info-circle-fill text-info me-2"></i>
+							<div class="small text-muted">
+								Lưu ý: <strong>Page Access Token</strong> nên là loại "vĩnh viễn" (Never Expire) để tránh việc tự động đăng bài bị gián đoạn.
+								Cấu hình này dùng cho Graph API v18.0+.
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 		<div class="mt-4 mb-5 d-flex justify-content-end">
 			<button type="button" class="btn btn-custom btn-save" onclick="saveSetting()">
 				<i class="bi bi-check2-circle"></i> Lưu thay đổi
@@ -1161,6 +1228,17 @@
 	}
 </script>
 <script>
+	function toggleFbVisibility(inputId) {
+		const input = document.getElementById(inputId);
+		const btnIcon = event.currentTarget.querySelector('i');
+		if (input.type === "password") {
+			input.type = "text";
+			btnIcon.classList.replace('bi-eye', 'bi-eye-slash');
+		} else {
+			input.type = "password";
+			btnIcon.classList.replace('bi-eye-slash', 'bi-eye');
+		}
+	}
 	function addNewOperation() {
 		const list = document.getElementById('operation-list');
 		const index = list.querySelectorAll('.operation-item').length;

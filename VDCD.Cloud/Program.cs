@@ -10,6 +10,7 @@ using VDCD.Business.Infrastructure;
 using VDCD.Business.Service;
 using VDCD.DataAccess;
 using VDCD.Hubs;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,7 +64,11 @@ builder.Services.AddHangfireServer(options =>
     options.WorkerCount = 1;
 });
 
-
+// Ví dụ cấu hình cho phép file lớn trong ASP.NET Core
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 104857600; // 100MB
+});
 // authen riêng cho admin
 builder.Services.AddAuthentication("AdminAuth")
     .AddCookie("AdminAuth", options =>

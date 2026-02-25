@@ -12,14 +12,16 @@ namespace VDCD.Areas.Admin.Controllers
         private readonly JobtitleService _jobtitleService;
         private readonly PositionService _positionService;
         private readonly FacebookService _facebookService;
+        private readonly SettingService _settingService;
         public FacebookController(DepartmentService departmentService, UserService userService,
-            JobtitleService jobtitleService, PositionService positionService, FacebookService facebookService)
+            JobtitleService jobtitleService, PositionService positionService, FacebookService facebookService,SettingService settingService)
         {
             _departmentService = departmentService;
             _userService = userService;
             _jobtitleService = jobtitleService;
             _positionService = positionService;
             _facebookService = facebookService;
+            _settingService = settingService;
         }
         public IActionResult Index()
         {
@@ -33,7 +35,9 @@ namespace VDCD.Areas.Admin.Controllers
 
             try
             {
-                object result;
+                var PageID = _settingService.Get("setting.facebook.page_id");
+                var Token = _settingService.Get("setting.facebook.page_token");
+				object result;
 
                 bool hasImages = model.ImageUrls != null && model.ImageUrls.Any();
                 bool hasVideos = model.Videos != null && model.Videos.Any();
@@ -41,27 +45,27 @@ namespace VDCD.Areas.Admin.Controllers
                 if (!hasImages && !hasVideos)
                 {
                     result = await _facebookService.PostTextAsync(
-                        model.PageId,
+                        PageID,
                         model.Messgase,
-                        model.Token
+                        Token
                     );
                 }
                 else if (hasVideos)
                 {
                     result = await _facebookService.PostVideoAsync(
-                        model.PageId,
+                        PageID,
                         model.Videos,
                         model.Messgase,
-                        model.Token
+                        Token
                     );
                 }
                 else
                 {
                     result = await _facebookService.PostImagesAsync(
-                        model.PageId,
+                        PageID,
                         model.ImageUrls,
                         model.Messgase,
-                        model.Token
+                        Token
                     );
                 }
 

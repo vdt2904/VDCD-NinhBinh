@@ -1,0 +1,1456 @@
+﻿@{
+    ViewData["Title"] = "Quản lý đăng bài Facebook";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js">    </script>
+<script src="https://cdn.ckeditor.com/ckeditor5/40.0.0/classic/ckeditor.js"></script>
+
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fa-brands fa-facebook me-2"></i>Quản lý đăng bài Facebook - VDCD Group
+                    </h4>
+                    <button class="btn btn-light" onclick="openFBEditor()">
+                        <i class="fa-solid fa-plus me-2"></i>Thêm bài viết mới
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Báo cáo đơn giản: Bài đã đăng và chờ đăng -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card border-left-primary">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-2">Bài đã đăng hôm nay</h6>
+                            <h2 class="mb-0">5</h2>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                            <i class="fa-solid fa-check-circle fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-left-warning">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-2">Bài chờ đăng</h6>
+                            <h2 class="mb-0">8</h2>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                            <i class="fa-solid fa-clock fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách bài viết -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fa-regular fa-newspaper me-2"></i>Danh sách bài viết
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control form-control-sm" style="width:250px" placeholder="Tìm kiếm bài viết...">
+                            <select class="form-select form-select-sm" style="width:150px">
+                                <option>Tất cả trạng thái</option>
+                                <option>Đã đăng</option>
+                                <option>Lưu nháp</option>
+                                <option>Đã lên lịch</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tiêu đề</th>
+                                    <th>Loại</th>
+                                    <th>Lịch đăng</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold">Workshop Chuyển đổi số trong doanh nghiệp</td>
+                                    <td><span class="badge bg-info">Sự kiện</span></td>
+                                    <td><span class="badge bg-light text-dark">25/01/2024 14:30</span></td>
+                                    <td><span class="badge bg-success">Đã lên lịch</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(1)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="previewFBPost(1)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deletePost(1)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Tuyển dụng Senior Developer</td>
+                                    <td><span class="badge bg-primary">Tuyển dụng</span></td>
+                                    <td><span class="badge bg-light text-dark">26/01/2024 9:00</span></td>
+                                    <td><span class="badge bg-success">Đã lên lịch</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(2)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="previewFBPost(2)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deletePost(2)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Giới thiệu đối tác mới</td>
+                                    <td><span class="badge bg-success">Đối tác</span></td>
+                                    <td><span class="badge bg-light text-dark">26/01/2024 15:45</span></td>
+                                    <td><span class="badge bg-warning">Lưu nháp</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(3)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="previewFBPost(3)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deletePost(3)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Hoạt động team building Q1</td>
+                                    <td><span class="badge bg-secondary">Hoạt động</span></td>
+                                    <td><span class="badge bg-light text-dark">27/01/2024 20:00</span></td>
+                                    <td><span class="badge bg-success">Đã lên lịch</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(4)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="previewFBPost(4)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deletePost(4)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Chia sẻ công nghệ mới</td>
+                                    <td><span class="badge bg-dark">Công nghệ</span></td>
+                                    <td><span class="badge bg-light text-dark">22/01/2024 10:15</span></td>
+                                    <td><span class="badge bg-secondary">Đã đăng</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(5)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" onclick="previewFBPost(5)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deletePost(5)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hiển thị lịch đăng dạng lịch tuần -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fa-regular fa-calendar me-2"></i>Lịch đăng bài
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mt-2">
+                        <div class="week-scroll-container">
+                            <div class="week-scroll-wrapper">
+                                <!-- Thứ 2 -->
+                                <div class="day-card">
+                                    <div class="card bg-light h-100">
+                                        <div class="card-header bg-white py-2">
+                                            <h6 class="mb-0">Thứ 2 - 22/01</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="p-2 bg-white rounded mb-2 border">
+                                                <span class="badge bg-primary">14:30</span>
+                                                <p class="mb-0 small mt-1 fw-bold">Workshop Chuyển đổi số</p>
+                                                <small class="text-muted">Sự kiện</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Thứ 3 -->
+                                <div class="day-card">
+                                    <div class="card bg-light h-100">
+                                        <div class="card-header bg-white py-2">
+                                            <h6 class="mb-0">Thứ 3 - 23/01</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="p-2 bg-white rounded mb-2 border">
+                                                <span class="badge bg-primary">9:00</span>
+                                                <p class="mb-0 small mt-1 fw-bold">Tuyển dụng Developer</p>
+                                                <small class="text-muted">Tuyển dụng</small>
+                                            </div>
+                                            <div class="p-2 bg-white rounded border">
+                                                <span class="badge bg-primary">15:45</span>
+                                                <p class="mb-0 small mt-1 fw-bold">Giới thiệu đối tác</p>
+                                                <small class="text-muted">Đối tác</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Thứ 4 -->
+                                <div class="day-card">
+                                    <div class="card bg-light h-100">
+                                        <div class="card-header bg-white py-2">
+                                            <h6 class="mb-0">Thứ 4 - 24/01</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="p-2 bg-white rounded border">
+                                                <span class="badge bg-primary">10:15</span>
+                                                <p class="mb-0 small mt-1 fw-bold">Chia sẻ công nghệ</p>
+                                                <small class="text-muted">Công nghệ</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Thứ 5 -->
+                                <div class="day-card">
+                                    <div class="card bg-light h-100">
+                                        <div class="card-header bg-white py-2">
+                                            <h6 class="mb-0">Thứ 5 - 25/01</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="p-2 bg-white rounded border text-muted fst-italic">
+                                                Chưa có lịch
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Thứ 6 -->
+                                <div class="day-card">
+                                    <div class="card bg-light h-100">
+                                        <div class="card-header bg-white py-2">
+                                            <h6 class="mb-0">Thứ 6 - 26/01</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="p-2 bg-white rounded border text-muted fst-italic">
+                                                Chưa có lịch
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Thứ 7 -->
+                                <div class="day-card">
+                                    <div class="card bg-light h-100">
+                                        <div class="card-header bg-white py-2">
+                                            <h6 class="mb-0">Thứ 7 - 27/01</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="p-2 bg-white rounded border text-muted fst-italic">
+                                                Chưa có lịch
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Chủ nhật -->
+                                <div class="day-card">
+                                    <div class="card bg-light h-100">
+                                        <div class="card-header bg-white py-2">
+                                            <h6 class="mb-0">Chủ nhật - 28/01</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="p-2 bg-white rounded border text-muted fst-italic">
+                                                Chưa có lịch
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editor Bài viết Facebook -->
+<div class="modal fade" id="fbEditorModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">
+                    <i class="fa-brands fa-facebook text-primary me-2"></i>
+                    <span id="editorModalTitle">THÊM BÀI VIẾT MỚI</span>
+                </h5>
+                <div class="d-flex gap-2 ms-auto me-2">
+                    <button class="btn btn-sm btn-outline-success" type="button" onclick="generateAIContent()">
+                        <i class="bi bi-magic me-1"></i>Tạo nội dung tự động
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" type="button" onclick="previewCurrentPost()">
+                        <i class="bi bi-eye me-1"></i>Xem trước
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+            </div>
+            <div class="modal-body p-4">
+                <form id="fbPostForm">
+                    <input type="hidden" id="fbPostId" value="0" />
+                    <input type="hidden" id="fbImageUrls" value="" />
+                    <input type="hidden" id="fbVideoUrls" value="" />
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <!-- Tiêu đề bài viết -->
+                            <div class="form-group mb-3">
+                                <label class="fw-bold">Tiêu đề bài viết <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="fbPostTitle" placeholder="Nhập tiêu đề bài viết...">
+                            </div>
+
+                            <!-- Loại nội dung và Trạng thái -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="fw-bold">Loại nội dung</label>
+                                    <select class="form-select" id="fbPostType">
+                                        <option value="activity">📸 Bài chia sẻ hoạt động CBCNV</option>
+                                        <option value="event">🎉 Thông báo sự kiện/workshop</option>
+                                        <option value="recruitment">💼 Thông tin tuyển dụng</option>
+                                        <option value="tech">💡 Chia sẻ công nghệ</option>
+                                        <option value="partner">🤝 Giới thiệu đối tác</option>
+                                        <option value="other">📝 Nội dung khác</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="fw-bold">Trạng thái</label>
+                                    <select class="form-select" id="fbPostStatus">
+                                        <option value="published">Đã đăng</option>
+                                        <option value="draft">Lưu nháp</option>
+                                        <option value="approved">Đã duyệt</option>
+                                        <option value="scheduled">Đã lên lịch</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Nội dung bài viết - CKEditor -->
+                            <div class="form-group mb-3">
+                                <label class="fw-bold">Nội dung bài viết</label>
+                                <textarea id="fbEditor" name="fbEditor"></textarea>
+                                <small class="text-muted">Có thể sử dụng các biến: {title}, {date}, {time}, {link}</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 border-start">
+                            <!-- Ảnh bài viết -->
+                            <div class="form-group mb-3">
+                                <label class="fw-bold d-block">Ảnh bài viết</label>
+                                <div class="multiple-image-container border rounded p-2 mb-2">
+                                    <div class="image-grid d-flex flex-wrap gap-2 mb-2" id="fbImageGrid">
+                                        <!-- Ảnh sẽ được thêm vào đây bằng JavaScript -->
+                                        <div class="image-placeholder text-center p-3 bg-light rounded" style="width:80px; height:80px; cursor:pointer;" onclick="openFBFileManager('image')">
+                                            <i class="bi bi-plus-circle text-muted"></i>
+                                            <small class="d-block">Thêm ảnh</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button class="btn btn-outline-primary btn-sm" type="button" onclick="openFBFileManager('image')">
+                                            <i class="bi bi-images me-1"></i>Chọn nhiều ảnh
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Video bài viết -->
+                            <div class="form-group mb-3">
+                                <label class="fw-bold d-block">Video bài viết</label>
+                                <div class="multiple-video-container border rounded p-2 mb-2">
+                                    <div class="video-grid d-flex flex-wrap gap-2 mb-2" id="fbVideoGrid">
+                                        <!-- Video sẽ được thêm vào đây bằng JavaScript -->
+                                        <div class="video-placeholder text-center p-3 bg-light rounded" style="width:80px; height:80px; cursor:pointer;" onclick="openFBFileManager('video')">
+                                            <i class="bi bi-plus-circle text-muted"></i>
+                                            <small class="d-block">Thêm video</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button class="btn btn-outline-danger btn-sm" type="button" onclick="openFBFileManager('video')">
+                                            <i class="bi bi-camera-video me-1"></i>Chọn video
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Lịch đăng trong editor (chỉ 1 lịch) -->
+                            <div class="form-group mb-3">
+                                <label class="fw-bold">Lịch đăng</label>
+                                <div class="border rounded p-3">
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <input type="date" class="form-control" id="scheduleDate" value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <input type="time" class="form-control" id="scheduleTime" value="09:00">
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">Gợi ý khung giờ vàng: </small>
+                                        <div class="d-flex gap-2 mt-1">
+                                            <button class="btn btn-sm btn-outline-warning" type="button" onclick="setGoldenHour('09:00')">9:00</button>
+                                            <button class="btn btn-sm btn-outline-warning" type="button" onclick="setGoldenHour('12:00')">12:00</button>
+                                            <button class="btn btn-sm btn-outline-warning" type="button" onclick="setGoldenHour('20:00')">20:00</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-warning me-2" onclick="saveAsDraft()">
+                    <i class="fa-regular fa-floppy-disk me-1"></i>Lưu nháp
+                </button>
+                <button type="button" class="btn btn-primary px-4" onclick="saveFBPost()">
+                    <i class="fa-regular fa-paper-plane me-1"></i>Đăng bài
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Preview Bài viết Facebook (đơn giản) -->
+<div class="modal fade" id="fbPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white py-2">
+                <h6 class="modal-title">
+                    <i class="fa-brands fa-facebook me-1"></i>Xem trước bài viết
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <!-- Bài viết Facebook đơn giản -->
+                <div class="facebook-post">
+                    <!-- Header: Avatar + Tên trang + Thời gian -->
+                    <div class="post-header d-flex align-items-center p-3">
+                        <div class="avatar me-2">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                                <i class="fa-brands fa-facebook-f"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">VDCD Group</h6>
+                            <small class="text-muted" id="previewDateTime">Vừa xong</small>
+                        </div>
+                    </div>
+
+                    <!-- Nội dung bài viết -->
+                    <div class="post-content px-3 pb-2">
+                        <!-- Text nội dung -->
+                        <div class="post-text mb-2" id="previewContent" style="font-size: 14px; line-height: 1.5;"></div>
+
+                        <!-- Ảnh đính kèm -->
+                        <div class="post-images mt-2" id="previewImages"></div>
+
+                        <!-- Video đính kèm -->
+                        <div class="post-videos mt-2" id="previewVideos"></div>
+
+                        <!-- Lịch đăng (nếu có) -->
+                        <div class="post-schedule mt-2 p-2 bg-light rounded small" id="previewSchedule" style="display: none;">
+                            <i class="fa-regular fa-calendar me-1 text-primary"></i>
+                            Lịch đăng: <span id="previewScheduleText" class="fw-bold"></span>
+                        </div>
+                    </div>
+
+                    <!-- Footer với các nút tương tác (đơn giản) -->
+                    <div class="post-footer border-top px-3 py-2 d-flex justify-content-around text-muted small">
+                        <span><i class="fa-regular fa-thumbs-up me-1"></i>Thích</span>
+                        <span><i class="fa-regular fa-comment me-1"></i>Bình luận</span>
+                        <span><i class="fa-regular fa-share-from-square me-1"></i>Chia sẻ</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal File Manager -->
+<div class="modal fade" id="fbFileManagerModal" tabindex="-1" aria-hidden="true" style="z-index:1070;">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="height:90vh;">
+        <div class="modal-content h-100 shadow-lg">
+            <div class="modal-header">
+                <h5 class="modal-title">Quản lý file</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0 h-100">
+                <iframe id="fbFileManagerIframe" src="" style="width:100%; height:100%; border:none;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CKEditor Script -->
+<script src="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.js"></script>
+
+<script>
+        let fbFmType = 'image';
+        let currentFBPostId = 0;
+        let selectedImages = []; // Mảng chứa ảnh
+        let selectedVideos = []; // Mảng chứa video
+        let editorInstance = null;
+
+        // Khởi tạo CKEditor
+        async function initCKEditor() {
+            const editorElement = document.querySelector('#fbEditor');
+
+            if (!editorElement) return;
+
+            // Xóa CKEditor cũ nếu có
+            if (editorInstance) {
+                await editorInstance.destroy();
+                editorInstance = null;
+            }
+
+            try {
+                editorInstance = await ClassicEditor.create(editorElement, {
+                    toolbar: {
+                        items: [
+                            'heading', '|',
+                            'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
+                            'blockQuote', 'insertTable', '|',
+                            'undo', 'redo'
+                        ],
+                        shouldNotGroupWhenFull: true
+                    },
+                    language: 'vi',
+                    placeholder: 'Nhập nội dung bài viết...',
+                    table: {
+                        contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
+                    },
+                    removePlugins: ['Title'],
+                    initialData: $('#fbEditor').val() || ''
+                });
+
+                console.log('CKEditor initialized successfully');
+            } catch (error) {
+                console.error('Lỗi khởi tạo CKEditor:', error);
+            }
+        }
+
+        // Mở editor để thêm bài mới
+        function openFBEditor() {
+            resetFBForm();
+            currentFBPostId = 0;
+            $('#fbPostId').val(0);
+            $('#editorModalTitle').text('THÊM BÀI VIẾT MỚI');
+
+            const modal = new bootstrap.Modal(document.getElementById('fbEditorModal'));
+            modal.show();
+
+            // Khởi tạo CKEditor sau khi modal hiển thị
+            setTimeout(initCKEditor, 500);
+        }
+
+        // Mở editor để sửa bài
+        function editFBPost(id) {
+            resetFBForm();
+            currentFBPostId = id;
+            $('#fbPostId').val(id);
+            $('#editorModalTitle').text('CHỈNH SỬA BÀI VIẾT');
+
+            // Giả lập load dữ liệu (sau này sẽ call API)
+            if (id === 1) {
+                $('#fbPostTitle').val('Workshop Chuyển đổi số trong doanh nghiệp');
+                $('#fbPostType').val('event');
+                $('#fbPostStatus').val('scheduled');
+                $('#fbEditor').val('<p>📅 <strong>VDCD Group</strong> tổ chức workshop "Chuyển đổi số trong doanh nghiệp" với sự tham gia của các chuyên gia hàng đầu.</p><p>Thời gian: 14:00, Thứ 6 ngày 25/01/2024<br>Địa điểm: Tòa nhà VDCD, Hà Nội</p><p>Link đăng ký: <a href="#">https://vdcd.vn/workshop</a></p>');
+                $('#scheduleDate').val('2024-01-25');
+                $('#scheduleTime').val('14:30');
+
+                selectedImages = [
+                    'https://via.placeholder.com/300x200/0d6efd/ffffff?text=Workshop+1',
+                    'https://via.placeholder.com/300x200/198754/ffffff?text=Workshop+2'
+                ];
+                updateImageGrid();
+            } else if (id === 2) {
+                $('#fbPostTitle').val('Tuyển dụng Senior Developer');
+                $('#fbPostType').val('recruitment');
+                $('#fbPostStatus').val('scheduled');
+                $('#fbEditor').val('<p>💼 <strong>VDCD Group</strong> đang tìm kiếm Senior Developer tài năng để gia nhập đội ngũ phát triển sản phẩm.</p><p><strong>Yêu cầu:</strong></p><ul><li>5+ năm kinh nghiệm</li><li>Thành thạo .NET Core, ReactJS</li><li>Kinh nghiệm làm việc với microservices</li></ul><p><strong>Quyền lợi:</strong> Lương thưởng hấp dẫn, môi trường chuyên nghiệp</p>');
+                $('#scheduleDate').val('2024-01-26');
+                $('#scheduleTime').val('09:00');
+
+                selectedImages = [
+                    'https://via.placeholder.com/300x200/0d6efd/ffffff?text=Tuyen+Dung'
+                ];
+                updateImageGrid();
+            }
+
+            const modal = new bootstrap.Modal(document.getElementById('fbEditorModal'));
+            modal.show();
+
+            // Khởi tạo CKEditor sau khi modal hiển thị
+            setTimeout(initCKEditor, 500);
+        }
+
+        // Mở File Manager cho ảnh hoặc video
+        function openFBFileManager(type) {
+            fbFmType = type;
+            document.getElementById('fbFileManagerIframe').src = '/Admin/FileManager/Index';
+            new bootstrap.Modal(document.getElementById('fbFileManagerModal')).show();
+        }
+
+        // Nhận URL từ File Manager
+        window.addEventListener('message', function (event) {
+            if (event.data && event.data.type === 'getFileUrl') {
+                const urls = event.data.url;
+
+                if (fbFmType === 'image') {
+                    // Thêm nhiều ảnh
+                    if (Array.isArray(urls)) {
+                        urls.forEach(imgUrl => {
+                            if (!selectedImages.includes(imgUrl)) {
+                                selectedImages.push(imgUrl);
+                            }
+                        });
+                    } else {
+                        if (!selectedImages.includes(urls)) {
+                            selectedImages.push(urls);
+                        }
+                    }
+                    updateImageGrid();
+                } else if (fbFmType === 'video') {
+                    // Thêm nhiều video
+                    if (Array.isArray(urls)) {
+                        urls.forEach(videoUrl => {
+                            // Kiểm tra xem video đã tồn tại chưa
+                            if (!selectedVideos.some(v => v.url === videoUrl)) {
+                                // Xác định loại video dựa trên đuôi file
+                                let videoType = 'other';
+                                let thumbnailUrl = videoUrl;
+
+                                if (videoUrl.match(/\.(mp4|webm|ogg)$/i)) {
+                                    videoType = 'mp4';
+                                    thumbnailUrl = 'https://via.placeholder.com/300x200/6c757d/ffffff?text=MP4+Video';
+                                } else if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+                                    videoType = 'youtube';
+                                    let videoId = '';
+                                    if (videoUrl.includes('youtube.com/watch?v=')) {
+                                        videoId = videoUrl.split('v=')[1]?.split('&')[0];
+                                    } else if (videoUrl.includes('youtu.be/')) {
+                                        videoId = videoUrl.split('youtu.be/')[1]?.split('?')[0];
+                                    }
+                                    if (videoId) {
+                                        thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                                    }
+                                } else if (videoUrl.includes('vimeo.com')) {
+                                    videoType = 'vimeo';
+                                    thumbnailUrl = 'https://via.placeholder.com/300x200/ff69b4/ffffff?text=Vimeo+Video';
+                                }
+
+                                selectedVideos.push({
+                                    url: videoUrl,
+                                    thumbnail: thumbnailUrl,
+                                    type: videoType
+                                });
+                            }
+                        });
+                    } else {
+                        if (!selectedVideos.some(v => v.url === urls)) {
+                            let videoType = 'other';
+                            let thumbnailUrl = urls;
+
+                            if (urls.match(/\.(mp4|webm|ogg)$/i)) {
+                                videoType = 'mp4';
+                                thumbnailUrl = 'https://via.placeholder.com/300x200/6c757d/ffffff?text=MP4+Video';
+                            } else if (urls.includes('youtube.com') || urls.includes('youtu.be')) {
+                                videoType = 'youtube';
+                                let videoId = '';
+                                if (urls.includes('youtube.com/watch?v=')) {
+                                    videoId = urls.split('v=')[1]?.split('&')[0];
+                                } else if (urls.includes('youtu.be/')) {
+                                    videoId = urls.split('youtu.be/')[1]?.split('?')[0];
+                                }
+                                if (videoId) {
+                                    thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+                                }
+                            } else if (urls.includes('vimeo.com')) {
+                                videoType = 'vimeo';
+                                thumbnailUrl = 'https://via.placeholder.com/300x200/ff69b4/ffffff?text=Vimeo+Video';
+                            }
+
+                            selectedVideos.push({
+                                url: urls,
+                                thumbnail: thumbnailUrl,
+                                type: videoType
+                            });
+                        }
+                    }
+                    updateVideoGrid();
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('fbFileManagerModal')).hide();
+            }
+        });
+
+        // Cập nhật grid ảnh trong editor
+        function updateImageGrid() {
+            const grid = document.getElementById('fbImageGrid');
+            if (!grid) return;
+
+            grid.innerHTML = '';
+
+            selectedImages.forEach((imgUrl, index) => {
+                const imgDiv = document.createElement('div');
+                imgDiv.className = 'image-item position-relative';
+                imgDiv.style.width = '80px';
+                imgDiv.style.height = '80px';
+
+                imgDiv.innerHTML = `
+                    <img src="${imgUrl}" class="rounded border" style="width:100%; height:100%; object-fit:cover;">
+                    <button class="btn btn-sm btn-danger position-absolute top-0 end-0" style="padding:0 5px;" onclick="removeImage(${index})">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                `;
+
+                grid.appendChild(imgDiv);
+            });
+
+            // Thêm nút thêm ảnh
+            const addDiv = document.createElement('div');
+            addDiv.className = 'image-placeholder text-center p-3 bg-light rounded';
+            addDiv.style.width = '80px';
+            addDiv.style.height = '80px';
+            addDiv.style.cursor = 'pointer';
+            addDiv.onclick = () => openFBFileManager('image');
+            addDiv.innerHTML = `
+                <i class="bi bi-plus-circle text-muted"></i>
+                <small class="d-block">Thêm ảnh</small>
+            `;
+
+            grid.appendChild(addDiv);
+        }
+
+        // Xóa ảnh
+        function removeImage(index) {
+            selectedImages.splice(index, 1);
+            updateImageGrid();
+        }
+
+        // Cập nhật grid video trong editor
+        function updateVideoGrid() {
+            const grid = document.getElementById('fbVideoGrid');
+            if (!grid) return;
+
+            grid.innerHTML = '';
+
+            selectedVideos.forEach((video, index) => {
+                const videoDiv = document.createElement('div');
+                videoDiv.className = 'video-item position-relative';
+                videoDiv.style.width = '80px';
+                videoDiv.style.height = '80px';
+
+                videoDiv.innerHTML = `
+                    <img src="${video.thumbnail}" class="rounded border" style="width:100%; height:100%; object-fit:cover;">
+                    <span class="position-absolute bottom-0 start-0 bg-dark text-white p-1 rounded" style="font-size: 10px;">
+                        <i class="bi bi-camera-video"></i>
+                    </span>
+                    <button class="btn btn-sm btn-danger position-absolute top-0 end-0" style="padding:0 5px;" onclick="removeVideo(${index})">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                `;
+
+                grid.appendChild(videoDiv);
+            });
+
+            // Thêm nút thêm video
+            const addDiv = document.createElement('div');
+            addDiv.className = 'video-placeholder text-center p-3 bg-light rounded';
+            addDiv.style.width = '80px';
+            addDiv.style.height = '80px';
+            addDiv.style.cursor = 'pointer';
+            addDiv.onclick = () => openFBFileManager('video');
+            addDiv.innerHTML = `
+                <i class="bi bi-plus-circle text-muted"></i>
+                <small class="d-block">Thêm video</small>
+            `;
+
+            grid.appendChild(addDiv);
+        }
+
+        // Xóa video
+        function removeVideo(index) {
+            selectedVideos.splice(index, 1);
+            updateVideoGrid();
+        }
+
+        // Tạo nội dung tự động bằng AI (giả lập)
+        function generateAIContent() {
+            const type = $('#fbPostType').val();
+            const title = $('#fbPostTitle').val();
+
+            if (!title) {
+                alert('Vui lòng nhập tiêu đề trước khi tạo nội dung');
+                return;
+            }
+
+            // Giả lập loading
+            const generateBtn = event.target;
+            const originalText = generateBtn.innerHTML;
+            generateBtn.innerHTML = '<i class="bi bi-arrow-repeat me-1 spinner"></i>Đang tạo...';
+            generateBtn.disabled = true;
+
+            setTimeout(() => {
+                let content = '';
+
+                switch(type) {
+                    case 'activity':
+                        content = `<p>📸 <strong>${title}</strong></p>
+    <p>Hôm nay, đội ngũ VDCD Group đã có một ngày hoạt động thật ý nghĩa và sôi động. Chúng ta đã cùng nhau tham gia nhiều hoạt động thú vị, gắn kết tình đồng đội và tạo ra những kỷ niệm đẹp.</p>
+    <p>✨ <strong>Những điểm nhấn trong ngày:</strong></p>
+    <ul>
+    <li>Hoạt động team building sôi nổi</li>
+    <li>Chia sẻ kinh nghiệm làm việc</li>
+    <li>Giao lưu văn nghệ</li>
+    </ul>
+    <p>Cảm ơn tất cả mọi người đã tham gia và tạo nên thành công cho chương trình! ❤️</p>`;
+                        break;
+
+                    case 'event':
+                        content = `<p>🎉 <strong>${title}</strong></p>
+    <p>VDCD Group trân trọng thông báo về sự kiện sắp tới dành cho tất cả các thành viên và đối tác.</p>
+    <p>📅 <strong>Thời gian:</strong> {date} lúc {time}<br>
+    📍 <strong>Địa điểm:</strong> Tòa nhà VDCD, Hà Nội</p>
+    <p>✨ <strong>Nội dung chương trình:</strong></p>
+    <ul>
+    <li>Chia sẻ từ chuyên gia hàng đầu</li>
+    <li>Workshop thực hành</li>
+    <li>Networking với các doanh nghiệp</li>
+    </ul>
+    <p>Đăng ký ngay: {link}</p>`;
+                        break;
+
+                    case 'recruitment':
+                        content = `<p>💼 <strong>${title}</strong></p>
+    <p>VDCD Group đang tìm kiếm những ứng viên tài năng để gia nhập đội ngũ phát triển của chúng tôi.</p>
+    <p>✅ <strong>Yêu cầu:</strong></p>
+    <ul>
+    <li>Kinh nghiệm 3-5 năm trong lĩnh vực</li>
+    <li>Kỹ năng làm việc nhóm tốt</li>
+    <li>Tiếng Anh giao tiếp</li>
+    </ul>
+    <p>✅ <strong>Quyền lợi:</strong></p>
+    <ul>
+    <li>Mức lương hấp dẫn</li>
+    <li>Môi trường làm việc chuyên nghiệp</li>
+    <li>Cơ hội thăng tiến cao</li>
+    </ul>
+    <p>Ứng tuyển ngay: {link}</p>`;
+                        break;
+
+                    case 'tech':
+                        content = `<p>💡 <strong>${title}</strong></p>
+    <p>Xin chào mọi người! Hôm nay mình xin chia sẻ về một công nghệ mới mà đội ngũ VDCD đang áp dụng.</p>
+    <p>🔧 <strong>Công nghệ chính:</strong></p>
+    <ul>
+    <li>.NET Core 8.0</li>
+    <li>ReactJS với TypeScript</li>
+    <li>Microservices architecture</li>
+    </ul>
+    <p>📝 <strong>Bài học rút ra:</strong></p>
+    <ul>
+    <li>Tối ưu hiệu suất</li>
+    <li>Bảo mật tốt hơn</li>
+    <li>Dễ dàng mở rộng</li>
+    </ul>
+    <p>Các bạn có thắc mắc gì cứ comment bên dưới nhé! 👨‍💻</p>`;
+                        break;
+
+                    default:
+                        content = `<p>📝 <strong>${title}</strong></p>
+    <p>VDCD Group xin gửi đến mọi người thông tin mới nhất về hoạt động của công ty trong thời gian qua.</p>
+    <p>✅ <strong>Những điểm nổi bật:</strong></p>
+    <ul>
+    <li>Hoàn thành dự án quan trọng</li>
+    <li>Mở rộng đội ngũ nhân sự</li>
+    <li>Hợp tác với đối tác mới</li>
+    </ul>
+    <p>Cảm ơn mọi người đã luôn đồng hành cùng VDCD Group!</p>`;
+                }
+
+                // Thay thế các biến
+                const today = new Date();
+                const dateStr = today.toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' });
+                const timeStr = today.getHours().toString().padStart(2,'0') + ':' + today.getMinutes().toString().padStart(2,'0');
+
+                content = content
+                    .replace(/{date}/g, dateStr)
+                    .replace(/{time}/g, timeStr)
+                    .replace(/{link}/g, '#');
+
+                // Cập nhật nội dung CKEditor
+                if (editorInstance) {
+                    editorInstance.setData(content);
+                } else {
+                    $('#fbEditor').val(content);
+                }
+
+                // Khôi phục nút
+                generateBtn.innerHTML = originalText;
+                generateBtn.disabled = false;
+
+                alert('Đã tạo nội dung tự động thành công!');
+            }, 1500);
+        }
+
+        // Xem trước bài viết từ danh sách
+        function previewFBPost(id) {
+            // Giả lập load dữ liệu (sau này sẽ call API)
+            let postData = {};
+
+            if (id === 1) {
+                postData = {
+                    title: 'Workshop Chuyển đổi số trong doanh nghiệp',
+                    content: '<p>📅 <strong>VDCD Group</strong> tổ chức workshop "Chuyển đổi số trong doanh nghiệp" với sự tham gia của các chuyên gia hàng đầu.</p><p>Thời gian: 14:00, Thứ 6 ngày 25/01/2024<br>Địa điểm: Tòa nhà VDCD, Hà Nội</p>',
+                    type: 'event',
+                    typeText: 'Sự kiện',
+                    typeClass: 'bg-info',
+                    scheduleDate: '25/01/2024',
+                    scheduleTime: '14:30',
+                    images: [
+                        'https://via.placeholder.com/300x200/0d6efd/ffffff?text=Workshop+1',
+                        'https://via.placeholder.com/300x200/198754/ffffff?text=Workshop+2'
+                    ],
+                    videos: [
+                        {
+                            url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                            thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+                            type: 'youtube'
+                        }
+                    ]
+                };
+            } else if (id === 2) {
+                postData = {
+                    title: 'Tuyển dụng Senior Developer',
+                    content: '<p>💼 <strong>VDCD Group</strong> đang tìm kiếm Senior Developer tài năng.</p><p><strong>Yêu cầu:</strong> 5+ năm kinh nghiệm, thành thạo .NET Core, ReactJS</p>',
+                    type: 'recruitment',
+                    typeText: 'Tuyển dụng',
+                    typeClass: 'bg-primary',
+                    scheduleDate: '26/01/2024',
+                    scheduleTime: '09:00',
+                    images: [
+                        'https://via.placeholder.com/300x200/0d6efd/ffffff?text=Tuyen+Dung'
+                    ],
+                    videos: []
+                };
+            } else {
+                postData = {
+                    title: 'Bài viết mẫu',
+                    content: '<p>Nội dung bài viết mẫu...</p>',
+                    type: 'other',
+                    typeText: 'Nội dung khác',
+                    typeClass: 'bg-secondary',
+                    scheduleDate: '',
+                    scheduleTime: '',
+                    images: [],
+                    videos: []
+                };
+            }
+
+            showPreview(postData);
+        }
+
+        // Xem trước bài viết hiện tại trong editor
+        function previewCurrentPost() {
+            const title = $('#fbPostTitle').val() || '(Chưa có tiêu đề)';
+            const content = editorInstance ? editorInstance.getData() : '';
+            const type = $('#fbPostType').val();
+            const scheduleDate = $('#scheduleDate').val();
+            const scheduleTime = $('#scheduleTime').val();
+
+            // Chuyển đổi loại bài viết
+            let typeText = 'Nội dung khác';
+            let typeClass = 'bg-secondary';
+
+            switch(type) {
+                case 'activity':
+                    typeText = 'Hoạt động';
+                    typeClass = 'bg-info';
+                    break;
+                case 'event':
+                    typeText = 'Sự kiện';
+                    typeClass = 'bg-success';
+                    break;
+                case 'recruitment':
+                    typeText = 'Tuyển dụng';
+                    typeClass = 'bg-primary';
+                    break;
+                case 'tech':
+                    typeText = 'Công nghệ';
+                    typeClass = 'bg-dark';
+                    break;
+                case 'partner':
+                    typeText = 'Đối tác';
+                    typeClass = 'bg-warning text-dark';
+                    break;
+            }
+
+            // Format ngày giờ
+            let scheduleDisplay = '';
+            if (scheduleDate && scheduleTime) {
+                const dateObj = new Date(scheduleDate + 'T' + scheduleTime);
+                scheduleDisplay = dateObj.toLocaleDateString('vi-VN') + ' ' + scheduleTime;
+            }
+
+            const postData = {
+                title: title,
+                content: content || '<p><em>Chưa có nội dung</em></p>',
+                type: type,
+                typeText: typeText,
+                typeClass: typeClass,
+                scheduleDate: scheduleDate ? new Date(scheduleDate).toLocaleDateString('vi-VN') : '',
+                scheduleTime: scheduleTime || '',
+                scheduleDisplay: scheduleDisplay,
+                images: selectedImages,
+                videos: selectedVideos
+            };
+
+            showPreview(postData);
+        }
+
+        // Hiển thị modal preview
+        function showPreview(postData) {
+            // Cập nhật tiêu đề
+            $('#previewTitle').text(postData.title);
+
+            // Cập nhật nội dung (giữ nguyên HTML)
+            $('#previewContent').html(postData.content || '<em>Chưa có nội dung</em>');
+
+            // Cập nhật loại bài viết
+            const typeBadge = $('#previewType');
+            typeBadge.text(postData.typeText);
+            typeBadge.removeClass().addClass(`badge ${postData.typeClass}`);
+
+            // Cập nhật thời gian
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' +
+                           now.getMinutes().toString().padStart(2, '0');
+            $('#previewDateTime').text(`Hôm nay lúc ${timeStr}`);
+
+            // Cập nhật lịch đăng
+            if (postData.scheduleDate && postData.scheduleTime) {
+                $('#previewScheduleText').text(`${postData.scheduleDate} ${postData.scheduleTime}`);
+                $('#previewSchedule').show();
+            } else {
+                $('#previewSchedule').hide();
+            }
+
+            // Cập nhật ảnh
+            const imagesContainer = $('#previewImages');
+            imagesContainer.empty();
+
+            if (postData.images && postData.images.length > 0) {
+                if (postData.images.length === 1) {
+                    imagesContainer.html(`
+                        <div class="single-image">
+                            <img src="${postData.images[0]}" class="img-fluid rounded" style="max-height: 250px; width: 100%; object-fit: cover;">
+                        </div>
+                    `);
+                } else if (postData.images.length === 2) {
+                    imagesContainer.html(`
+                        <div class="row g-1">
+                            <div class="col-6"><img src="${postData.images[0]}" class="img-fluid rounded" style="height: 120px; width: 100%; object-fit: cover;"></div>
+                            <div class="col-6"><img src="${postData.images[1]}" class="img-fluid rounded" style="height: 120px; width: 100%; object-fit: cover;"></div>
+                        </div>
+                    `);
+                } else if (postData.images.length >= 3) {
+                    imagesContainer.html(`
+                        <div class="row g-1">
+                            <div class="col-4"><img src="${postData.images[0]}" class="img-fluid rounded" style="height: 80px; width: 100%; object-fit: cover;"></div>
+                            <div class="col-4"><img src="${postData.images[1]}" class="img-fluid rounded" style="height: 80px; width: 100%; object-fit: cover;"></div>
+                            <div class="col-4"><img src="${postData.images[2]}" class="img-fluid rounded" style="height: 80px; width: 100%; object-fit: cover;"></div>
+                        </div>
+                        ${postData.images.length > 3 ? '<div class="text-muted small mt-1">+' + (postData.images.length - 3) + ' ảnh khác</div>' : ''}
+                    `);
+                }
+            }
+
+            // Cập nhật video
+            const videosContainer = $('#previewVideos');
+            videosContainer.empty();
+
+            if (postData.videos && postData.videos.length > 0) {
+                if (postData.videos.length === 1) {
+                    const video = postData.videos[0];
+                    videosContainer.html(`
+                        <div class="single-video position-relative">
+                            <img src="${video.thumbnail}" class="img-fluid rounded" style="max-height: 250px; width: 100%; object-fit: cover;">
+                            <span class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-75 text-white rounded-circle p-3" style="font-size: 24px; cursor: pointer;" onclick="window.open('${video.url}', '_blank')">
+                                <i class="bi bi-play-fill"></i>
+                            </span>
+                            <div class="position-absolute bottom-0 start-0 bg-dark text-white p-1 rounded small m-1">
+                                <i class="bi bi-camera-video me-1"></i>Video
+                            </div>
+                        </div>
+                    `);
+                } else {
+                    let html = '<div class="row g-1">';
+                    postData.videos.forEach(video => {
+                        html += `
+                            <div class="col-6 position-relative">
+                                <img src="${video.thumbnail}" class="img-fluid rounded" style="height: 120px; width: 100%; object-fit: cover;">
+                                <span class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-75 text-white rounded-circle p-2" style="font-size: 16px; cursor: pointer;" onclick="window.open('${video.url}', '_blank')">
+                                    <i class="bi bi-play-fill"></i>
+                                </span>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    videosContainer.html(html);
+                }
+            }
+
+            // Hiển thị modal preview
+            new bootstrap.Modal(document.getElementById('fbPreviewModal')).show();
+        }
+
+        // Reset form
+        function resetFBForm() {
+            $('#fbPostId').val(0);
+            $('#fbPostTitle').val('');
+            $('#fbPostType').val('activity');
+            $('#fbPostStatus').val('draft');
+            $('#fbEditor').val('');
+            $('#scheduleDate').val('@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")');
+            $('#scheduleTime').val('09:00');
+
+            // Reset images và videos
+            selectedImages = [];
+            selectedVideos = [];
+            updateImageGrid();
+            updateVideoGrid();
+
+            // Reset CKEditor
+            if (editorInstance) {
+                editorInstance.setData('');
+            }
+        }
+
+        // Đặt khung giờ vàng
+        function setGoldenHour(time) {
+            $('#scheduleTime').val(time);
+        }
+
+        // Lưu nháp
+        function saveAsDraft() {
+            const title = $('#fbPostTitle').val();
+            if (!title) {
+                alert('Vui lòng nhập tiêu đề bài viết');
+                return;
+            }
+
+            // Lấy nội dung từ CKEditor
+            const content = editorInstance ? editorInstance.getData() : '';
+
+            console.log('Lưu nháp:', {
+                id: $('#fbPostId').val(),
+                title: title,
+                type: $('#fbPostType').val(),
+                status: 'draft',
+                content: content,
+                scheduleDate: $('#scheduleDate').val(),
+                scheduleTime: $('#scheduleTime').val(),
+                images: selectedImages,
+                videos: selectedVideos
+            });
+
+            alert('Đã lưu vào bản nháp');
+            bootstrap.Modal.getInstance(document.getElementById('fbEditorModal')).hide();
+        }
+
+        // Lưu và đăng bài
+        function saveFBPost() {
+            const title = $('#fbPostTitle').val();
+
+            if (!title) {
+                alert('Vui lòng nhập tiêu đề bài viết');
+                return;
+            }
+
+            // Lấy nội dung từ CKEditor
+            const content = editorInstance ? editorInstance.getData() : '';
+
+            if (!content) {
+                alert('Vui lòng nhập nội dung bài viết');
+                return;
+            }
+
+            console.log('Lưu bài viết:', {
+                id: $('#fbPostId').val(),
+                title: title,
+                type: $('#fbPostType').val(),
+                status: $('#fbPostStatus').val(),
+                content: content,
+                scheduleDate: $('#scheduleDate').val(),
+                scheduleTime: $('#scheduleTime').val(),
+                images: selectedImages,
+                videos: selectedVideos
+            });
+
+            alert('Đã lưu bài viết thành công!');
+            bootstrap.Modal.getInstance(document.getElementById('fbEditorModal')).hide();
+        }
+
+        function deletePost(id) {
+            if (confirm('Xóa bài viết này?')) {
+                alert('Đã xóa bài viết ID: ' + id);
+            }
+        }
+
+        let myEditor;
+        let fmType = 'editor';
+
+        $(document).ready(function () {
+            $('#blogTable').DataTable({
+                "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json" },
+                "order": [[2, "desc"]]
+            });
+
+            // Khởi tạo ClassicEditor với cấu hình Resize
+            ClassicEditor.create(document.querySelector('#editor'), {
+                toolbar: [
+                    'heading', '|',
+                    'bold', 'italic', 'link',
+                    'bulletedList', 'numberedList',
+                    'blockQuote', 'insertTable',
+                    'undo', 'redo'
+                ],
+                mediaEmbed: {
+                    previewsInData: true
+                },
+            }).then(editor => { myEditor = editor; }).catch(error => console.error(error));
+        });
+</script>
+
+<style>
+    .border-left-primary {
+        border-left: 4px solid #0d6efd;
+    }
+
+    .border-left-warning {
+        border-left: 4px solid #ffc107;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    /* Week scroll styles */
+    .week-scroll-container {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 10px;
+        margin-bottom: 5px;
+        scrollbar-width: thin;
+        scrollbar-color: #c0c0c0 #f0f0f0;
+    }
+
+    .week-scroll-wrapper {
+        display: flex;
+        flex-direction: row;
+        gap: 15px;
+        min-width: min-content;
+    }
+
+    .day-card {
+        flex: 0 0 280px;
+        min-width: 280px;
+        max-width: 280px;
+    }
+
+    .week-scroll-container::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .week-scroll-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .week-scroll-container::-webkit-scrollbar-thumb {
+        background: #c0c0c0;
+        border-radius: 10px;
+    }
+
+        .week-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #a0a0a0;
+        }
+
+    .day-card .card {
+        height: 100%;
+        min-height: 160px;
+    }
+
+        .day-card .card:hover {
+            transform: translateY(-2px);
+            transition: transform 0.2s;
+        }
+
+    /* CKEditor styles */
+    .ck-editor__editable {
+        min-height: 250px;
+        max-height: 400px;
+    }
+
+    .ck-content {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+        .ck-content h2 {
+            font-size: 1.5rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .ck-content h3 {
+            font-size: 1.25rem;
+            margin-top: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+    /* Style cho nhiều ảnh/video */
+    .image-item, .video-item {
+        position: relative;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+        .image-item:hover, .video-item:hover {
+            transform: scale(1.05);
+        }
+
+        .image-item .btn-danger, .video-item .btn-danger {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .image-item:hover .btn-danger, .video-item:hover .btn-danger {
+            opacity: 1;
+        }
+
+    .image-placeholder, .video-placeholder {
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .image-placeholder:hover, .video-placeholder:hover {
+            background-color: #e9ecef !important;
+        }
+
+    /* Facebook Preview Styles - Đơn giản */
+    .facebook-post {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background: white;
+    }
+
+    .post-header {
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .post-content {
+        font-size: 14px;
+    }
+
+        .post-content p {
+            margin-bottom: 8px;
+        }
+
+        .post-content ul, .post-content ol {
+            margin-bottom: 8px;
+            padding-left: 20px;
+        }
+
+    .post-footer span {
+        cursor: default;
+        padding: 4px 8px;
+        border-radius: 4px;
+    }
+
+        .post-footer span:hover {
+            background: #f0f2f5;
+        }
+
+    /* Spinner animation */
+    .spinner {
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Video play button */
+    .single-video .bi-play-fill {
+        font-size: 24px;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .day-card {
+            flex: 0 0 240px;
+            min-width: 240px;
+        }
+    }
+</style>

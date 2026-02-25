@@ -70,19 +70,20 @@
                             <i class="fa-regular fa-newspaper me-2"></i>Danh sách bài viết
                         </h5>
                         <div class="d-flex gap-2">
-                            <input type="text" class="form-control form-control-sm" style="width:250px" placeholder="Tìm kiếm bài viết...">
-                            <select class="form-select form-select-sm" style="width:150px">
-                                <option>Tất cả trạng thái</option>
-                                <option>Đã đăng</option>
-                                <option>Lưu nháp</option>
-                                <option>Đã lên lịch</option>
+                            <input type="text" class="form-control form-control-sm" style="width:250px" placeholder="Tìm kiếm bài viết..." id="searchInput">
+                            <select class="form-select form-select-sm" style="width:150px" id="statusFilter">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="published">Đã đăng</option>
+                                <option value="pending">Chờ duyệt</option>
+                                <option value="approved">Đã duyệt</option>
+                                <option value="scheduled">Đã lên lịch</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
+                        <table class="table table-hover mb-0" id="postsTable">
                             <thead class="table-light">
                                 <tr>
                                     <th>Tiêu đề</th>
@@ -92,12 +93,12 @@
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="tableBody">
                                 <tr>
                                     <td class="fw-bold">Workshop Chuyển đổi số trong doanh nghiệp</td>
                                     <td><span class="badge bg-info">Sự kiện</span></td>
                                     <td><span class="badge bg-light text-dark">25/01/2024 14:30</span></td>
-                                    <td><span class="badge bg-success">Đã lên lịch</span></td>
+                                    <td><span class="badge bg-success">Đã Duyệt</span></td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(1)">
                                             <i class="bi bi-pencil"></i>
@@ -114,7 +115,7 @@
                                     <td class="fw-bold">Tuyển dụng Senior Developer</td>
                                     <td><span class="badge bg-primary">Tuyển dụng</span></td>
                                     <td><span class="badge bg-light text-dark">26/01/2024 9:00</span></td>
-                                    <td><span class="badge bg-success">Đã lên lịch</span></td>
+                                    <td><span class="badge bg-success">Đã Duyệt</span></td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(2)">
                                             <i class="bi bi-pencil"></i>
@@ -131,7 +132,7 @@
                                     <td class="fw-bold">Giới thiệu đối tác mới</td>
                                     <td><span class="badge bg-success">Đối tác</span></td>
                                     <td><span class="badge bg-light text-dark">26/01/2024 15:45</span></td>
-                                    <td><span class="badge bg-warning">Lưu nháp</span></td>
+                                    <td><span class="badge bg-warning">Chờ duyệt</span></td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(3)">
                                             <i class="bi bi-pencil"></i>
@@ -148,7 +149,7 @@
                                     <td class="fw-bold">Hoạt động team building Q1</td>
                                     <td><span class="badge bg-secondary">Hoạt động</span></td>
                                     <td><span class="badge bg-light text-dark">27/01/2024 20:00</span></td>
-                                    <td><span class="badge bg-success">Đã lên lịch</span></td>
+                                    <td><span class="badge bg-success">Đã Duyệt</span></td>
                                     <td>
                                         <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(4)">
                                             <i class="bi bi-pencil"></i>
@@ -167,19 +168,138 @@
                                     <td><span class="badge bg-light text-dark">22/01/2024 10:15</span></td>
                                     <td><span class="badge bg-secondary">Đã đăng</span></td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(5)">
+                                        <button class="btn btn-sm btn-outline-primary invisible"
+                                                onclick="editFBPost(5)">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-outline-info" onclick="previewFBPost(5)">
+                                        <button class="btn btn-sm btn-outline-info"
+                                                onclick="previewFBPost(5)">
                                             <i class="bi bi-eye"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="deletePost(5)">
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                onclick="deletePost(5)">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </td>
                                 </tr>
+                                <!-- Thêm dữ liệu mẫu để thấy phân trang -->
+                                <tr>
+                                    <td class="fw-bold">Hội thảo AI trong doanh nghiệp</td>
+                                    <td><span class="badge bg-info">Sự kiện</span></td>
+                                    <td><span class="badge bg-light text-dark">28/01/2024 09:30</span></td>
+                                    <td><span class="badge bg-success">Đã duyệt</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Tuyển dụng Frontend Developer</td>
+                                    <td><span class="badge bg-primary">Tuyển dụng</span></td>
+                                    <td><span class="badge bg-light text-dark">29/01/2024 10:00</span></td>
+                                    <td><span class="badge bg-warning">Chờ duyệt</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Giới thiệu đối tác chiến lược</td>
+                                    <td><span class="badge bg-success">Đối tác</span></td>
+                                    <td><span class="badge bg-light text-dark">30/01/2024 14:00</span></td>
+                                    <td><span class="badge bg-success">Đã duyệt</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Workshop React Native cơ bản</td>
+                                    <td><span class="badge bg-info">Sự kiện</span></td>
+                                    <td><span class="badge bg-light text-dark">31/01/2024 08:30</span></td>
+                                    <td><span class="badge bg-success">Đã duyệt</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Tuyển dụng DevOps Engineer</td>
+                                    <td><span class="badge bg-primary">Tuyển dụng</span></td>
+                                    <td><span class="badge bg-light text-dark">01/02/2024 11:00</span></td>
+                                    <td><span class="badge bg-warning">Chờ duyệt</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Chia sẻ về Microservices</td>
+                                    <td><span class="badge bg-dark">Công nghệ</span></td>
+                                    <td><span class="badge bg-light text-dark">02/02/2024 15:30</span></td>
+                                    <td><span class="badge bg-secondary">Đã đăng</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary invisible"
+                                                onclick="editFBPost(5)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info"
+                                                onclick="previewFBPost(5)">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                onclick="deletePost(5)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Team building đầu năm</td>
+                                    <td><span class="badge bg-secondary">Hoạt động</span></td>
+                                    <td><span class="badge bg-light text-dark">03/02/2024 09:00</span></td>
+                                    <td><span class="badge bg-success">Đã duyệt</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Phân trang -->
+                    <div class="d-flex justify-content-between align-items-center p-3 border-top">
+                        <div class="text-muted small">
+                            Hiển thị <span id="pageStart">1</span> - <span id="pageEnd">5</span> trên tổng số <span id="totalRecords">12</span> bài viết
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination pagination-sm mb-0" id="pagination">
+                                <li class="page-item disabled" id="prevPage">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a>
+                                </li>
+                                <li class="page-item active"><a class="page-link" href="#" data-page="1">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#" data-page="2">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#" data-page="3">3</a></li>
+                                <li class="page-item" id="nextPage">
+                                    <a class="page-link" href="#">Sau</a>
+                                </li>
+                            </ul>
+                        </nav>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted small">Hiển thị:</span>
+                            <select class="form-select form-select-sm" style="width:70px" id="pageSize">
+                                <option value="5" selected>5</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -207,9 +327,10 @@
                                         </div>
                                         <div class="card-body p-2">
                                             <div class="p-2 bg-white rounded mb-2 border">
-                                                <span class="badge bg-primary">14:30</span>
+                                                <span class="badge bg-light text-secondary border">14:30</span>
                                                 <p class="mb-0 small mt-1 fw-bold">Workshop Chuyển đổi số</p>
-                                                <small class="text-muted">Sự kiện</small>
+                                                <small class="badge bg-info">Sự kiện</small><br />
+                                                <small class="text-muted">Người đăng: Minh Khiết</small>
                                             </div>
                                         </div>
                                     </div>
@@ -223,14 +344,17 @@
                                         </div>
                                         <div class="card-body p-2">
                                             <div class="p-2 bg-white rounded mb-2 border">
-                                                <span class="badge bg-primary">9:00</span>
+                                                <span class="badge bg-light text-secondary border">9:00</span>
                                                 <p class="mb-0 small mt-1 fw-bold">Tuyển dụng Developer</p>
-                                                <small class="text-muted">Tuyển dụng</small>
+                                                <small class="badge bg-primary">Tuyển dụng</small><br />
+                                                <small class="text-muted">Người đăng: Minh Khiết</small>
                                             </div>
                                             <div class="p-2 bg-white rounded border">
-                                                <span class="badge bg-primary">15:45</span>
+                                                <span class="badge bg-light text-secondary border">15:45</span>
                                                 <p class="mb-0 small mt-1 fw-bold">Giới thiệu đối tác</p>
-                                                <small class="text-muted">Đối tác</small>
+                                                <small class="badge bg-success">Đối tác</small><br />
+                                                <small class="text-muted">Người đăng: Thái Vũ</small>
+
                                             </div>
                                         </div>
                                     </div>
@@ -244,9 +368,11 @@
                                         </div>
                                         <div class="card-body p-2">
                                             <div class="p-2 bg-white rounded border">
-                                                <span class="badge bg-primary">10:15</span>
+                                                <span class="badge bg-light text-secondary border">10:15</span>
                                                 <p class="mb-0 small mt-1 fw-bold">Chia sẻ công nghệ</p>
-                                                <small class="text-muted">Công nghệ</small>
+                                                <span class="badge bg-info">Công nghệ</span><br />
+                                                <small class="text-muted">Người đăng: Đức Duy</small>
+
                                             </div>
                                         </div>
                                     </div>
@@ -362,22 +488,12 @@
                                         <option value="other">📝 Nội dung khác</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="fw-bold">Trạng thái</label>
-                                    <select class="form-select" id="fbPostStatus">
-                                        <option value="published">Đã đăng</option>
-                                        <option value="draft">Lưu nháp</option>
-                                        <option value="approved">Đã duyệt</option>
-                                        <option value="scheduled">Đã lên lịch</option>
-                                    </select>
-                                </div>
                             </div>
 
                             <!-- Nội dung bài viết - CKEditor -->
                             <div class="form-group mb-3">
                                 <label class="fw-bold">Nội dung bài viết</label>
                                 <textarea id="fbEditor" name="fbEditor"></textarea>
-                                <small class="text-muted">Có thể sử dụng các biến: {title}, {date}, {time}, {link}</small>
                             </div>
                         </div>
 
@@ -449,10 +565,10 @@
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                 <button type="button" class="btn btn-warning me-2" onclick="saveAsDraft()">
-                    <i class="fa-regular fa-floppy-disk me-1"></i>Lưu nháp
+                    <i class="fa-regular fa-floppy-disk me-1"></i>Chờ duyệt
                 </button>
                 <button type="button" class="btn btn-primary px-4" onclick="saveFBPost()">
-                    <i class="fa-regular fa-paper-plane me-1"></i>Đăng bài
+                    <i class="fa-regular fa-paper-plane me-1"></i>Duyệt
                 </button>
             </div>
         </div>
@@ -1185,7 +1301,7 @@
             $('#scheduleTime').val(time);
         }
 
-        // Lưu nháp
+        // Chờ duyệt
         function saveAsDraft() {
             const title = $('#fbPostTitle').val();
             if (!title) {
@@ -1196,7 +1312,7 @@
             // Lấy nội dung từ CKEditor
             const content = editorInstance ? editorInstance.getData() : '';
 
-            console.log('Lưu nháp:', {
+            console.log('Chờ duyệt:', {
                 id: $('#fbPostId').val(),
                 title: title,
                 type: $('#fbPostType').val(),
@@ -1274,6 +1390,140 @@
                 },
             }).then(editor => { myEditor = editor; }).catch(error => console.error(error));
         });
+</script>
+<script>
+    $(document).ready(function() {
+        // Khởi tạo phân trang
+        let currentPage = 1;
+        let pageSize = 5;
+        let totalRecords = 12; // Tổng số bản ghi thực tế
+        let filteredData = [];
+        let originalData = [];
+
+        // Thu thập dữ liệu từ bảng
+        function collectTableData() {
+            const rows = [];
+            $('#postsTable tbody tr').each(function() {
+                const row = $(this);
+                const statusCell = row.find('td:eq(3) span').text().trim();
+                const title = row.find('td:eq(0)').text().trim();
+                const type = row.find('td:eq(1) span').text().trim();
+                const schedule = row.find('td:eq(2) span').text().trim();
+
+                // Xác định giá trị status để lọc
+                let statusValue = 'published';
+                if (statusCell.includes('Chờ duyệt')) statusValue = 'pending';
+                else if (statusCell.includes('Đã Duyệt')) statusValue = 'approved';
+                else if (statusCell.includes('Đã lên lịch')) statusValue = 'scheduled';
+
+                rows.push({
+                    html: row[0].outerHTML,
+                    title: title,
+                    type: type,
+                    status: statusValue,
+                    statusText: statusCell,
+                    schedule: schedule
+                });
+            });
+            return rows;
+        }
+
+        originalData = collectTableData();
+        totalRecords = originalData.length;
+        $('#totalRecords').text(totalRecords);
+
+        // Cập nhật phân trang
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredData.length / pageSize) || 1;
+            const start = (currentPage - 1) * pageSize;
+            const end = Math.min(start + pageSize, filteredData.length);
+
+            // Cập nhật hiển thị số thứ tự
+            $('#pageStart').text(filteredData.length > 0 ? start + 1 : 0);
+            $('#pageEnd').text(end);
+            $('#totalRecords').text(filteredData.length);
+
+            // Hiển thị dữ liệu của trang hiện tại
+            const tbody = $('#postsTable tbody');
+            tbody.empty();
+
+            for (let i = start; i < end; i++) {
+                tbody.append(filteredData[i].html);
+            }
+
+            // Cập nhật phân trang
+            let paginationHtml = '';
+            paginationHtml += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}" id="prevPage">
+                <a class="page-link" href="#" data-page="${currentPage - 1}" tabindex="-1" ${currentPage === 1 ? 'aria-disabled="true"' : ''}>Trước</a>
+            </li>`;
+
+            // Hiển thị tối đa 5 số trang
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            startPage = Math.max(1, endPage - 4);
+
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>`;
+            }
+
+            paginationHtml += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}" id="nextPage">
+                <a class="page-link" href="#" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'aria-disabled="true"' : ''}>Sau</a>
+            </li>`;
+
+            $('#pagination').html(paginationHtml);
+        }
+
+        // Lọc dữ liệu
+        function filterData() {
+            const searchTerm = $('#searchInput').val().toLowerCase();
+            const statusFilter = $('#statusFilter').val();
+
+            filteredData = originalData.filter(item => {
+                const matchSearch = searchTerm === '' ||
+                    item.title.toLowerCase().includes(searchTerm) ||
+                    item.type.toLowerCase().includes(searchTerm);
+
+                const matchStatus = statusFilter === '' || item.status === statusFilter;
+
+                return matchSearch && matchStatus;
+            });
+
+            currentPage = 1;
+            updatePagination();
+        }
+
+        // Sự kiện tìm kiếm
+        $('#searchInput').on('keyup', function() {
+            filterData();
+        });
+
+        // Sự kiện lọc theo trạng thái
+        $('#statusFilter').on('change', function() {
+            filterData();
+        });
+
+        // Sự kiện thay đổi số lượng hiển thị
+        $('#pageSize').on('change', function() {
+            pageSize = parseInt($(this).val());
+            currentPage = 1;
+            filterData();
+        });
+
+        // Sự kiện click phân trang
+        $(document).on('click', '#pagination a', function(e) {
+            e.preventDefault();
+            const page = $(this).data('page');
+            if (page) {
+                currentPage = parseInt(page);
+                updatePagination();
+            }
+        });
+
+        // Khởi tạo dữ liệu
+        filterData();
+    });
 </script>
 
 <style>
@@ -1452,5 +1702,9 @@
             flex: 0 0 240px;
             min-width: 240px;
         }
+    }
+
+    .rounded{
+        cursor: pointer;
     }
 </style>

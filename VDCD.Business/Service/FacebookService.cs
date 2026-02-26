@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using VDCD.Business.Infrastructure;
 using VDCD.DataAccess;
+using VDCD.Entities.Cache;
 using VDCD.Entities.Custom;
 using static System.Net.WebRequestMethods;
 
@@ -32,6 +33,19 @@ namespace VDCD.Business.Service
             _seoRepo = seoRepo;
             _http = http;
             _fbtRepo = fbtRepo;
+        }
+        public void save(FacebookPost fbPost)
+        {
+            if(fbPost.Id == 0)
+            {
+                _fbRepo.Create(fbPost);
+            }
+            else
+            {
+                _fbRepo.Update(fbPost);
+            }
+            _context.SaveChanges();
+            ClearCache();
         }
         /*        public async Task<FacebookToken> GetActiveTokenAsync(string pageId)
                 {
@@ -107,11 +121,7 @@ namespace VDCD.Business.Service
             return json;
         }
 
-        public async Task<string> PostImagesAsync(
-    string pageId,
-    List<string> imageUrls,
-    string message,
-    string token)
+        public async Task<string> PostImagesAsync(string pageId,List<string> imageUrls,string message,string token)
         {
             var attachedMedia = new List<KeyValuePair<string, string>>();
 
@@ -169,11 +179,7 @@ namespace VDCD.Business.Service
             return postJson;
         }
 
-        public async Task<string> PostVideoAsync(
-            string pageId,
-            string videoUrl,
-            string message,
-            string token)
+        public async Task<string> PostVideoAsync(string pageId,string videoUrl,string message,string token)
         {
             var url = $"https://graph.facebook.com/{pageId}/videos";
 
@@ -187,6 +193,105 @@ namespace VDCD.Business.Service
             var res = await _http.PostAsync(url, content);
             return await res.Content.ReadAsStringAsync();
         }
+        public async Task<string> PostVideoWithImagesAsync(string pageId,string videoUrl,List<string> imageUrls,string message,string token)
+        {
+            // 1️⃣ Đăng video trước
+            var videoUrlEndpoint = $"https://graph.facebook.com/v24.0/{pageId}/videos";
 
+            var videoContent = new FormUrlEncodedContent(new[]
+            {
+        new KeyValuePair<string, string>("file_url", videoUrl),
+        new KeyValuePair<string, string>("description", message),
+        new KeyValuePair<string, string>("access_token", token)
+    });
+
+            var videoRes = await _http.PostAsync(videoUrlEndpoint, videoContent);
+            var videoJson = await videoRes.Content.ReadAsStringAsync();
+
+            if (!videoRes.IsSuccessStatusCode)
+                throw new Exception($"Post video error: {videoJson}");
+
+            dynamic videoObj = Newtonsoft.Json.JsonConvert.DeserializeObject(videoJson);
+            string postId = videoObj.id;
+
+            // 2️⃣ Upload ảnh unpublished
+            var attachedMedia = new List<KeyValuePair<string, string>>();
+            int index = 0;
+
+            foreach (var img in imageUrls)
+            {
+                var uploadUrl = $"https://graph.facebook.com/v24.0/{pageId}/photos";
+
+                var uploadContent = new FormUrlEncodedContent(new[]
+                {
+            new KeyValuePair<string, string>("url", img),
+            new KeyValuePair<string, string>("published", "false"),
+            new KeyValuePair<string, string>("access_token", token)
+        });
+
+                var uploadRes = await _http.PostAsync(uploadUrl, uploadContent);
+                var uploadJson = await uploadRes.Content.ReadAsStringAsync();
+
+                if (!uploadRes.IsSuccessStatusCode)
+                    throw new Exception($"Upload image error: {uploadJson}");
+
+                dynamic imgObj = Newtonsoft.Json.JsonConvert.DeserializeObject(uploadJson);
+                string photoId = imgObj.id;
+
+                attachedMedia.Add(
+                    new KeyValuePair<string, string>(
+                        $"attached_media[{index}]",
+                        $"{{\"media_fbid\":\"{photoId}\"}}"
+                    )
+                );
+
+                index++;
+            }
+
+            // 3️⃣ Comment album ảnh vào video post
+            var commentUrl = $"https://graph.facebook.com/v24.0/{postId}/comments";
+
+            var commentParams = new List<KeyValuePair<string, string>>
+    {
+        new KeyValuePair<string, string>("access_token", token)
+    };
+
+            commentParams.AddRange(attachedMedia);
+
+            var commentContent = new FormUrlEncodedContent(commentParams);
+
+            var commentRes = await _http.PostAsync(commentUrl, commentContent);
+            var commentJson = await commentRes.Content.ReadAsStringAsync();
+
+            if (!commentRes.IsSuccessStatusCode)
+                throw new Exception($"Comment images error: {commentJson}");
+
+            return videoJson;
+        }
+        public IReadOnlyList<FacebookPost> GetAll()
+        {
+            if (_cache.TryGet(CacheParam.FacebookPostAll, out List<FacebookPost> cached))
+                return cached;
+
+            var data = _fbRepo
+                .GetsReadOnly()
+                .ToList();
+
+            _cache.Set(
+                CacheParam.FacebookPostAll,
+                data,
+                TimeSpan.FromMinutes(CacheParam.FacebookPostAllTimeout)
+            );
+
+            return data;
+        }
+        public FacebookPost Get(int id)
+        {
+            return _fbRepo.Get(id); 
+        }
+        private void ClearCache()
+        {
+            _cache.Remove(CacheParam.FacebookPostAll);
+        }
     }
 }

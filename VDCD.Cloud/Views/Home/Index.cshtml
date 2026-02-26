@@ -913,7 +913,11 @@
 							}
 
 							<span class="text-muted small text-uppercase fw-bold">
-								@(blogCats.ContainsKey((int)item.CategoryId) ? blogCats[(int)item.CategoryId] : "Tin tức")
+								@(
+															blogCats.ContainsKey(item.CategoryId ?? 0)
+															? blogCats[item.CategoryId ?? 0]
+															: "Tin tức"
+															)
 							</span>
 
 							<h4 class="blog-title mb-3">

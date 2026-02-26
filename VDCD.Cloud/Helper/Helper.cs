@@ -2,9 +2,9 @@
 
 namespace VDCD.Helper
 {
-    public class Helper
+    public static class Helper
     {
-        public string CurrentUser(HttpContext context)
+        public static string CurrentUser(HttpContext context)
         {
             return context?.User?.Identity?.Name;
         }

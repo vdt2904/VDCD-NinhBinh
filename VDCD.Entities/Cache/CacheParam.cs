@@ -50,6 +50,9 @@ namespace VDCD.Entities.Cache
 
         public const string JobApplyAll = "$domain.cv.all";
         public const int JobApplyAllTimeout = 30;
+
+        public const string FacebookPostAll = "$domain.fb.all";
+        public const int FacebookPostAllTimeout = 30;
         /* ================== COMMON ================== */
 
         public const int OneMinute = 1;

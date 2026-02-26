@@ -47,64 +47,7 @@ namespace VDCD.Business.Service
             _context.SaveChanges();
             ClearCache();
         }
-        /*        public async Task<FacebookToken> GetActiveTokenAsync(string pageId)
-                {
-                    var token = _fbtRepo.Get(false,x=>x.PageId ==pageId);
-
-                    if (token == null)
-                        throw new Exception("Không tìm thấy token fanpage");
-
-                    // Nếu token sắp hết hạn trong 5 ngày
-                    if (token.ExpiresAt.HasValue &&
-                        token.ExpiresAt.Value < DateTime.UtcNow.AddDays(5))
-                    {
-                        await RefreshTokenAsync(token.Id);
-                        token = _fbtRepo.Get(token.Id);
-                    }
-
-                    return token;
-                }
-                public async Task RefreshTokenAsync(int tokenId)
-                {
-                    var token = _fbtRepo.Get(tokenId);
-                    if (token == null)
-                        return;
-
-                    // Đổi sang long-lived user token
-                    var url =
-                        $"https://graph.facebook.com/v19.0/oauth/access_token" +
-                        $"?grant_type=fb_exchange_token" +
-                        $"&client_id={_appId}" +
-                        $"&client_secret={_appSecret}" +
-                        $"&fb_exchange_token={token.UserAccessToken}";
-
-                    var res = await _http.GetAsync(url);
-                    var json = await res.Content.ReadAsStringAsync();
-
-                    dynamic data = JsonConvert.DeserializeObject(json);
-
-                    string newUserToken = data.access_token;
-                    int expiresIn = data.expires_in;
-
-                    token.UserAccessToken = newUserToken;
-                    token.ExpiresAt = DateTime.UtcNow.AddSeconds(expiresIn);
-                    token.LastRefreshDate = DateTime.UtcNow;
-
-                    // Lấy lại page token
-                    var pageUrl =
-                        $"https://graph.facebook.com/v19.0/{token.PageId}" +
-                        $"?fields=access_token" +
-                        $"&access_token={newUserToken}";
-
-                    var pageRes = await _http.GetAsync(pageUrl);
-                    var pageJson = await pageRes.Content.ReadAsStringAsync();
-
-                    dynamic pageData = JsonConvert.DeserializeObject(pageJson);
-                    token.PageAccessToken = pageData.access_token;
-
-                    _repo.Update(token);
-                }*/
-        public async Task<string> PostTextAsync(string pageId, string message, string pageToken)
+        public async Task<string> PostTextAsync(int id,string pageId, string message, string pageToken)
         {
             var encodedMessage = Uri.EscapeDataString(message);
 
@@ -117,11 +60,12 @@ namespace VDCD.Business.Service
             {
                 throw new Exception($"Facebook API Error: {json}");
             }
+            Posted(id);
 
-            return json;
+			return json;
         }
 
-        public async Task<string> PostImagesAsync(string pageId,List<string> imageUrls,string message,string token)
+        public async Task<string> PostImagesAsync(int id,string pageId,List<string> imageUrls,string message,string token)
         {
             var attachedMedia = new List<KeyValuePair<string, string>>();
 
@@ -175,11 +119,11 @@ namespace VDCD.Business.Service
 
             if (!postResponse.IsSuccessStatusCode)
                 throw new Exception($"Create post error: {postJson}");
-
-            return postJson;
+			Posted(id);
+			return postJson;
         }
 
-        public async Task<string> PostVideoAsync(string pageId,string videoUrl,string message,string token)
+        public async Task<string> PostVideoAsync(int id,string pageId,string videoUrl,string message,string token)
         {
             var url = $"https://graph.facebook.com/{pageId}/videos";
 
@@ -191,9 +135,10 @@ namespace VDCD.Business.Service
             });
 
             var res = await _http.PostAsync(url, content);
-            return await res.Content.ReadAsStringAsync();
+			Posted(id);
+			return await res.Content.ReadAsStringAsync();
         }
-        public async Task<string> PostVideoWithImagesAsync(string pageId,string videoUrl,List<string> imageUrls,string message,string token)
+        public async Task<string> PostVideoWithImagesAsync(int id,string pageId,string videoUrl,List<string> imageUrls,string message,string token)
         {
             // 1️⃣ Đăng video trước
             var videoUrlEndpoint = $"https://graph.facebook.com/v24.0/{pageId}/videos";
@@ -265,8 +210,8 @@ namespace VDCD.Business.Service
 
             if (!commentRes.IsSuccessStatusCode)
                 throw new Exception($"Comment images error: {commentJson}");
-
-            return videoJson;
+			Posted(id);
+			return videoJson;
         }
         public IReadOnlyList<FacebookPost> GetAll()
         {
@@ -288,6 +233,22 @@ namespace VDCD.Business.Service
         public FacebookPost Get(int id)
         {
             return _fbRepo.Get(id); 
+        }
+        public void Posted(int id)
+        {
+            var fb = _fbRepo.Get(id);
+            fb.PostedDate = DateTime.Now;
+            fb.Status = 3;
+            fb.IsPosted = true;
+            _fbRepo.Update(fb); 
+            _context.SaveChanges();
+            ClearCache();
+        }
+        public void Delete(int id)
+        {
+            _fbRepo.Delete(Get(id));
+            _context.SaveChanges();
+            ClearCache() ;
         }
         private void ClearCache()
         {

@@ -71,6 +71,14 @@ Co the bat trong file cau hinh:
 Luu y:
 - Chi nen bat o moi truong dev/staging.
 - Production nen de `false` va goi seed chu dong khi can.
+- Thu tu uu tien config: `appsettings.json` < `appsettings.{Environment}.json` < Environment Variables.
+- Vi du: neu app chay `Development` thi gia tri trong `appsettings.Development.json` se de len `appsettings.json`.
+- Neu ban bat `true` trong `appsettings.json` nhung `appsettings.Development.json` dang `false` thi startup seed van KHONG chay.
+
+### Kiem tra nhanh startup co doc dung flag khong
+Xem log luc app boot, he thong in ra:
+- `[RBAC] Environment=...`
+- `[RBAC] Seed demo completed...` hoac `[RBAC] Seed demo skipped because flag is false.`
 
 ## 8. Checklist test nhanh
 - Login bang tung tai khoan demo va kiem tra menu theo role.

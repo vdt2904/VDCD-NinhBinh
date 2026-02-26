@@ -119,12 +119,26 @@ using (var scope = app.Services.CreateScope())
         LIMIT 1;
         """);
 
-    var seedDemoRbacOnStartup = builder.Configuration.GetValue<bool>("Security:SeedDemoRbacOnStartup");
+    var seedDemoRbacOnStartup = app.Configuration.GetValue<bool>("Security:SeedDemoRbacOnStartup");
+    app.Logger.LogInformation(
+        "[RBAC] Environment={EnvironmentName}, Security:SeedDemoRbacOnStartup={SeedEnabled}",
+        app.Environment.EnvironmentName,
+        seedDemoRbacOnStartup);
+
     if (seedDemoRbacOnStartup)
     {
-        var resetDemoPasswords = builder.Configuration.GetValue<bool>("Security:ResetDemoRbacPasswordsOnStartup");
+        var resetDemoPasswords = app.Configuration.GetValue<bool>("Security:ResetDemoRbacPasswordsOnStartup");
         var demoSeeder = scope.ServiceProvider.GetRequiredService<RbacDemoSeedService>();
-        demoSeeder.SeedDemoUsers(resetDemoPasswords);
+        var seedResult = demoSeeder.SeedDemoUsers(resetDemoPasswords);
+        app.Logger.LogInformation(
+            "[RBAC] Seed demo completed. Created={CreatedCount}, Updated={UpdatedCount}, ResetPassword={ResetPassword}",
+            seedResult.CreatedUsers.Count,
+            seedResult.UpdatedUsers.Count,
+            resetDemoPasswords);
+    }
+    else
+    {
+        app.Logger.LogInformation("[RBAC] Seed demo skipped because flag is false.");
     }
 }
 

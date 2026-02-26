@@ -50,7 +50,7 @@ namespace VDCD.Areas.Admin.Controllers
 
                 if (!hasImages && !hasVideos)
                 {
-                    result = await _facebookService.PostTextAsync(
+                    result = await _facebookService.PostTextAsync((int)model.Id,
                         PageID,
                         model.Messgase,
                         Token
@@ -58,12 +58,14 @@ namespace VDCD.Areas.Admin.Controllers
                 }
                 else if (hasImages && hasVideos)
                 {
-                    result = await _facebookService.PostVideoWithImagesAsync(PageID,model.Videos,model.ImageUrls,model.Messgase,Token);
+                    result = await _facebookService.PostVideoWithImagesAsync((int)model.Id,PageID, model.Videos,model.ImageUrls,model.Messgase,Token);
                 }
                 else if (hasVideos)
                 {
                     result = await _facebookService.PostVideoAsync(
-                        PageID,
+						(int)model.Id,
+
+						PageID,
                         model.Videos,
                         model.Messgase,
                         Token
@@ -72,7 +74,9 @@ namespace VDCD.Areas.Admin.Controllers
                 else
                 {
                     result = await _facebookService.PostImagesAsync(
-                        PageID,
+						(int)model.Id,
+
+						PageID,
                         model.ImageUrls,
                         model.Messgase,
                         Token
@@ -154,25 +158,25 @@ namespace VDCD.Areas.Admin.Controllers
                 if (!hasImages && !hasVideos)
                 {
                     jobId = BackgroundJob.Schedule<FacebookService>(x =>
-                        x.PostTextAsync(PageID, fbp.Message, Token),
+                        x.PostTextAsync(id,PageID, fbp.Message, Token),
                         fbp.ScheduledDate.Value);
                 }
                 else if (hasImages && hasVideos)
                 {
                     jobId = BackgroundJob.Schedule<FacebookService>(x =>
-                        x.PostVideoWithImagesAsync( PageID, fbp.VideoUrl, imageList, fbp.Message, Token),
+                        x.PostVideoWithImagesAsync(id, PageID, fbp.VideoUrl, imageList, fbp.Message, Token),
                         fbp.ScheduledDate.Value);
                 }
                 else if (hasVideos)
                 {
                     jobId = BackgroundJob.Schedule<FacebookService>(x =>
-                        x.PostVideoAsync( PageID, fbp.VideoUrl, fbp.Message, Token),
+                        x.PostVideoAsync(id, PageID, fbp.VideoUrl, fbp.Message, Token),
                         fbp.ScheduledDate.Value);
                 }
                 else
                 {
                     jobId = BackgroundJob.Schedule<FacebookService>(x =>
-                        x.PostImagesAsync(PageID, imageList, fbp.Message, Token),
+                        x.PostImagesAsync(id,PageID, imageList, fbp.Message, Token),
                         fbp.ScheduledDate.Value);
                 }
                 fbp.FacebookPostId = jobId;
@@ -183,5 +187,85 @@ namespace VDCD.Areas.Admin.Controllers
                 return Ok(new { success = false, message = ex.Message });
             }
         }
-    }
+		public async Task<IActionResult> DeleteScheculePostFaceBooke(int id, int status)
+		{
+			try
+			{
+				var fbp = _facebookService.Get(id);
+				if (fbp == null)
+				{
+					return Ok(new { success = false, message = "Không tìm thấy bài viết" });
+				}
+
+				bool jobDeleted = false;
+
+				// Trường hợp có lịch
+				if (!string.IsNullOrEmpty(fbp.FacebookPostId))
+				{
+					jobDeleted = BackgroundJob.Delete(fbp.FacebookPostId);
+
+					// Clear jobId dù delete thành công hay không
+					fbp.FacebookPostId = null;
+				}
+
+				// Nếu status = 0 → xóa luôn record
+				if (status == 0)
+				{
+					_facebookService.Delete(id);
+				}
+				else
+				{
+					fbp.Status = status;
+					_facebookService.save(fbp);
+				}
+
+				return Ok(new
+				{
+					success = true,
+					jobDeleted = jobDeleted // để bạn biết job có xóa được không
+				});
+			}
+			catch (Exception ex)
+			{
+				return Ok(new { success = false, message = ex.Message });
+			}
+		}
+		public async Task<IActionResult> GetAll(int page = 1, int pagesize = 5)
+		{
+			try
+			{
+				if (page <= 0) page = 1;
+				if (pagesize <= 0) pagesize = 5;
+
+				var allData = _facebookService.GetAll();
+
+				var total = allData.Count;
+				var totalPages = (int)Math.Ceiling((double)total / pagesize);
+
+				var data = allData
+					.OrderByDescending(x => x.Id) // hoặc ScheduledDate tùy bạn
+					.Skip((page - 1) * pagesize)
+					.Take(pagesize)
+					.ToList();
+
+				return Ok(new
+				{
+					success = true,
+					page,
+					pagesize,
+					total,
+					totalPages,
+					data
+				});
+			}
+			catch (Exception ex)
+			{
+				return Ok(new
+				{
+					success = false,
+					message = ex.Message
+				});
+			}
+		}
+	}
 }

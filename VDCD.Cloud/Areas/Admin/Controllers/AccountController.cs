@@ -9,8 +9,11 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
     public class AccountController : Controller
     {
         private readonly CacheSevice _cacheSevice;
-        public AccountController(CacheSevice cacheSevice) { 
+        private readonly UserService _userService;
+
+        public AccountController(CacheSevice cacheSevice, UserService userService) { 
             _cacheSevice = cacheSevice;
+            _userService = userService;
         }
         [HttpGet]
 		public IActionResult Login(string returnUrl = "/admin")
@@ -29,8 +32,14 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
                 return View();
             }
 
+            var user = _userService.GetByUserName(username);
+
             var claims = new List<Claim>
             {
+                new Claim(
+                    ClaimTypes.NameIdentifier,
+                    user.UserId.ToString()
+                ),
                 new Claim(ClaimTypes.Name, username),
                 new Claim(ClaimTypes.Role, "Admin")
             };

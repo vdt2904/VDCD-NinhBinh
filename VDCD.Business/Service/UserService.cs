@@ -57,6 +57,14 @@ namespace VDCD.Business.Service
             }
             return user;
         }
+
+        public User? GetByUserName(string userName)
+        {
+            return _userRepo.Get(
+                true,
+                x => x.UserName == userName
+            );
+        }
         public bool SaveUser(User user, List<UserDepartmentJobtitlePosition> assignments)
         {
             // Bắt đầu Transaction

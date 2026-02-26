@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using VDCD.Business.Infrastructure.Filters;
 using VDCD.Business.Service;
 using VDCD.Entities.Custom;
+using VDCD.Entities.Enums;
 using VDCD.Helper;
 
 namespace VDCD.Areas.Admin.Controllers
@@ -25,6 +27,8 @@ namespace VDCD.Areas.Admin.Controllers
             ViewBag.Categories = _categoryService.GetAll();
             return View(lst);
         }
+
+        [ActivityLog(ActivityLogType.Post, "Thêm bài viết")]
         public IActionResult Save(Posts model)
         {
             try
@@ -51,6 +55,8 @@ namespace VDCD.Areas.Admin.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        [ActivityLog(ActivityLogType.Post, "Xóa bài viết")]
         public IActionResult Delete(int id)
         {
             try

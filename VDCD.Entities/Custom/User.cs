@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VDCD.Entities.Custom
 {
@@ -19,5 +15,8 @@ namespace VDCD.Entities.Custom
         public string? Profile {  get; set; }
         public bool? IsShow { get; set; } = false;
         public string? Avatar { get; set; }
+
+        [NotMapped]
+        public string? RoleName { get; set; }
     }
 }

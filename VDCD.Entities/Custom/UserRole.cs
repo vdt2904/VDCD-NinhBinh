@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using VDCD.Entities.Security;
 
-namespace VDCD.Entities.Custom
+namespace VDCD.Entities.Custom;
+
+public class UserRole
 {
-	public class UserRole
-	{
-		public int Id { get; set; }	
+    public int Id { get; set; }
 		public int RoleId { get; set; }
-		public int UserId { get; set; }
-	}
+    public int UserId { get; set; }
+    public string RoleName { get; set; } = AdminRoles.Viewer;
+    public DateTime CreateAt { get; set; } = DateTime.Now;
+    public DateTime? UpdateAt { get; set; }
 }

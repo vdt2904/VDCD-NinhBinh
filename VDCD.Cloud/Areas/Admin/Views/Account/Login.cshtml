@@ -1,84 +1,427 @@
-﻿<div class="login-container">
-    <form method="post" class="login-form">
-        <h2 class="text-center mb-4 fw-bold">HỆ THỐNG QUẢN TRỊ</h2>
-        <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
-
-        <div class="mb-3">
-            <label class="form-label">Tài khoản</label>
-            <input name="username" class="form-control custom-input" placeholder="Nhập tên đăng nhập..." required />
-        </div>
-
-        <div class="mb-4">
-            <label class="form-label">Mật khẩu</label>
-            <input name="password" type="password" class="form-control custom-input" placeholder="••••••••" required />
-        </div>
-
-        <button type="submit" class="btn btn-primary w-100 btn-login mb-3">ĐĂNG NHẬP</button>
-
-        @if (ViewBag.Error != null)
-        {
-            <div class="alert alert-danger py-2 text-center" style="font-size: 0.9rem;">
-                <i class="bi bi-exclamation-triangle me-2"></i> @ViewBag.Error
-            </div>
-        }
-    </form>
-</div>
-<style>
-    /* Nền giả định nếu bạn chưa có ảnh nền */
-    body {
-        background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('your-background-image.jpg');
-        background-size: cover;
-        background-position: center;
-        height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .login-form {
-        background: rgba(255, 255, 255, 0.15); /* Hiệu ứng trong suốt */
-        backdrop-filter: blur(15px); /* Làm mờ hậu cảnh */
-        padding: 40px;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-        width: 100%;
-        max-width: 400px;
-        color: white;
-    }
-
-    .custom-input {
-        background: rgba(255, 255, 255, 0.9);
-        border: none;
-        border-radius: 10px;
-        padding: 12px 15px;
-        transition: all 0.3s;
-    }
-
-        .custom-input:focus {
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
+﻿@{
+    Layout = null;
+    var returnUrl = ViewBag.ReturnUrl as string ?? "/admin";
+    var hasError = ViewBag.Error != null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dang nhap quan tri</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-1: #f1f5f9;
+            --bg-2: #fff4e6;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --muted: #5b6475;
+            --line: #d6deea;
+            --brand: #d9480f;
+            --brand-hover: #b8400e;
+            --focus: #0f766e;
+            --danger-bg: #fee2e2;
+            --danger-line: #fca5a5;
+            --danger-text: #991b1b;
         }
 
-    .btn-login {
-        background: #e63946; /* Màu đỏ thương hiệu của bạn */
-        border: none;
-        border-radius: 10px;
-        padding: 12px;
-        font-weight: bold;
-        letter-spacing: 1px;
-        transition: 0.3s;
-    }
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Be Vietnam Pro", sans-serif;
+            color: var(--text);
+            background: radial-gradient(circle at 8% 10%, #dbeafe 0, rgba(219,234,254,0) 35%),
+                        radial-gradient(circle at 86% 78%, #ffe7cc 0, rgba(255,231,204,0) 36%),
+                        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .auth-shell {
+            width: min(1080px, 100%);
+            min-height: min(700px, calc(100vh - 48px));
+            background: rgba(255,255,255,0.78);
+            border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 28px 56px rgba(15, 23, 42, 0.14);
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            backdrop-filter: blur(8px);
+            animation: fade-up 0.6s ease both;
+        }
+
+        .brand-panel {
+            position: relative;
+            background: linear-gradient(150deg, #0f172a 0%, #1e293b 45%, #334155 100%);
+            color: #f8fafc;
+            padding: 42px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .brand-panel::before,
+        .brand-panel::after {
+            content: "";
+            position: absolute;
+            border-radius: 999px;
+            pointer-events: none;
+        }
+
+        .brand-panel::before {
+            width: 240px;
+            height: 240px;
+            top: -92px;
+            right: -70px;
+            background: rgba(217, 72, 15, 0.22);
+        }
+
+        .brand-panel::after {
+            width: 190px;
+            height: 190px;
+            bottom: -64px;
+            left: -52px;
+            background: rgba(15, 118, 110, 0.2);
+        }
+
+        .brand-mark {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: "Barlow Condensed", sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .mark-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fb923c;
+            box-shadow: 0 0 0 6px rgba(251,146,60,0.2);
+        }
+
+        .brand-title {
+            font-family: "Barlow Condensed", sans-serif;
+            font-size: clamp(2rem, 3.7vw, 3rem);
+            line-height: 1;
+            margin: 26px 0 14px;
+            max-width: 440px;
+        }
+
+        .brand-text {
+            margin: 0;
+            color: #cbd5e1;
+            line-height: 1.7;
+            max-width: 440px;
+        }
+
+        .brand-points {
+            margin-top: 26px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .point {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 12px;
+            padding: 10px 12px;
+            color: #e2e8f0;
+            font-size: 0.92rem;
+            transform: translateY(16px);
+            opacity: 0;
+            animation: stagger-in 0.6s ease forwards;
+        }
+
+        .point:nth-child(2) {
+            animation-delay: 0.08s;
+        }
+
+        .point:nth-child(3) {
+            animation-delay: 0.16s;
+        }
+
+        .point:nth-child(4) {
+            animation-delay: 0.24s;
+        }
+
+        .brand-foot {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 0.84rem;
+        }
+
+        .form-panel {
+            background: var(--surface);
+            padding: clamp(24px, 4.2vw, 48px);
+            display: flex;
+            align-items: center;
+        }
+
+        .form-wrap {
+            width: min(420px, 100%);
+            margin-inline: auto;
+        }
+
+        .form-title {
+            margin: 0;
+            font-family: "Barlow Condensed", sans-serif;
+            font-size: clamp(2rem, 4vw, 2.6rem);
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+        .form-subtitle {
+            margin: 8px 0 24px;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .field {
+            margin-bottom: 14px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.86rem;
+            color: #334155;
+            margin-bottom: 7px;
+            font-weight: 600;
+        }
+
+        .input-shell {
+            position: relative;
+        }
+
+        .auth-input {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            height: 46px;
+            padding: 0 14px;
+            font: inherit;
+            color: var(--text);
+            background: #fff;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+
+        .auth-input:focus {
+            outline: 0;
+            border-color: var(--focus);
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.13);
+        }
+
+        .toggle-pass {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: 8px;
+        }
+
+        .toggle-pass:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .btn-login {
+            width: 100%;
+            height: 48px;
+            border: 0;
+            border-radius: 12px;
+            background: linear-gradient(90deg, var(--brand), #f76707);
+            color: #fff;
+            font: inherit;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .6px;
+            cursor: pointer;
+            transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+            margin-top: 10px;
+        }
 
         .btn-login:hover {
-            background: #c1121f;
-            transform: scale(1.02);
+            background: linear-gradient(90deg, var(--brand-hover), #e8590c);
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(217, 72, 15, 0.28);
         }
 
-    .form-label {
-        font-weight: 500;
-        font-size: 0.9rem;
-        margin-bottom: 8px;
-    }
-</style>
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .error-box {
+            margin: 14px 0 0;
+            border-radius: 10px;
+            border: 1px solid var(--danger-line);
+            background: var(--danger-bg);
+            color: var(--danger-text);
+            padding: 10px 12px;
+            font-size: 0.86rem;
+        }
+
+        .help-text {
+            margin: 16px 0 0;
+            color: #64748b;
+            font-size: 0.83rem;
+            text-align: center;
+        }
+
+        @media (max-width: 980px) {
+            .auth-shell {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+
+            .brand-panel {
+                padding: 26px 24px;
+            }
+
+            .brand-title {
+                margin-top: 16px;
+                margin-bottom: 10px;
+            }
+
+            .brand-foot {
+                margin-top: 20px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 12px;
+            }
+
+            .auth-shell {
+                border-radius: 16px;
+            }
+
+            .brand-panel {
+                display: none;
+            }
+
+            .form-panel {
+                padding: 24px 16px;
+            }
+
+            .auth-input {
+                height: 44px;
+            }
+        }
+
+        @keyframes fade-up {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes stagger-in {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="auth-shell">
+        <section class="brand-panel">
+            <div>
+                <div class="brand-mark">
+                    <span class="mark-dot"></span>
+                    VDCD Admin
+                </div>
+                <h1 class="brand-title">He thong quan tri noi bo</h1>
+                <p class="brand-text">
+                    Quan ly noi dung, nhan su va cau hinh tren mot giao dien tap trung, de theo doi va van hanh nhanh hon.
+                </p>
+                <div class="brand-points">
+                    <div class="point">Phan quyen theo vai tro va module</div>
+                    <div class="point">Bao mat dang nhap bang mat khau ma hoa</div>
+                    <div class="point">Thong bao va xu ly cong viec tap trung</div>
+                    <div class="point">Toi uu cho desktop va mobile</div>
+                </div>
+            </div>
+            <p class="brand-foot">VDCD Cloud Console</p>
+        </section>
+
+        <section class="form-panel">
+            <div class="form-wrap">
+                <h2 class="form-title">Dang nhap</h2>
+                <p class="form-subtitle">Nhap thong tin tai khoan quan tri de tiep tuc.</p>
+
+                <form method="post" autocomplete="off">
+                    <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                    <div class="field">
+                        <label for="username">Tai khoan</label>
+                        <div class="input-shell">
+                            <input id="username" name="username" class="auth-input" placeholder="vi du: demo.superadmin" required />
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="password">Mat khau</label>
+                        <div class="input-shell">
+                            <input id="password" name="password" type="password" class="auth-input" placeholder="Nhap mat khau" required />
+                            <button class="toggle-pass" type="button" id="togglePass">HIEN</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-login">Dang nhap he thong</button>
+
+                    @if (hasError)
+                    {
+                        <div class="error-box">@ViewBag.Error</div>
+                    }
+                </form>
+
+                <p class="help-text">Neu ban khong co quyen truy cap, vui long lien he quan tri he thong.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const pass = document.getElementById('password');
+            const toggle = document.getElementById('togglePass');
+            if (!pass || !toggle) return;
+
+            toggle.addEventListener('click', function () {
+                const showing = pass.type === 'text';
+                pass.type = showing ? 'password' : 'text';
+                toggle.textContent = showing ? 'HIEN' : 'AN';
+                pass.focus();
+            });
+        })();
+    </script>
+</body>
+</html>

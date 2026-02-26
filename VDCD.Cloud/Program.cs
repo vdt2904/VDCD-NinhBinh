@@ -11,6 +11,7 @@ using VDCD.Business.Service;
 using VDCD.DataAccess;
 using VDCD.Hubs;
 using Microsoft.AspNetCore.Http.Features;
+using VDCD.Entities.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -83,6 +84,50 @@ builder.Services.AddAuthorization();
 builder.Services.AddHttpClient();
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.ExecuteSqlRaw("""
+        CREATE TABLE IF NOT EXISTS user_roles (
+            id INT NOT NULL AUTO_INCREMENT,
+            user_id INT NOT NULL,
+            role_name VARCHAR(50) NOT NULL DEFAULT 'Viewer',
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY uq_user_roles_user_id (user_id),
+            CONSTRAINT fk_user_roles_users_user_id FOREIGN KEY (user_id) REFERENCES users (UserId) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        """);
+
+    db.Database.ExecuteSqlRaw($"""
+        INSERT INTO user_roles (user_id, role_name, created_at)
+        SELECT u.UserId, '{AdminRoles.SuperAdmin}', NOW()
+        FROM users u
+        LEFT JOIN user_roles ur ON ur.user_id = u.UserId
+        WHERE LOWER(u.UserName) = 'admin' AND ur.id IS NULL;
+        """);
+
+    db.Database.ExecuteSqlRaw($"""
+        INSERT INTO user_roles (user_id, role_name, created_at)
+        SELECT u.UserId, '{AdminRoles.SuperAdmin}', NOW()
+        FROM users u
+        LEFT JOIN user_roles ur ON ur.user_id = u.UserId
+        WHERE ur.id IS NULL
+          AND NOT EXISTS (SELECT 1 FROM user_roles WHERE role_name = '{AdminRoles.SuperAdmin}')
+        ORDER BY u.UserId
+        LIMIT 1;
+        """);
+
+    var seedDemoRbacOnStartup = builder.Configuration.GetValue<bool>("Security:SeedDemoRbacOnStartup");
+    if (seedDemoRbacOnStartup)
+    {
+        var resetDemoPasswords = builder.Configuration.GetValue<bool>("Security:ResetDemoRbacPasswordsOnStartup");
+        var demoSeeder = scope.ServiceProvider.GetRequiredService<RbacDemoSeedService>();
+        demoSeeder.SeedDemoUsers(resetDemoPasswords);
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -95,6 +140,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseAuthentication();
 app.UseHangfireDashboard("/admin/hangfire", new DashboardOptions
 {
     // Cho phép tất cả mọi người truy cập (Chỉ dùng khi test, sau này nên thêm Filter)

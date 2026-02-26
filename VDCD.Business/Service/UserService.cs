@@ -128,5 +128,15 @@ namespace VDCD.Business.Service
             _context.SaveChanges();
             ClearCache();
         }
+
+        public User GetByUsername(string username)
+        {
+            var user = _userRepo.Get(true, x => x.UserName == username);
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(username));
+            }
+            return user;
+        }
     }
 }

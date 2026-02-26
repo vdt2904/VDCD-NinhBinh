@@ -24,6 +24,11 @@ namespace VDCD.Entities.Custom
 
         public string? FacebookPostId { get; set; }
         public string? ErrorMessage { get; set; }
+        public int? UserCreateId { get; set; }
+        public int? UserReviewerId { get; set; }
+        public int? Status { get; set; }
+        public string? TypePost { get; set; }
+        public string? Title { get; set; }
     }
 
 }

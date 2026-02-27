@@ -3,8 +3,6 @@ using System;
 using Hangfire.MySql;
 using System.Transactions;
 using Microsoft.EntityFrameworkCore;
-
-
 using VDCD.Business;
 using VDCD.Business.Infrastructure;
 using VDCD.Business.Service;

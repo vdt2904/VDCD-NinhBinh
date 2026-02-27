@@ -65,7 +65,7 @@ namespace VDCD.Business.Service
 			return json;
         }
 
-        public async Task<string> PostImagesAsync(int id,string pageId,List<string> imageUrls,string message,string token)
+        public async Task<string> PostImagesAsync(int id,string pageId,IEnumerable<string> imageUrls,string message,string token)
         {
             var attachedMedia = new List<KeyValuePair<string, string>>();
 
@@ -138,7 +138,7 @@ namespace VDCD.Business.Service
 			Posted(id);
 			return await res.Content.ReadAsStringAsync();
         }
-        public async Task<string> PostVideoWithImagesAsync(int id,string pageId,string videoUrl,List<string> imageUrls,string message,string token)
+        public async Task<string> PostVideoWithImagesAsync(int id,string pageId,string videoUrl, IEnumerable<string> imageUrls, string message,string token)
         {
             // 1️⃣ Đăng video trước
             var videoUrlEndpoint = $"https://graph.facebook.com/v24.0/{pageId}/videos";

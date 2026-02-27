@@ -26,6 +26,7 @@ namespace VDCD.Areas.Admin.Controllers
             ViewBag.Categories = _categoryService.GetAll();
             return View(lst);
         }
+
         public IActionResult Save(Posts model)
         {
             try
@@ -52,6 +53,7 @@ namespace VDCD.Areas.Admin.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
         public IActionResult Delete(int id)
         {
             try

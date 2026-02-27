@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using VDCD.Business.Service;
 using VDCD.Entities.Security;
-
+using VDCD.Extensions;
 namespace VDCD.Cloud.Areas.Admin.Controllers
 {
     [Area("Admin")]
@@ -145,6 +145,17 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
         public IActionResult Denied()
         {
             return View();
+        }
+        public IActionResult GetCurrentUser()
+        {
+            var user = new
+            {
+                UserId = User.GetUserId(),
+                UserName = User.GetUsername(),
+                UserRole = User.GetRole(),
+                FullName = User.GetFullName(),
+			};
+            return Ok(user);
         }
     }
 }

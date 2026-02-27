@@ -12,7 +12,7 @@ using VDCD.Helper;
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AdminRoles.ContentAccess)]
+/*    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AdminRoles.ContentAccess)]*/
     public class FacebookController : Controller
     {
         private readonly DepartmentService _departmentService;
@@ -146,9 +146,9 @@ namespace VDCD.Areas.Admin.Controllers
             {
                 var fbp = _facebookService.Get(id);
                 fbp.Status = 2;
-                var username = Helper.Helper.CurrentUser(HttpContext);
+/*                var username = Helper.Helper.CurrentUser(HttpContext);
                 var user = _userService.GetByUsername(username);
-                fbp.UserReviewerId = user.UserId;
+                fbp.UserReviewerId = user.UserId;*/
 
                 bool hasImages = fbp.ImageUrls != null && fbp.ImageUrls.Any();
                 bool hasVideos = fbp.VideoUrl != null && fbp.VideoUrl.Any();

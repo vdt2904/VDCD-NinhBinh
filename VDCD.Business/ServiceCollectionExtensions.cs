@@ -14,7 +14,12 @@ namespace VDCD.Business
                 .Where(t =>
                     t.IsClass &&
                     !t.IsAbstract &&
-                    t.Namespace == "VDCD.Business.Service");
+                    t.IsPublic &&
+                    !t.IsNested &&
+                    t.Namespace == "VDCD.Business.Service" &&
+                    (t.Name.EndsWith("Service", StringComparison.Ordinal) ||
+                     t.Name.EndsWith("Sevice", StringComparison.Ordinal) ||
+                     t.Name.EndsWith("Bll", StringComparison.Ordinal)));
 
             foreach (var type in serviceTypes)
             {

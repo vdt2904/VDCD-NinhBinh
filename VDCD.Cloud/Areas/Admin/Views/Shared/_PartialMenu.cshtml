@@ -1,4 +1,12 @@
-﻿<div id="layoutSidenav_nav">
+﻿@using System.Security.Claims
+@using VDCD.Entities.Security
+@{
+    var isSuperAdmin = User?.IsInRole(AdminRoles.SuperAdmin) == true;
+    var canContent = isSuperAdmin || (User?.IsInRole(AdminRoles.ContentManager) == true);
+    var canHr = isSuperAdmin || (User?.IsInRole(AdminRoles.HrManager) == true);
+    var roleName = User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Role)?.Value ?? "Unknown";
+}
+<div id="layoutSidenav_nav">
     <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
         <div class="sb-sidenav-menu">
             <div class="nav">
@@ -6,75 +14,97 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                     Dashboard
                 </a>
-                <a class="nav-link" href="~/admin/setting/generalsetting">
-                    <div class="sb-nav-link-icon"><i class="fa-solid fa-bars"></i></div>
-                    Thiết kế hệ thống
-                </a>
-                <a class="nav-link position-relative" href="~/admin/ContactMessage/index">
-                    <div class="sb-nav-link-icon">
-                        <i class="fa-solid fa-bars"></i>
+
+                @if (isSuperAdmin)
+                {
+                    <a class="nav-link" href="~/admin/setting/generalsetting">
+                        <div class="sb-nav-link-icon"><i class="fa-solid fa-bars"></i></div>
+                        Thiết kế hệ thống
+                    </a>
+                }
+
+                @if (canContent)
+                {
+                    <a class="nav-link position-relative" href="~/admin/ContactMessage/index">
+                        <div class="sb-nav-link-icon">
+                            <i class="fa-solid fa-bars"></i>
+                        </div>
+                        Quản lý tin nhắn
+                    </a>
+
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
+                        <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
+                        Quản lý dự án
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" href="~/Admin/category/index">Danh sách danh mục</a>
+                            <a class="nav-link" href="~/admin/projects/index">Danh sách dự án</a>
+                            <a class="nav-link" href="~/admin/customer/index">Danh sách khách hàng </a>
+                        </nav>
                     </div>
-                    Quản lý tin nhắn
-                </a>
+                }
 
-                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
-                    <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                    Quản lý dự án
-                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                </a>
-                <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
-                    <nav class="sb-sidenav-menu-nested nav">
-                        <a class="nav-link" href="~/Admin/category/index">Danh sách danh mục</a>
-                        <a class="nav-link" href="~/admin/projects/index">Danh sách dự án</a>
-                        <a class="nav-link" href="~/admin/customer/index">Danh sách khách hàng </a>
-                    </nav>
-                </div>
-                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
-                    <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
-                    Cơ cấu tổ chức
-                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                </a>
-                <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
-                    <nav class="sb-sidenav-menu-nested nav">
-                        <a class="nav-link" href="~/admin/center/index">Trung Tâm</a>
-                        <a class="nav-link" href="~/admin/User/index">Cán bộ</a>
-                        <a class="nav-link" href="~/admin/department/index">Phòng ban</a>
-                        <a class="nav-link" href="~/admin/position/index">Chức vụ</a>
-                        <a class="nav-link" href="~/admin/jobtitle/index">Chức danh</a>
-                    </nav>
-                </div>
-                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseCareers" aria-expanded="false" aria-controls="collapseCareers">
-                    <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
-                    Careers
-                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                </a>
-                <div class="collapse" id="collapseCareers" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
-                    <nav class="sb-sidenav-menu-nested nav">
-                        <a class="nav-link" href="~/admin/JobPosition/index">Job description</a>
-                        <a class="nav-link" href="~/admin/JobApplication/index">CURRICULUM VITAE </a>
-                    </nav>
-                </div>
-                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePosts" aria-expanded="false" aria-controls="collapsePosts">
-                    <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                    Quản lý bài viết
-                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                </a>
-                <div class="collapse" id="collapsePosts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
-                    <nav class="sb-sidenav-menu-nested nav">
-                        <a class="nav-link" href="~/Admin/posts/index">Danh sách bài viết</a>
-                        <a class="nav-link" href="~/Admin/Tags/index">Danh sách HasTags</a>
-                    </nav>
-                </div>
-                <a class="nav-link" href="~/admin/seo/index">
-                    <div class="sb-nav-link-icon"><i class="fa-solid fa-bars"></i></div>
-                    Quản lý SEO
-                </a>
+                @if (canHr)
+                {
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
+                        <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                        Cơ cấu tổ chức
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" href="~/admin/center/index">Trung Tâm</a>
+                            @if (isSuperAdmin)
+                            {
+                                <a class="nav-link" href="~/admin/User/index">Cán bộ</a>
+                            }
+                            <a class="nav-link" href="~/admin/department/index">Phòng ban</a>
+                            <a class="nav-link" href="~/admin/position/index">Chức vụ</a>
+                            <a class="nav-link" href="~/admin/jobtitle/index">Chức danh</a>
+                        </nav>
+                    </div>
 
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseCareers" aria-expanded="false" aria-controls="collapseCareers">
+                        <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                        Careers
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapseCareers" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" href="~/admin/JobPosition/index">Job description</a>
+                            <a class="nav-link" href="~/admin/JobApplication/index">CURRICULUM VITAE </a>
+                        </nav>
+                    </div>
+                }
+
+                @if (canContent)
+                {
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePosts" aria-expanded="false" aria-controls="collapsePosts">
+                        <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
+                        Quản lý bài viết
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapsePosts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" href="~/Admin/posts/index">Danh sách bài viết</a>
+                        </nav>
+                    </div>
+                    <a class="nav-link" href="~/admin/seo/index">
+                        <div class="sb-nav-link-icon"><i class="fa-solid fa-bars"></i></div>
+                        Quản lý SEO
+                    </a>
+                    <a class="nav-link" href="~/admin/autopost/index">
+                        <div class="sb-nav-link-icon"><i class="fa-solid fa-robot"></i></div>
+                        Tự động đăng bài page
+                    </a>
+                }
             </div>
         </div>
         <div class="sb-sidenav-footer">
             <div class="small">Logged in as:</div>
-            VDCD
+            @($"{User?.Identity?.Name} ({roleName})")
         </div>
     </nav>
 </div>
@@ -86,22 +116,18 @@
             const href = link.getAttribute('href');
             if (!href || href === '#') return;
 
-            // Chuẩn hóa href
             const linkPath = href
                 .replace('~', '')
                 .split('?')[0]
                 .toLowerCase();
 
             if (currentPath.startsWith(linkPath)) {
-                // Active link
                 link.classList.add('active');
 
-                // Nếu là menu con → mở menu cha
                 const collapse = link.closest('.collapse');
                 if (collapse) {
                     collapse.classList.add('show');
 
-                    // active menu cha
                     const parentLink = document.querySelector(
                         `[data-bs-target="#${collapse.id}"]`
                     );
@@ -114,4 +140,3 @@
         });
     });
 </script>
-

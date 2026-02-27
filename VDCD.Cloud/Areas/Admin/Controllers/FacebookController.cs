@@ -1,15 +1,19 @@
 ﻿using Hangfire;
+
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Common;
 using System.Text.Json;
 using VDCD.Business.Service;
 using VDCD.Entities.Custom;
 using VDCD.Entities.DTO;
+using VDCD.Entities.Security;
 using VDCD.Helper;
 
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
+/*    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AdminRoles.ContentAccess)]*/
     public class FacebookController : Controller
     {
         private readonly DepartmentService _departmentService;

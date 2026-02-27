@@ -2,13 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using VDCD.Business.Service;
 using VDCD.Entities.Custom;
+using VDCD.Entities.Security;
 using VDCD.Helper;
 
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-	[Authorize(AuthenticationSchemes = "AdminAuth")]
-	public class PostsController : Controller
+    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AdminRoles.ContentAccess)]
+    public class PostsController : Controller
     {
         private readonly PostsService _postsService;
         private readonly CategoryService _categoryService;
@@ -25,6 +26,7 @@ namespace VDCD.Areas.Admin.Controllers
             ViewBag.Categories = _categoryService.GetAll();
             return View(lst);
         }
+
         public IActionResult Save(Posts model)
         {
             try
@@ -51,6 +53,7 @@ namespace VDCD.Areas.Admin.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
         public IActionResult Delete(int id)
         {
             try

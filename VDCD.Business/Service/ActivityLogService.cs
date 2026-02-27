@@ -18,10 +18,14 @@ namespace VDCD.Business.Service
     public class ActivityLogService : IActivityLogService
     {
         private readonly AppDbContext _db;
+        private readonly IRepository<ActivityLog> _repo;
 
-        public ActivityLogService(AppDbContext db)
+        public ActivityLogService(
+            AppDbContext db,
+            IRepository<ActivityLog> repo)
         {
             _db = db;
+            _repo = repo;
         }
 
         public async Task LogAsync(
@@ -66,7 +70,7 @@ namespace VDCD.Business.Service
                 CreatedOnDate = DateTime.UtcNow
             };
 
-            _db.ActivityLogs.Add(log);
+            _repo.Create(log);
             await _db.SaveChangesAsync();
         }
 
@@ -75,7 +79,7 @@ namespace VDCD.Business.Service
             int page,
             int pageSize)
         {
-            var query = _db.ActivityLogs.AsQueryable();
+            var query = _repo.Raw.AsNoTracking();
 
             var total = await query.CountAsync();
 
@@ -99,7 +103,7 @@ namespace VDCD.Business.Service
         public async Task<PagedResult<ActivityLogDto>> SearchAsync(
             ActivityLogSearchRequest req)
         {
-            var query = _db.ActivityLogs.AsQueryable();
+            var query = _repo.Raw.AsNoTracking();
 
             // 🔎 Filter Content
             if (!string.IsNullOrWhiteSpace(req.Content))

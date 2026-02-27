@@ -210,5 +210,15 @@ namespace VDCD.Business.Service
                 user.RoleName = roleMap.TryGetValue(user.UserId, out var role) ? role : _userRoleService.NormalizeRole(null);
             }
         }
+
+        public User GetByUsername(string username)
+        {
+            var user = _userRepo.Get(true, x => x.UserName == username);
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(username));
+            }
+            return user;
+        }
     }
 }

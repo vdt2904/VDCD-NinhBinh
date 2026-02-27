@@ -26,10 +26,9 @@
             </div>
         </div>
     </div>
-
-    <!-- Báo cáo đơn giản: Bài đã đăng và chờ đăng -->
+    <!-- Báo cáo đơn giản: Bài đã đăng, đã duyệt và chờ duyệt -->
     <div class="row mt-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card border-left-primary">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -44,7 +43,22 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
+            <div class="card border-left-success">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-2">Bài đã duyệt</h6>
+                            <h2 class="mb-0" id="approvedCount">0</h2>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="fa-solid fa-check-double fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
             <div class="card border-left-warning">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -70,13 +84,29 @@
                         <h5 class="mb-0">
                             <i class="fa-regular fa-newspaper me-2"></i>Danh sách bài viết
                         </h5>
-                        <div class="d-flex gap-2">
-                            <input type="text" class="form-control form-control-sm" style="width:250px" placeholder="Tìm kiếm bài viết..." id="searchInput">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <input type="text" class="form-control form-control-sm" style="width:200px" placeholder="Tìm kiếm tiêu đề..." id="searchInput">
+
                             <select class="form-select form-select-sm" style="width:150px" id="statusFilter">
                                 <option value="">Tất cả trạng thái</option>
                                 <option value="1">Chờ duyệt</option>
                                 <option value="2">Đã duyệt</option>
                                 <option value="3">Đã đăng</option>
+                            </select>
+
+                            <select class="form-select form-select-sm" style="width:150px" id="typeFilter">
+                                <option value="">Tất cả loại</option>
+                                <option value="activity">📸 Hoạt động</option>
+                                <option value="event">🎉 Sự kiện</option>
+                                <option value="recruitment">💼 Tuyển dụng</option>
+                                <option value="tech">💡 Công nghệ</option>
+                                <option value="partner">🤝 Đối tác</option>
+                                <option value="other">📝 Khác</option>
+                            </select>
+
+                            <select class="form-select form-select-sm" style="width:180px" id="userFilter">
+                                <option value="">Tất cả người đăng</option>
+                                <!-- Options sẽ được load động từ users array -->
                             </select>
                         </div>
                     </div>
@@ -496,6 +526,7 @@
                                 allPosts = allResponse.data;
                                 updateStats(allPosts);
                                 updateWeeklySchedule(allPosts); // Cập nhật lịch tuần với tất cả dữ liệu
+                                loadUserFilter();
                             }
                         }
                     });
@@ -512,10 +543,14 @@
         // Đếm bài đã đăng (status = 3)
         const totalPosted = posts.filter(p => p.status === 3).length;
 
+        // Đếm bài đã duyệt (status = 2)
+        const approvedCount = posts.filter(p => p.status === 2).length;
+
         // Đếm bài chờ duyệt (status = 1)
         const pendingCount = posts.filter(p => p.status === 1).length;
 
         $('#totalPosted').text(totalPosted);
+        $('#approvedCount').text(approvedCount);
         $('#pendingCount').text(pendingCount);
     }
     // Refresh thống kê tổng
@@ -1422,7 +1457,6 @@
     }
 
     // Xem trước bài viết hiện tại
-    // Xem trước bài viết hiện tại
     function previewCurrentPost() {
         const title = $('#fbPostTitle').val() || '(Chưa có tiêu đề)';
 
@@ -1722,15 +1756,38 @@
         filterPosts();
     });
 
+    $('#typeFilter').on('change', function () {
+        filterPosts();
+    });
+
+    $('#userFilter').on('change', function () {
+        filterPosts();
+    });
+
     $('#pageSize').on('change', function () {
         pageSize = parseInt($(this).val());
         currentPage = 1;
         filterPosts();
     });
 
+    // Debounce function để tránh gọi API quá nhiều khi gõ
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
     function filterPosts() {
-        const searchTerm = $('#searchInput').val().toLowerCase();
+        const searchTerm = $('#searchInput').val().toLowerCase().trim();
         const statusFilter = $('#statusFilter').val();
+        const typeFilter = $('#typeFilter').val();
+        const userFilter = $('#userFilter').val();
 
         $.ajax({
             url: '/Admin/Facebook/GetAll',
@@ -1743,20 +1800,42 @@
                 if (response.success) {
                     let filteredData = response.data;
 
+                    // Lọc theo tiêu đề
                     if (searchTerm) {
                         filteredData = filteredData.filter(p =>
-                            (p.title && p.title.toLowerCase().includes(searchTerm)) ||
-                            (p.typePost && p.typePost.toLowerCase().includes(searchTerm))
+                            p.title && p.title.toLowerCase().includes(searchTerm)
                         );
                     }
 
+                    // Lọc theo trạng thái
                     if (statusFilter) {
                         filteredData = filteredData.filter(p => p.status == statusFilter);
                     }
 
-                    renderPosts(filteredData);
-                    updatePagination(currentPage, Math.ceil(filteredData.length / pageSize), filteredData.length);
+                    // Lọc theo loại bài viết
+                    if (typeFilter) {
+                        filteredData = filteredData.filter(p => p.typePost === typeFilter);
+                    }
+
+                    // Lọc theo người đăng
+                    if (userFilter) {
+                        filteredData = filteredData.filter(p => p.userCreateId == userFilter);
+                    }
+
+                    // Cập nhật phân trang cho dữ liệu đã lọc
+                    const totalFiltered = filteredData.length;
+                    const totalPagesFiltered = Math.ceil(totalFiltered / pageSize);
+
+                    // Lấy dữ liệu cho trang hiện tại
+                    const startIndex = (currentPage - 1) * pageSize;
+                    const paginatedData = filteredData.slice(startIndex, startIndex + pageSize);
+
+                    renderPosts(paginatedData);
+                    updatePagination(currentPage, totalPagesFiltered, totalFiltered);
                 }
+            },
+            error: function () {
+                toastr.error('Không thể tải danh sách bài viết');
             }
         });
     }
@@ -1766,6 +1845,32 @@
         getCurrentUser();
         loadPosts(1);
     });
+
+    // Load danh sách người dùng vào combobox lọc
+    function loadUserFilter() {
+        const $userFilter = $('#userFilter');
+        $userFilter.empty().append('<option value="">Tất cả người đăng</option>');
+
+        if (users && users.length > 0) {
+            // Tạo một Set để lọc các user duy nhất (tránh trùng lặp)
+            const uniqueUsers = [];
+            const userIds = new Set();
+
+            users.forEach(user => {
+                if (!userIds.has(user.userId)) {
+                    userIds.add(user.userId);
+                    uniqueUsers.push(user);
+                }
+            });
+
+            // Sắp xếp theo tên
+            uniqueUsers.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
+
+            uniqueUsers.forEach(user => {
+                $userFilter.append(`<option value="${user.userId}">${user.fullName || 'Không tên'}</option>`);
+            });
+        }
+    }
 </script>
 
 <style>

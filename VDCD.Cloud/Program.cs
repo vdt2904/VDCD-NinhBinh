@@ -33,6 +33,8 @@ builder.Services.AddScoped<SettingService>();
 builder.Services.AddScoped<FileManagerService>();
 builder.Services.AddScoped<CacheSevice>();
 builder.Services.AddScoped<CategoryService>();*/
+builder.Services.AddHttpClient<IAiService, AiService>();
+builder.Services.AddScoped<IAiPostService, AiPostService>();
 
 builder.Services.AddControllersWithViews();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

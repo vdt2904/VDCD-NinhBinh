@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace VDCD.Entities.DTO
 {
-    public class FacebookPostRequest
+    public class FacebookPostRequest    
     {
         public int? Id { get; set; }
         public string? Messgase { get; set; }

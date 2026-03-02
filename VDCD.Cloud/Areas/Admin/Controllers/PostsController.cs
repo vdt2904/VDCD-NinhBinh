@@ -1,16 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using VDCD.Business.Infrastructure.Filters;
 using VDCD.Business.Service;
 using VDCD.Entities.Custom;
-using VDCD.Entities.Enums;
+using VDCD.Entities.Security;
 using VDCD.Helper;
 
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-	[Authorize(AuthenticationSchemes = "AdminAuth")]
-	public class PostsController : Controller
+    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AdminRoles.ContentAccess)]
+    public class PostsController : Controller
     {
         private readonly PostsService _postsService;
         private readonly CategoryService _categoryService;
@@ -28,7 +27,6 @@ namespace VDCD.Areas.Admin.Controllers
             return View(lst);
         }
 
-        [ActivityLog(ActivityLogType.Post, "Thêm bài viết")]
         public IActionResult Save(Posts model)
         {
             try
@@ -56,7 +54,6 @@ namespace VDCD.Areas.Admin.Controllers
             }
         }
 
-        [ActivityLog(ActivityLogType.Post, "Xóa bài viết")]
         public IActionResult Delete(int id)
         {
             try

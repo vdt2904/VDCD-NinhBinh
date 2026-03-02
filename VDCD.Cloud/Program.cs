@@ -32,6 +32,13 @@ builder.Services.AddScoped<SettingService>();
 builder.Services.AddScoped<FileManagerService>();
 builder.Services.AddScoped<CacheSevice>();
 builder.Services.AddScoped<CategoryService>();*/
+builder.Services.AddHttpClient<IAiService, AiService>(client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(5); // tăng lên 5 phút
+});
+
+builder.Services.AddScoped<IAiPostService, AiPostService>();
+builder.Services.AddScoped<IActivityLogService, ActivityLogService>();
 
 builder.Services.AddControllersWithViews();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

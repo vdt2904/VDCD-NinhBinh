@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using VDCD.Business.Infrastructure;
 using VDCD.Business.Service;
 using VDCD.Entities.DTO;
+using VDCD.Entities.Enums;
+using VDCD.Helper;
 
 namespace VDCD.Areas.Admin.Controllers
 {
-    [Route("api/activity-logs")]
-    [ApiController]
-    public class ActivityLogsController : ControllerBase
+    [Area("Admin")]
+    [Authorize(AuthenticationSchemes = "AdminAuth")]
+    public class ActivityLogsController : Controller
     {
         private readonly ActivityLogService _service;
 
@@ -16,27 +19,45 @@ namespace VDCD.Areas.Admin.Controllers
             _service = service;
         }
 
-        // ⭐ GET /api/activity-logs?page=1&pageSize=20
-        [HttpGet]
-        public async Task<IActionResult> Get(
-            int page = 1,
-            int pageSize = 20)
+        // GET: /Admin/ 
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 10)
         {
-            var result =
-                await _service.GetPagedAsync(page, pageSize);
-
-            return Ok(result);
+            var result = await _service.GetPagedAsync(page, pageSize);
+            ViewBag.TypeList = GetActivityLogTypes();
+            return View(result);
         }
 
-        // ⭐ POST /api/activity-logs/search
-        [HttpPost("search")]
+         // GET: /Admin/ActivityLogs/Search
+        [HttpGet]
         public async Task<IActionResult> Search(
-            ActivityLogSearchRequest req)
+            string? Content,
+            string? TypeText,
+            int page = 1,
+            int pageSize = 10)
         {
-            var result =
-                await _service.SearchAsync(req);
+            var req = new ActivityLogSearchRequest
+            {
+                Content = Content,
+                TypeText = TypeText,
+                Page = page,
+                PageSize = pageSize
+            };
 
-            return Ok(result);
+            var result = await _service.SearchAsync(req);
+
+            ViewBag.Content = Content;
+            ViewBag.TypeText = TypeText;
+            ViewBag.TypeList = GetActivityLogTypes();
+
+            return View("Index", result);
+        }
+
+        private List<string> GetActivityLogTypes()
+        {
+            return Enum.GetValues(typeof(ActivityLogType))
+                .Cast<ActivityLogType>()
+                .Select(x => x.GetDescription())
+                .ToList();
         }
     }
 }

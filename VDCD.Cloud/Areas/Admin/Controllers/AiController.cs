@@ -15,12 +15,13 @@ namespace VDCD.Areas.Admin.Controllers
     public class AiController : ControllerBase
     {
         private readonly IAiPostService _service;
-
+        private readonly IAiService _aiService;
         public AiController(
-            IAiPostService service)
+            IAiPostService service, IAiService aiService)
         {
             _service = service;
-        }
+            _aiService = aiService;
+		}
 
         [HttpPost("generate")]
         public async Task<IActionResult> Generate([FromBody] GeneratePostRequest req)
@@ -44,28 +45,47 @@ namespace VDCD.Areas.Admin.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        [HttpPost("AiGenrerate")]
+        public async Task<IActionResult> AiGenrerate([FromBody] string topic)
+        {
+            if (string.IsNullOrWhiteSpace(topic))
+                return BadRequest("Topic is required");
+            try
+            {
+                var content = await _aiService.GeneratePost(topic);
+                return Ok(new ApiResponse<string>
+                {
+                    Success = true,
+                    Message = "Generated successfully",
+                    Data = content
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+		}
+		//[HttpPost("post-now/{id}")]
+		//public async Task<IActionResult> PostNow(int id)
+		//{
+		//    var post = await _db.FbPosts.FindAsync(id);
 
-        //[HttpPost("post-now/{id}")]
-        //public async Task<IActionResult> PostNow(int id)
-        //{
-        //    var post = await _db.FbPosts.FindAsync(id);
+		//    if (post == null)
+		//        return NotFound();
 
-        //    if (post == null)
-        //        return NotFound();
+		//    var fbId = await _fb.Post(post.Content);
 
-        //    var fbId = await _fb.Post(post.Content);
+		//    post.Status = "Posted";
+		//    post.FacebookPostId = fbId;
 
-        //    post.Status = "Posted";
-        //    post.FacebookPostId = fbId;
+		//    await _db.SaveChangesAsync();
 
-        //    await _db.SaveChangesAsync();
-
-        //    return Ok(new ApiResponse<object>
-        //    {
-        //        Success = true,
-        //        Message = "Post published successfully",
-        //        Data = new { FacebookPostId = fbId }
-        //    });
-        //}
-    }
+		//    return Ok(new ApiResponse<object>
+		//    {
+		//        Success = true,
+		//        Message = "Post published successfully",
+		//        Data = new { FacebookPostId = fbId }
+		//    });
+		//}
+	}
 }

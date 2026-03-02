@@ -87,6 +87,7 @@ builder.Services.AddAuthentication("AdminAuth")
 
 builder.Services.AddAuthorization();
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

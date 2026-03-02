@@ -100,12 +100,13 @@
                         Tự động đăng bài page
                     </a>
                 }
-                
-                <a class="nav-link" href="/Admin/ActivityLogs/index">
-                    <div class="sb-nav-link-icon"><i class="fa-solid fa-bars"></i></div>
-                    Quản lý Log
-                </a>
-
+                @if (isSuperAdmin)
+                {
+                    <a class="nav-link" href="/Admin/ActivityLogs/index">
+                        <div class="sb-nav-link-icon"><i class="fa-solid fa-bars"></i></div>
+                        Quản lý Log
+                    </a>
+                }
             </div>
         </div>
         <div class="sb-sidenav-footer">

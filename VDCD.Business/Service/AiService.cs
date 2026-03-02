@@ -18,8 +18,8 @@ namespace VDCD.Business.Service
         private readonly HttpClient _client;
         private readonly string _apiKey;
         private readonly IConfiguration _config;
-
-        public AiService(HttpClient client, IConfiguration config)
+		private readonly SettingService _settingService;
+		public AiService(HttpClient client, IConfiguration config)
         {
             _client = client;
             _apiKey = config["OpenAI:ApiKey"];
@@ -55,14 +55,16 @@ namespace VDCD.Business.Service
 
         private async Task<string> AskOpenAI(string prompt)
         {
-            var body = new
+			var KeyGpt = _settingService.Get("setting.openai.api_key");
+            var ModelGPT = _settingService.Get("setting.openai.model") ?? "gpt-4.1-mini";
+			var body = new
             {
-                model = "gpt-4.1-mini",
+                model = ModelGPT,
                 input = prompt
             };
-
-            _client.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", _apiKey);
+			
+			_client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", KeyGpt);
 
             var res = await _client.PostAsJsonAsync(
                 "https://api.openai.com/v1/responses", body);

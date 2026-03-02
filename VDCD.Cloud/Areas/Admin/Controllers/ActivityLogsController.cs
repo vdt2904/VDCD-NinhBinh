@@ -12,9 +12,9 @@ namespace VDCD.Areas.Admin.Controllers
     [Authorize(AuthenticationSchemes = "AdminAuth")]
     public class ActivityLogsController : Controller
     {
-        private readonly ActivityLogService _service;
+        private readonly IActivityLogService _service;
 
-        public ActivityLogsController(ActivityLogService service)
+        public ActivityLogsController(IActivityLogService service)
         {
             _service = service;
         }

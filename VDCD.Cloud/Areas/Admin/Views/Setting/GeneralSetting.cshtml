@@ -879,6 +879,66 @@
 				</div>
 			</div>
 		</div>
+		<div class="card settings-card shadow-sm border-0 mb-4">
+			<div class="card-header settings-header p-0">
+				<a class="d-flex justify-content-between align-items-center px-4 py-3 text-decoration-none"
+				   data-bs-toggle="collapse"
+				   data-bs-target="#chatGptSetting">
+					<span><i class="bi bi-robot me-2 text-success"></i>Cấu hình ChatGPT (OpenAI API)</span>
+					<i class="bi bi-chevron-down toggle-icon"></i>
+				</a>
+			</div>
+
+			<div id="chatGptSetting" class="collapse show">
+				<div class="card-body p-4">
+					<div class="row">
+						@{
+							var chatSettings = (ViewBag.ChatGptSettings as IEnumerable<dynamic>) ?? new List<dynamic>();
+
+							// Cấu trúc 3 key chính theo database của bạn
+							var gptFields = new[] {
+												new { Key = "setting.openai.api_key", Label = "OpenAI API Key (sk-...)", IsPass = true },
+												new { Key = "setting.openai.model", Label = "Model sử dụng (Ví dụ: gpt-4o, gpt-4-turbo)", IsPass = false },
+												new { Key = "setting.openai.organization_id", Label = "Organization ID (Nếu có)", IsPass = false }
+												};
+
+							foreach (var field in gptFields)
+							{
+								var item = chatSettings.FirstOrDefault(x => x.SettingKey == field.Key);
+								<div class="col-md-6 mb-3">
+									<label class="form-label small fw-bold">@field.Label</label>
+									@if (field.IsPass)
+									{
+										<div class="input-group">
+											<input type="password" class="form-control border-success"
+												   name="@field.Key"
+												   value="@(item?.Value ?? "")"
+												   id="pass-openai-key">
+											<button class="btn btn-outline-success" type="button" onclick="toggleGptKey()">
+												<i class="bi bi-eye" id="gpt-eye-icon"></i>
+											</button>
+										</div>
+									}
+									else
+									{
+										<input type="text" class="form-control"
+											   name="@field.Key"
+											   value="@(item?.Value ?? "")"
+											   placeholder="@field.Label">
+									}
+								</div>
+							}
+						}
+					</div>
+					<div class="alert alert-success d-flex align-items-center mb-0 mt-2" role="alert">
+						<i class="bi bi-shield-check me-2"></i>
+						<div class="small">
+							Thông tin API Key được dùng để tích hợp các tính năng AI. Hãy bảo mật tuyệt đối mã này.
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 		<div class="mt-4 mb-5 d-flex justify-content-end">
 			<button type="button" class="btn btn-custom btn-save" onclick="saveSetting()">
 				<i class="bi bi-check2-circle"></i> Lưu thay đổi

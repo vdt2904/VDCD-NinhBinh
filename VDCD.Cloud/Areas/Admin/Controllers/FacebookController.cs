@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Common;
@@ -146,9 +147,9 @@ namespace VDCD.Areas.Admin.Controllers
             {
                 var fbp = _facebookService.Get(id);
                 fbp.Status = 2;
-/*                var username = Helper.Helper.CurrentUser(HttpContext);
+                var username = Helper.Helper.CurrentUser(HttpContext);
                 var user = _userService.GetByUsername(username);
-                fbp.UserReviewerId = user.UserId;*/
+                fbp.UserReviewerId = user.UserId;
 
                 bool hasImages = fbp.ImageUrls != null && fbp.ImageUrls.Any();
                 bool hasVideos = fbp.VideoUrl != null && fbp.VideoUrl.Any();

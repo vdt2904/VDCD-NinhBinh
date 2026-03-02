@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VDCD.Business.Helper;
 using VDCD.Business.Infrastructure;
 using VDCD.DataAccess;
 using VDCD.Entities.Cache;
@@ -50,7 +51,7 @@ namespace VDCD.Business.Service
         public async Task<string> PostTextAsync(int id,string pageId, string message, string pageToken)
         {
             var encodedMessage = Uri.EscapeDataString(message);
-
+            message = SocialContentFormatter.ToFacebookText(message);
             var url = $"https://graph.facebook.com/v24.0/{pageId}/feed?message={message}&access_token={pageToken}";
 
             var response = await _http.PostAsync(url, null);
@@ -67,8 +68,8 @@ namespace VDCD.Business.Service
         public async Task<string> PostImagesAsync(int id,string pageId,IEnumerable<string> imageUrls,string message,string token)
         {
             var attachedMedia = new List<KeyValuePair<string, string>>();
-
-            int index = 0;
+			message = SocialContentFormatter.ToFacebookText(message);
+			int index = 0;
 
             foreach (var img in imageUrls)
             {
@@ -125,8 +126,8 @@ namespace VDCD.Business.Service
         public async Task<string> PostVideoAsync(int id,string pageId,string videoUrl,string message,string token)
         {
             var url = $"https://graph.facebook.com/{pageId}/videos";
-
-            var content = new FormUrlEncodedContent(new[]
+			message = SocialContentFormatter.ToFacebookText(message);
+			var content = new FormUrlEncodedContent(new[]
             {
             new KeyValuePair<string, string>("file_url", videoUrl),
             new KeyValuePair<string, string>("description", message),
@@ -142,8 +143,8 @@ namespace VDCD.Business.Service
         {
             // 1️⃣ Đăng video trước
             var videoUrlEndpoint = $"https://graph.facebook.com/v24.0/{pageId}/videos";
-
-            var videoContent = new FormUrlEncodedContent(new[]
+			message = SocialContentFormatter.ToFacebookText(message);
+			var videoContent = new FormUrlEncodedContent(new[]
             {
         new KeyValuePair<string, string>("file_url", videoUrl),
         new KeyValuePair<string, string>("description", message),

@@ -36,6 +36,7 @@ namespace VDCD.Areas.Admin.Controllers
 			ViewBag.Solutions = lstSetting.Where(x => x.SettingKey.StartsWith("setting.general.solution."));
 			ViewBag.EmailSettings = lstSetting.Where(x => x.SettingKey.StartsWith("setting.email."));
 			ViewBag.FacebookSettings = lstSetting.Where(x => x.SettingKey.StartsWith("setting.facebook."));
+			ViewBag.ChatGptSettings = lstSetting.Where(x => x.SettingKey.StartsWith("setting.openai."));
             return View();
         }
         [HttpPost]

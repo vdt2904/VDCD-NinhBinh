@@ -15,7 +15,7 @@ using VDCD.Helper;
 
 namespace VDCD.Business.Service
 {
-    public class ActivityLogService 
+    public class ActivityLogService : IActivityLogService 
     {
         private readonly AppDbContext _db;
         private readonly IRepository<ActivityLog> _repo;

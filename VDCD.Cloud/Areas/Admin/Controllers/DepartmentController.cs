@@ -2,12 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using VDCD.Business.Service;
 using VDCD.Entities.Custom;
+using VDCD.Entities.Security;
 
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-	[Authorize(AuthenticationSchemes = "AdminAuth")]
-	public class DepartmentController : Controller
+    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AdminRoles.HrAccess)]
+    public class DepartmentController : Controller
     {
         private readonly DepartmentService _departmentService;
         private readonly UserService _userService;

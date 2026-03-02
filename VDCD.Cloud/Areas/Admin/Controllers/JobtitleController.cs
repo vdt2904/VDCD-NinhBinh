@@ -2,12 +2,13 @@
 using Microsoft.AspNetCore.Mvc;
 using VDCD.Business.Service;
 using VDCD.Entities.Custom;
+using VDCD.Entities.Security;
 
 namespace VDCD.Areas.Admin.Controllers
 {
     [Area("Admin")]
-	[Authorize(AuthenticationSchemes = "AdminAuth")]
-	public class JobtitleController : Controller
+    [Authorize(AuthenticationSchemes = "AdminAuth", Roles = AdminRoles.HrAccess)]
+    public class JobtitleController : Controller
     {
         private readonly JobtitleService _JobtitleService;
         public JobtitleController(JobtitleService JobtitleService)

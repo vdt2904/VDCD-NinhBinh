@@ -1,7 +1,9 @@
-﻿@model IEnumerable<VDCD.Entities.Custom.User>
+﻿@using VDCD.Entities.Security
+@model IEnumerable<VDCD.Entities.Custom.User>
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+    var roleOptions = AdminRoles.All;
 }
 <style>
     /* Ép textarea Profile rộng 100% */
@@ -32,9 +34,14 @@
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
             <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-person-lines-fill me-2"></i>Quản lý người dùng</h5>
-            <button class="btn btn-primary" onclick="openUserModal(0)">
-                <i class="bi bi-plus-lg"></i> Thêm nhân sự
-            </button>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-secondary" onclick="seedDemoRbac(false)">
+                    <i class="bi bi-database-fill-add"></i> Seed demo RBAC
+                </button>
+                <button class="btn btn-primary" onclick="openUserModal(0)">
+                    <i class="bi bi-plus-lg"></i> Thêm nhân sự
+                </button>
+            </div>
         </div>
         <div class="card-body">
             <div class="row mb-3">
@@ -56,6 +63,7 @@
                             <th class="ps-3">UserName</th>
                             <th>FullName</th>
                             <th>Email</th>
+                            <th>Vai trò</th>
                             <th>Trạng thái</th>
                             <th class="text-center">Thao tác</th>
                         </tr>
@@ -67,6 +75,9 @@
                                 <td class="ps-3 fw-bold">@item.UserName</td>
                                 <td>@item.FullName</td>
                                 <td>@item.Mail</td>
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary">@item.RoleName</span>
+                                </td>
                                 <td>
                                     @if (item.IsActive == true)
                                     {
@@ -153,12 +164,31 @@
                                         <label class="form-label fw-bold">Email</label>
                                         <input id="Mail" name="Mail" class="form-control" placeholder="email@company.com" />
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">Vai trò</label>
+                                        <select class="form-select" id="RoleName" name="RoleName">
+                                            @foreach (var role in roleOptions)
+                                            {
+                                                <option value="@role">@role</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
                                         <label class="form-label fw-bold">Trạng thái</label>
                                         <select class="form-select" id="IsActive" name="IsActive">
                                             <option value="true">Đang làm việc</option>
                                             <option value="false">Đã nghỉ việc / Khóa</option>
                                         </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Mật khẩu đăng nhập</label>
+                                        <input id="NewPassword" name="NewPassword" type="password" class="form-control"
+                                               placeholder="Nhập để tạo mới / đổi mật khẩu">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Xác nhận mật khẩu</label>
+                                        <input id="ConfirmPassword" name="ConfirmPassword" type="password" class="form-control"
+                                               placeholder="Nhập lại mật khẩu">
                                     </div>
                                 </div>
                             </div>
@@ -228,6 +258,9 @@
         $('#tblAssign tbody').empty();
         $('#UserId').val(id);
         $('#avatarPreview').attr('src', 'https://placehold.co/150x150?text=No+Avatar');
+        $('#RoleName').val('@AdminRoles.Viewer');
+        $('#NewPassword').val('');
+        $('#ConfirmPassword').val('');
 
         if (id > 0) {
             $.get('/Admin/User/GetById/' + id, function (res) {
@@ -240,8 +273,9 @@
                     // NẠP THÊM 2 TRƯỜNG MỚI
                     $('#Profile').val(u.profile);
                     $('#IsShow').prop('checked', u.isShow === true);
+                    $('#RoleName').val(res.roleName || '@AdminRoles.Viewer');
 
-                    $('#IsActive').val(u.isActive.toString());
+                    $('#IsActive').val((u.isActive ?? true).toString());
                     if (u.avatar) $('#avatarPreview').attr('src', u.avatar);
 
                     res.assignments.forEach(a => addRow(a.departmentId, a.departmentName,a));
@@ -283,6 +317,27 @@
     }
 
     function saveUser() {
+        const userId = parseInt($('#UserId').val()) || 0;
+        const newPassword = $('#NewPassword').val();
+        const confirmPassword = $('#ConfirmPassword').val();
+
+        if (!$('#UserName').val()) {
+            alert("Vui lòng nhập tài khoản.");
+            return;
+        }
+
+        if (userId === 0 && !newPassword) {
+            alert("Vui lòng nhập mật khẩu cho tài khoản mới.");
+            return;
+        }
+
+        if (newPassword || confirmPassword) {
+            if (newPassword !== confirmPassword) {
+                alert("Mật khẩu xác nhận không khớp.");
+                return;
+            }
+        }
+
         let assignments = [];
         $('.assign-row').each(function () {
             assignments.push({
@@ -304,6 +359,8 @@
                 IsShow: $('#IsShow').is(':checked'),
                 IsActive: $('#IsActive').val() === "true"
             },
+            roleName: $('#RoleName').val(),
+            newPassword: newPassword,
             SelectedPositionsJson: JSON.stringify(assignments)
         };
 
@@ -331,5 +388,22 @@
         function deleteUser(id) {
             if (confirm("Xác nhận xóa?")) $.post('/Admin/User/Delete/' + id, r => location.reload());
         }
-    </script>
 
+        function seedDemoRbac(resetPassword) {
+            if (!confirm("Tạo dữ liệu demo phân quyền?\nHệ thống sẽ thêm user demo nếu chưa tồn tại.")) return;
+
+            $.post('/admin/account/seed-demo-rbac?resetPassword=' + resetPassword, function (res) {
+                if (!res || !res.success) {
+                    alert("Seed demo thất bại: " + (res?.error || res?.message || "Không rõ lỗi"));
+                    return;
+                }
+
+                const created = (res.createdUsers || []).join(", ") || "Không có";
+                const updated = (res.updatedUsers || []).join(", ") || "Không có";
+                alert("Seed demo thành công.\nCreated: " + created + "\nUpdated: " + updated);
+                location.reload();
+            }).fail(function (xhr) {
+                alert("Seed demo thất bại: " + (xhr.responseText || "Lỗi hệ thống"));
+            });
+        }
+    </script>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VDCD.Business.Infrastructure;
+using VDCD.Business.Service;
 using VDCD.Entities.DTO;
 
 namespace VDCD.Areas.Admin.Controllers
@@ -8,9 +9,9 @@ namespace VDCD.Areas.Admin.Controllers
     [ApiController]
     public class ActivityLogsController : ControllerBase
     {
-        private readonly IActivityLogService _service;
+        private readonly ActivityLogService _service;
 
-        public ActivityLogsController(IActivityLogService service)
+        public ActivityLogsController(ActivityLogService service)
         {
             _service = service;
         }

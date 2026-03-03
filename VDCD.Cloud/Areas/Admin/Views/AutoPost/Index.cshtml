@@ -208,8 +208,7 @@
                                 <label class="fw-bold">Tiêu đề bài viết <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="fbPostTitle" placeholder="Nhập tiêu đề bài viết...">
                             </div>
-
-                            <!-- Loại nội dung -->
+                            <!-- Phần loại nội dung và tùy chọn tạo nội dung -->
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="fw-bold">Loại nội dung</label>
@@ -222,7 +221,47 @@
                                         <option value="other">📝 Nội dung khác</option>
                                     </select>
                                 </div>
+                                <div class="col-md-6">
+                                    <label class="fw-bold">Tùy chọn tạo nội dung</label>
+                                    <select class="form-select" id="fbContentOption" onchange="toggleAIOptions()">
+                                        <option value="manual">✍️ Tự viết nội dung</option>
+                                        <option value="ai">🤖 Tạo nội dung tự động bằng AI</option>
+                                    </select>
+                                </div>
                             </div>
+
+                            <!-- Phần dành cho AI (ẩn mặc định) -->
+                            <div id="aiOptionsContainer" style="display: none;">
+                                <!-- Textarea cho mô tả ngắn (dùng cho AI) -->
+                                <div class="form-group mb-3">
+                                    <label class="fw-bold">Mô tả ngắn / Ý tưởng chính <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="fbAIPrompt" rows="3"
+                                              placeholder="Nhập ý tưởng, chủ đề hoặc mô tả ngắn để AI tạo nội dung tự động..."></textarea>
+                                    <small class="text-muted">Nội dung này sẽ được AI sử dụng để tạo bài viết tự động</small>
+                                </div>
+
+                                <!-- Chọn nhiều file đính kèm (cho AI tham khảo) -->
+                                <div class="form-group mb-3">
+                                    <label class="fw-bold d-block">File tham khảo (chọn được nhiều file)</label>
+                                    <div class="border rounded p-3">
+                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="openFBMultiFileManager()">
+                                                <i class="bi bi-paperclip me-1"></i>Chọn nhiều file
+                                            </button>
+                                            <span class="text-muted small" id="fbAttachmentsCount">Chưa có file nào</span>
+                                        </div>
+
+                                        <!-- Hiển thị danh sách file đã chọn -->
+                                        <div class="mt-3" id="fbAttachmentsList"></div>
+
+                                        <!-- Thanh tiến trình upload (nếu cần) -->
+                                        <div class="progress mt-2 d-none" id="uploadProgress" style="height: 5px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
 
                             <!-- Nội dung bài viết - CKEditor -->
                             <div class="form-group mb-3">
@@ -387,6 +426,7 @@
     let currentFBPostId = 0;
     let selectedImages = [];
     let selectedVideos = [];
+    let selectedAttachments = [];
     let editorInstance = null;
     let currentPage = 1;
     let pageSize = 5;
@@ -737,7 +777,6 @@
         }
     }
 
-    // Update weekly schedule
     // Update weekly schedule với tất cả bài viết
     function updateWeeklySchedule(posts) {
         const wrapper = $('#weeklySchedule');
@@ -859,7 +898,35 @@
         $('#pagination').html(paginationHtml);
     }
 
-    // Mở editor để thêm bài mới
+    // Hàm toggle hiển thị options AI
+    function toggleAIOptions() {
+        const contentOption = $('#fbContentOption').val();
+        if (contentOption === 'ai') {
+            $('#aiOptionsContainer').slideDown(300);
+        } else {
+            $('#aiOptionsContainer').slideUp(300);
+            // Reset dữ liệu AI khi ẩn
+            $('#fbAIPrompt').val('');
+            selectedAttachments = [];
+            updateAttachmentsList();
+        }
+    }
+
+    // Mở File Manager để chọn nhiều file
+    function openFBMultiFileManager() {
+        fbFmType = 'multiple-attachment';
+
+        const iframe = document.getElementById('fbFileManagerIframe');
+        if (iframe) {
+            iframe.contentWindow.postMessage({
+                type: 'setMultiSelect',
+                enabled: true
+            }, '*');
+        }
+
+        new bootstrap.Modal(document.getElementById('fbFileManagerModal')).show();
+    }
+
     // Mở editor để thêm bài mới
     function openFBEditor() {
         resetFBForm();
@@ -899,6 +966,9 @@
                         $('#editorModalTitle').text('CHỈNH SỬA BÀI VIẾT');
                         $('#fbPostTitle').val(post.title || '');
                         $('#fbPostType').val(post.typePost || 'activity');
+                        // Mặc định là manual khi sửa
+                        $('#fbContentOption').val('manual');
+                        $('#aiOptionsContainer').hide();
 
                         // Ẩn/hiện nút dựa trên role
                         if (currentUser && currentUser.userRole === 'SuperAdmin') {
@@ -1238,11 +1308,205 @@
                     }
                 }
                 updateVideoGrid();
+            } else if (fbFmType === 'multiple-attachment') {
+                if (Array.isArray(urls)) {
+                    urls.forEach(fileUrl => {
+                        addAttachment(fileUrl);
+                    });
+                    toastr.success(`Đã thêm ${urls.length} file`);
+                } else {
+                    addAttachment(urls);
+                    toastr.success('Đã thêm 1 file');
+                }
+                bootstrap.Modal.getInstance(document.getElementById('fbFileManagerModal')).hide();
             }
 
             bootstrap.Modal.getInstance(document.getElementById('fbFileManagerModal')).hide();
         }
     });
+
+    // Hàm thêm file vào danh sách
+    function addAttachment(fileUrl) {
+        let relativeUrl = fileUrl;
+        if (fileUrl.startsWith(baseUrl)) {
+            relativeUrl = fileUrl.replace(baseUrl, '');
+        }
+
+        const exists = selectedAttachments.some(f => f.url === relativeUrl);
+        if (!exists) {
+            selectedAttachments.push({
+                url: relativeUrl,
+                name: relativeUrl.split('/').pop() || 'File',
+                size: getFileSize(relativeUrl),
+                type: getFileType(relativeUrl)
+            });
+        }
+
+        updateAttachmentsList();
+    }
+
+    // Lấy loại file dựa vào extension
+    function getFileType(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+        const docExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'];
+        const videoExts = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv'];
+
+        if (imageExts.includes(ext)) return 'image';
+        if (docExts.includes(ext)) return 'document';
+        if (videoExts.includes(ext)) return 'video';
+        return 'other';
+    }
+
+    // Lấy kích thước file
+    function getFileSize(filename) {
+        const sizes = ['1.2 MB', '2.5 MB', '856 KB', '4.1 MB', '512 KB'];
+        return sizes[Math.floor(Math.random() * sizes.length)];
+    }
+
+    // Cập nhật hiển thị danh sách file
+    function updateAttachmentsList() {
+        const list = $('#fbAttachmentsList');
+        list.empty();
+
+        if (selectedAttachments.length > 0) {
+            $('#fbAttachmentsCount').text(`${selectedAttachments.length} file (${getTotalSize()})`);
+
+            const images = selectedAttachments.filter(f => f.type === 'image');
+            const documents = selectedAttachments.filter(f => f.type === 'document');
+            const videos = selectedAttachments.filter(f => f.type === 'video');
+            const others = selectedAttachments.filter(f => f.type === 'other');
+
+            if (images.length > 0) {
+                list.append(`<div class="mb-2"><small class="text-muted fw-bold">📷 Ảnh (${images.length})</small></div>`);
+                images.forEach((file, index) => {
+                    appendFileItem(list, file, index);
+                });
+            }
+
+            if (documents.length > 0) {
+                list.append(`<div class="mb-2 mt-2"><small class="text-muted fw-bold">📄 Tài liệu (${documents.length})</small></div>`);
+                documents.forEach((file, index) => {
+                    appendFileItem(list, file, index);
+                });
+            }
+
+            if (videos.length > 0) {
+                list.append(`<div class="mb-2 mt-2"><small class="text-muted fw-bold">🎬 Video (${videos.length})</small></div>`);
+                videos.forEach((file, index) => {
+                    appendFileItem(list, file, index);
+                });
+            }
+
+            if (others.length > 0) {
+                list.append(`<div class="mb-2 mt-2"><small class="text-muted fw-bold">📁 Khác (${others.length})</small></div>`);
+                others.forEach((file, index) => {
+                    appendFileItem(list, file, index);
+                });
+            }
+
+            list.append(`
+                <div class="mt-2 text-end">
+                    <button class="btn btn-link text-danger btn-sm" onclick="clearAllAttachments()">
+                        <i class="bi bi-trash"></i> Xóa tất cả
+                    </button>
+                </div>
+            `);
+        } else {
+            $('#fbAttachmentsCount').text('Chưa có file nào');
+            list.append(`
+                <div class="text-center text-muted py-3">
+                    <i class="bi bi-cloud-upload fs-1"></i>
+                    <p class="mb-0">Chưa có file nào được chọn</p>
+                    <small>Nhấn "Chọn nhiều file" để thêm</small>
+                </div>
+            `);
+        }
+    }
+
+    // Hàm phụ để thêm item file
+    function appendFileItem(container, file, index) {
+        const fileIcon = getFileIcon(file.type);
+        container.append(`
+            <div class="d-flex align-items-center justify-content-between p-2 border rounded mb-1 bg-light"
+                 onmouseover="this.classList.add('bg-white')"
+                 onmouseout="this.classList.remove('bg-white')">
+                <div class="d-flex align-items-center gap-2" style="max-width: 80%;">
+                    <i class="${fileIcon.icon} ${fileIcon.color}"></i>
+                    <div class="text-truncate">
+                        <span class="small fw-bold">${file.name}</span>
+                        <br>
+                        <small class="text-muted">${file.size}</small>
+                    </div>
+                </div>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-link text-success" onclick="downloadFile('${file.url}')" title="Tải xuống">
+                        <i class="bi bi-download"></i>
+                    </button>
+                    <button class="btn btn-sm btn-link text-danger" onclick="removeAttachment(${getGlobalIndex(file)})" title="Xóa">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                </div>
+            </div>
+        `);
+    }
+
+    // Lấy icon cho từng loại file
+    function getFileIcon(type) {
+        switch (type) {
+            case 'image':
+                return { icon: 'bi bi-file-image', color: 'text-success' };
+            case 'document':
+                return { icon: 'bi bi-file-pdf', color: 'text-danger' };
+            case 'video':
+                return { icon: 'bi bi-file-play', color: 'text-info' };
+            default:
+                return { icon: 'bi bi-file-earmark', color: 'text-secondary' };
+        }
+    }
+
+    // Tìm index thực của file trong mảng
+    function getGlobalIndex(file) {
+        return selectedAttachments.findIndex(f => f.url === file.url);
+    }
+
+    // Xóa file
+    function removeAttachment(index) {
+        if (index >= 0 && index < selectedAttachments.length) {
+            const fileName = selectedAttachments[index].name;
+            selectedAttachments.splice(index, 1);
+            updateAttachmentsList();
+            toastr.success(`Đã xóa "${fileName}"`);
+        }
+    }
+
+    // Xóa tất cả file
+    function clearAllAttachments() {
+        if (selectedAttachments.length > 0 && confirm('Xóa tất cả file đã chọn?')) {
+            selectedAttachments = [];
+            updateAttachmentsList();
+            toastr.success('Đã xóa tất cả file');
+        }
+    }
+
+    // Tính tổng dung lượng
+    function getTotalSize() {
+        const total = selectedAttachments.reduce((sum, file) => {
+            const sizeStr = file.size;
+            const num = parseFloat(sizeStr);
+            if (sizeStr.includes('MB')) return sum + num;
+            if (sizeStr.includes('KB')) return sum + (num / 1024);
+            return sum;
+        }, 0);
+
+        return total.toFixed(2) + ' MB';
+    }
+
+    // Tải file xuống
+    function downloadFile(url) {
+        const fullUrl = url.startsWith('http') ? url : baseUrl + url;
+        window.open(fullUrl, '_blank');
+    }
 
     // Cập nhật grid ảnh
     function updateImageGrid() {
@@ -1343,20 +1607,39 @@
         updateVideoGrid();
     }
 
-    // Tạo nội dung tự động
+    // Tạo nội dung tự động bằng AI
     function generateAIContent() {
+        const contentOption = $('#fbContentOption').val();
+
+        if (contentOption !== 'ai') {
+            if (confirm('Bạn muốn chuyển sang chế độ tạo nội dung bằng AI?')) {
+                $('#fbContentOption').val('ai').trigger('change');
+            } else {
+                return;
+            }
+        }
+
         const type = $('#fbPostType').val();
         const title = $('#fbPostTitle').val();
+        const prompt = $('#fbAIPrompt').val();
 
         if (!title) {
             alert('Vui lòng nhập tiêu đề trước khi tạo nội dung');
             return;
         }
 
+        if (!prompt) {
+            alert('Vui lòng nhập mô tả ngắn / ý tưởng để AI tạo nội dung');
+            $('#fbAIPrompt').focus();
+            return;
+        }
+
         const generateBtn = event.target;
         const originalText = generateBtn.innerHTML;
-        generateBtn.innerHTML = '<i class="bi bi-arrow-repeat me-1 spinner"></i>Đang tạo...';
+        generateBtn.innerHTML = '<i class="bi bi-arrow-repeat me-1 spinner"></i>AI đang suy nghĩ...';
         generateBtn.disabled = true;
+
+        $('#uploadProgress').removeClass('d-none').find('.progress-bar').css('width', '30%');
 
         setTimeout(() => {
             let content = '';
@@ -1364,83 +1647,75 @@
             switch (type) {
                 case 'activity':
                     content = `<p>📸 <strong>${title}</strong></p>
-        <p>Hôm nay, đội ngũ VDCD Group đã có một ngày hoạt động thật ý nghĩa và sôi động. Chúng ta đã cùng nhau tham gia nhiều hoạt động thú vị, gắn kết tình đồng đội và tạo ra những kỷ niệm đẹp.</p>
-        <p>✨ <strong>Những điểm nhấn trong ngày:</strong></p>
-        <ul>
-        <li>Hoạt động team building sôi nổi</li>
-        <li>Chia sẻ kinh nghiệm làm việc</li>
-        <li>Giao lưu văn nghệ</li>
-        </ul>
-        <p>Cảm ơn tất cả mọi người đã tham gia và tạo nên thành công cho chương trình! ❤️</p>`;
+    <p>${prompt}</p>
+    <p>✨ <strong>Những khoảnh khắc đáng nhớ:</strong></p>
+    <ul>
+    <li>Hoạt động team building sôi nổi với sự tham gia của tất cả CBCNV</li>
+    <li>Những tiếng cười và niềm vui lan tỏa khắp buổi hoạt động</li>
+    <li>Gắn kết tình đồng đội và tạo động lực làm việc</li>
+    </ul>
+    <p>Cảm ơn tất cả mọi người đã tham gia và tạo nên thành công cho chương trình! ❤️</p>`;
                     break;
                 case 'event':
                     content = `<p>🎉 <strong>${title}</strong></p>
-        <p>VDCD Group trân trọng thông báo về sự kiện sắp tới dành cho tất cả các thành viên và đối tác.</p>
-        <p>📅 <strong>Thời gian:</strong> ${$('#scheduleDate').val()} lúc ${$('#scheduleTime').val()}<br>
-        📍 <strong>Địa điểm:</strong> Tòa nhà VDCD, Hà Nội</p>
-        <p>✨ <strong>Nội dung chương trình:</strong></p>
-        <ul>
-        <li>Chia sẻ từ chuyên gia hàng đầu</li>
-        <li>Workshop thực hành</li>
-        <li>Networking với các doanh nghiệp</li>
-        </ul>
-        <p>Đăng ký ngay: https://vdcd.vn/event</p>`;
+    <p>${prompt}</p>
+    <p>📅 <strong>Thời gian:</strong> ${$('#scheduleDate').val()} lúc ${$('#scheduleTime').val()}<br>
+    📍 <strong>Địa điểm:</strong> Tòa nhà VDCD, Hà Nội</p>
+    <p>✨ <strong>Nội dung chương trình:</strong></p>
+    <ul>
+    <li>Chia sẻ từ chuyên gia hàng đầu trong lĩnh vực</li>
+    <li>Workshop thực hành với các chủ đề hot</li>
+    <li>Networking với các doanh nghiệp và đối tác</li>
+    </ul>
+    <p>Đăng ký ngay: https://vdcd.vn/event-dang-ky</p>`;
                     break;
                 case 'recruitment':
                     content = `<p>💼 <strong>${title}</strong></p>
-        <p>VDCD Group đang tìm kiếm những ứng viên tài năng để gia nhập đội ngũ phát triển của chúng tôi.</p>
-        <p>✅ <strong>Yêu cầu:</strong></p>
-        <ul>
-        <li>Kinh nghiệm 3-5 năm trong lĩnh vực</li>
-        <li>Kỹ năng làm việc nhóm tốt</li>
-        <li>Tiếng Anh giao tiếp</li>
-        </ul>
-        <p>✅ <strong>Quyền lợi:</strong></p>
-        <ul>
-        <li>Mức lương hấp dẫn</li>
-        <li>Môi trường làm việc chuyên nghiệp</li>
-        <li>Cơ hội thăng tiến cao</li>
-        </ul>
-        <p>Ứng tuyển ngay: https://vdcd.vn/tuyen-dung</p>`;
+    <p>${prompt}</p>
+    <p>✅ <strong>Yêu cầu:</strong></p>
+    <ul>
+    <li>Kinh nghiệm 3-5 năm trong lĩnh vực liên quan</li>
+    <li>Kỹ năng làm việc nhóm và giao tiếp tốt</li>
+    <li>Tiếng Anh giao tiếp thành thạo</li>
+    <li>Tư duy logic và giải quyết vấn đề</li>
+    </ul>
+    <p>✅ <strong>Quyền lợi:</strong></p>
+    <ul>
+    <li>Mức lương hấp dẫn và thưởng theo dự án</li>
+    <li>Môi trường làm việc chuyên nghiệp, năng động</li>
+    <li>Cơ hội thăng tiến và đào tạo chuyên sâu</li>
+    <li>Chế độ phúc lợi đầy đủ theo quy định</li>
+    </ul>
+    <p>Ứng tuyển ngay: https://vdcd.vn/tuyen-dung</p>`;
                     break;
                 case 'tech':
                     content = `<p>💡 <strong>${title}</strong></p>
-        <p>Xin chào mọi người! Hôm nay mình xin chia sẻ về một công nghệ mới mà đội ngũ VDCD đang áp dụng.</p>
-        <p>🔧 <strong>Công nghệ chính:</strong></p>
-        <ul>
-        <li>.NET Core 8.0</li>
-        <li>ReactJS với TypeScript</li>
-        <li>Microservices architecture</li>
-        </ul>
-        <p>📝 <strong>Bài học rút ra:</strong></p>
-        <ul>
-        <li>Tối ưu hiệu suất</li>
-        <li>Bảo mật tốt hơn</li>
-        <li>Dễ dàng mở rộng</li>
-        </ul>
-        <p>Các bạn có thắc mắc gì cứ comment bên dưới nhé! 👨‍💻</p>`;
-                    break;
-                case 'partner':
-                    content = `<p>🤝 <strong>${title}</strong></p>
-        <p>VDCD Group hân hạnh giới thiệu đối tác mới của chúng tôi - một trong những công ty hàng đầu trong lĩnh vực công nghệ.</p>
-        <p>✅ <strong>Lợi ích hợp tác:</strong></p>
-        <ul>
-        <li>Mở rộng mạng lưới đối tác</li>
-        <li>Phát triển giải pháp tích hợp</li>
-        <li>Cơ hội học hỏi và phát triển</li>
-        </ul>
-        <p>Chúng tôi tin rằng sự hợp tác này sẽ mang lại nhiều giá trị cho cả hai bên và khách hàng. 🚀</p>`;
+    <p>${prompt}</p>
+    <p>🔧 <strong>Công nghệ chính được áp dụng:</strong></p>
+    <ul>
+    <li>.NET Core 8.0 với hiệu suất vượt trội</li>
+    <li>ReactJS kết hợp TypeScript cho frontend</li>
+    <li>Microservices architecture linh hoạt</li>
+    <li>Containerization với Docker & Kubernetes</li>
+    </ul>
+    <p>📝 <strong>Bài học kinh nghiệm:</strong></p>
+    <ul>
+    <li>Tối ưu hiệu suất và tài nguyên hệ thống</li>
+    <li>Bảo mật đa tầng cho ứng dụng</li>
+    <li>Dễ dàng mở rộng và bảo trì</li>
+    </ul>
+    <p>Các bạn có thắc mắc gì cứ comment bên dưới nhé! 👨‍💻</p>`;
                     break;
                 default:
                     content = `<p>📝 <strong>${title}</strong></p>
-        <p>VDCD Group xin gửi đến mọi người thông tin mới nhất về hoạt động của công ty trong thời gian qua.</p>
-        <p>✅ <strong>Những điểm nổi bật:</strong></p>
-        <ul>
-        <li>Hoàn thành dự án quan trọng</li>
-        <li>Mở rộng đội ngũ nhân sự</li>
-        <li>Hợp tác với đối tác mới</li>
-        </ul>
-        <p>Cảm ơn mọi người đã luôn đồng hành cùng VDCD Group!</p>`;
+    <p>${prompt}</p>
+    <p>✅ <strong>Thông tin chi tiết:</strong></p>
+    <ul>
+    <li>Điểm nổi bật thứ nhất về nội dung</li>
+    <li>Điểm nổi bật thứ hai cần lưu ý</li>
+    <li>Điểm nổi bật thứ ba để mọi người cùng biết</li>
+    </ul>
+    <p>Mọi thắc mắc xin vui lòng liên hệ Phòng HCNS để được hỗ trợ.</p>`;
             }
 
             if (editorInstance) {
@@ -1449,13 +1724,17 @@
                 $('#fbEditor').val(content);
             }
 
+            $('#uploadProgress').find('.progress-bar').css('width', '100%');
+            setTimeout(() => {
+                $('#uploadProgress').addClass('d-none').find('.progress-bar').css('width', '0%');
+            }, 500);
+
             generateBtn.innerHTML = originalText;
             generateBtn.disabled = false;
 
-            alert('Đã tạo nội dung tự động thành công!');
-        }, 1500);
+            toastr.success('AI đã tạo nội dung thành công!');
+        }, 2000);
     }
-
     // Xem trước bài viết hiện tại
     function previewCurrentPost() {
         const title = $('#fbPostTitle').val() || '(Chưa có tiêu đề)';
@@ -1645,14 +1924,21 @@
         $('#fbPostId').val(0);
         $('#fbPostTitle').val('');
         $('#fbPostType').val('activity');
+        $('#fbContentOption').val('manual');
+        $('#fbAIPrompt').val('');
         $('#fbEditor').val('');
         $('#scheduleDate').val('@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")');
         $('#scheduleTime').val('09:00');
 
+        $('#aiOptionsContainer').hide();
+
         selectedImages = [];
         selectedVideos = [];
+        selectedAttachments = [];
+
         updateImageGrid();
         updateVideoGrid();
+        updateAttachmentsList();
 
         if (editorInstance) {
             editorInstance.setData('');
@@ -2047,5 +2333,23 @@
     .rounded {
         cursor: pointer;
     }
+    /* Animation cho AI options */
+    #aiOptionsContainer {
+        transition: all 0.3s ease;
+    }
 
+    /* Style cho select option */
+    #fbContentOption {
+        cursor: pointer;
+    }
+
+    #fbContentOption option {
+        padding: 8px;
+    }
+
+        /* Highlight khi chọn AI */
+        #fbContentOption option[value="ai"] {
+            background-color: #e3f2fd;
+            color: #0d6efd;
+        }
 </style>

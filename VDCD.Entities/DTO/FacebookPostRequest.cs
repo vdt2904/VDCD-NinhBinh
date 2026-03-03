@@ -15,5 +15,8 @@ namespace VDCD.Entities.DTO
         public string? title { get; set; }
         public DateTime? scheduleDate { get; set; }
         public string? type { get; set; }
-    }
+        public int? IsAi { get; set; }
+         public string? Prompt { get; set; }
+         public string? Files { get; set; }
+	}
 }

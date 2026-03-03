@@ -1,8 +1,6 @@
 ﻿using System;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using VDCD.Business.Infrastructure;
 using VDCD.DataAccess;
@@ -23,15 +21,17 @@ namespace VDCD.Business.Service
             _db = db;
         }
 
-        public async Task<FbPost> GenerateAndSave(string topic)
+        // Accept attachments and persist them as serialized JSON in FbPost.Files
+        public async Task<FbPost> GenerateAndSave(string topic, List<string>? fbAttachmentsList = null)
         {
-            var content = await _ai.GeneratePost(topic);
+            var content = await _ai.GeneratePost(topic, fbAttachmentsList);
 
             var post = new FbPost
             {
                 Topic = topic,
                 Content = content,
-                Status = "Draft"
+                Status = "Draft",
+                Files = fbAttachmentsList is null ? null : JsonSerializer.Serialize(fbAttachmentsList)
             };
 
             _repo.Create(post);

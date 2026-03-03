@@ -31,7 +31,8 @@ namespace VDCD.Areas.Admin.Controllers
 
             try
             {
-                var post = await _service.GenerateAndSave(req.Topic);
+                // Pass attachments to service
+                var post = await _service.GenerateAndSave(req.Topic, req.FbAttachmentsList);
 
                 return Ok(new ApiResponse<FbPost>
                 {
@@ -45,6 +46,7 @@ namespace VDCD.Areas.Admin.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
         [HttpPost("AiGenrerate")]
         public async Task<IActionResult> AiGenrerate([FromBody] string topic)
         {
@@ -65,27 +67,5 @@ namespace VDCD.Areas.Admin.Controllers
                 return StatusCode(500, ex.Message);
             }
 		}
-		//[HttpPost("post-now/{id}")]
-		//public async Task<IActionResult> PostNow(int id)
-		//{
-		//    var post = await _db.FbPosts.FindAsync(id);
-
-		//    if (post == null)
-		//        return NotFound();
-
-		//    var fbId = await _fb.Post(post.Content);
-
-		//    post.Status = "Posted";
-		//    post.FacebookPostId = fbId;
-
-		//    await _db.SaveChangesAsync();
-
-		//    return Ok(new ApiResponse<object>
-		//    {
-		//        Success = true,
-		//        Message = "Post published successfully",
-		//        Data = new { FacebookPostId = fbId }
-		//    });
-		//}
 	}
 }

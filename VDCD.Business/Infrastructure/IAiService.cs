@@ -8,6 +8,7 @@ namespace VDCD.Business.Infrastructure
 {
     public interface IAiService
     {
-        Task<string> GeneratePost(string topic);
+        // Accept optional list of attachment URLs/paths for reference
+        Task<string> GeneratePost(string topic, List<string>? fbAttachmentsList = null);
     }
 }

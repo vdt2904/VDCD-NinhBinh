@@ -15,5 +15,8 @@ namespace VDCD.Entities.Custom
         public DateTime? ScheduledAt { get; set; }
         public string? FacebookPostId { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // New: serialized attachments (JSON array of urls / identifiers)
+        public string? Files { get; set; }
     }
 }

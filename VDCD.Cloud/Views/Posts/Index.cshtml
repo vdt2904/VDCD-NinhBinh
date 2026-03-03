@@ -38,6 +38,7 @@
         position: relative;
         display: flex;
         align-items: flex-end; /* Đẩy nội dung xuống đáy */
+        margin-top: 110px;
     }
 
     .hero-content {
@@ -95,7 +96,7 @@
             <article class="post-details">
                 <header class="post-header mb-4">
                     <div class="post-meta text-muted text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">
-                        @categoryName • @Model.PublishedDate?.ToString("MMMM d, yyyy", new System.Globalization.CultureInfo("vi-VN"))
+                        @categoryName • @Model.PublishedDate?.ToString("MMMM-dd-yyyy", new System.Globalization.CultureInfo("vi-VN"))
                     </div>
                     <h1 class="fw-bold mb-4" style="font-size: 2.5rem; line-height: 1.2;">
                         @Model.Title

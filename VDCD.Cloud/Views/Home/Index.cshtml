@@ -11,7 +11,7 @@
 
 		<div class="explore-button-wrapper">
 			<a href="#" class="btn-explore">
-				Khám Phá Dự Án <span class="icon-arrow">↗</span>
+				Khám Phá Dự Án<span class="icon-arrow">→</span>
 			</a>
 		</div>
 	</div>
@@ -128,9 +128,9 @@
 	/* Định vị khối thống kê đè lên ảnh */
 	.stats-container {
 		position: absolute;
-		top: -50px;
+		top: 0px;
 		right: 0;
-		width: 350px;
+		width: 400px;
 		z-index: 10;
 	}
 
@@ -170,18 +170,19 @@
 	<div class="container">
 		<div class="row mb-4">
 			<div class="col-12">
-				<div class="d-flex align-items-center mb-2">
+				<div class="d-flex align-items-center mb-4">
 					<span class="line me-2"></span>
-					<span class="text-danger fw-bold text-uppercase small">Về chúng tôi.</span>
+					<span class="text-danger fw-bold text-uppercase small">Về chúng tôi</span>
+					<span class="line ms-2"></span>
 				</div>
-				<h1 class="display-5 fw-bold text-uppercase">
+				<h1 class="display-6 fw-bold text-uppercase">
 					@GetSt("setting.general.aboutus.headertext")
 				</h1>
 			</div>
 		</div>
 
 		<div class="row g-0 position-relative mt-5">
-			<div class="col-lg-4 pe-lg-5 mb-4 mb-lg-0">
+			<div class="col-lg-4 pe-lg-5 mb-4 mb-lg-0 mt-5">
 				<h3 class="fw-bold fs-4 mb-4">
 					@GetSt("setting.general.aboutus.title")
 				</h3>
@@ -191,20 +192,20 @@
 			</div>
 
 			<div class="col-lg-8 position-relative">
-				<div class="main-image-wrapper">
+				<div class="main-image-wrapper mt-5">
 					<img src="@GetSt("setting.general.aboutus.image")" alt="VDCD Tech" class="img-fluid w-100 shadow-sm">
 				</div>
 
 				<div class="stats-container d-flex">
-					<div class="stat-box bg-red text-white p-4 flex-fill text-center">
+					<div class="stat-box bg-red text-white p-4 flex-fill">
 						<i class="fa-solid fa-trophy mb-3" style="font-size: 2.5rem;"></i>
 						<div class="counter-num h2 fw-bold mb-0">500+</div>
-						<div class="text-uppercase small fw-bold">Dự án hoàn thành</div>
+						<div class="text-uppercase small">Dự án hoàn thành</div>
 					</div>
-					<div class="stat-box bg-black text-white p-4 flex-fill text-center">
+					<div class="stat-box bg-black text-white p-4 flex-fill">
 						<i class="fa-solid fa-handshake mb-3" style="font-size: 2.5rem;"></i>
 						<div class="counter-num h2 fw-bold mb-0">250+</div>
-						<div class="text-uppercase small fw-bold">Khách hàng</div>
+						<div class="text-uppercase small">Khách hàng</div>
 					</div>
 				</div>
 			</div>
@@ -232,7 +233,12 @@
 							<div class="icon-box">
 								<div class="bg-danger d-inline-flex align-items-center justify-content-center box-icon-red">
 									@* THAY ĐỔI Ở ĐÂY: Dùng thẻ img cho icon *@
-									<img src="@item.Icon" alt="icon" class="service-icon-img">
+									@{
+										var icon = string.IsNullOrEmpty(item.Icon) 
+											? "/images/icon-default.webp" 
+											: item.Icon;
+									}
+									<img src="@icon" alt="icon" class="service-icon-img">
 								</div>
 							</div>
 
@@ -277,8 +283,8 @@
 	}
 
 	.box-icon-red {
-		width: 65px;
-		height: 65px;
+		width: 75px;
+		height: 75px;
 		z-index: 3;
 	}
 
@@ -307,7 +313,7 @@
 	}
 
 	.service-item:hover .service-overlay {
-		background: rgba(227, 6, 19, 0.5);
+		background: rgba(0, 0, 0, 0.8);
 	}
 
 	.learn-more-btn {
@@ -343,25 +349,26 @@
 }
 
 
-<section class="vision-section py-5 position-relative">
+<section class="vision-section py-5 position-relative" style="padding-top: 90px !important;">
 	<div class="vision-bg-overlay d-none d-lg-block"></div>
 
 	<div class="container position-relative" style="z-index: 2;">
 		@* 1. TIÊU ĐỀ CHÍNH *@
 		<div class="row mb-4">
 			<div class="col-12 text-center text-lg-start">
-				<div class="d-flex align-items-center mb-2 justify-content-center justify-content-lg-start">
+				<div class="d-flex align-items-center mb-3 justify-content-center">
 					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
-					<span class="text-danger fw-bold text-uppercase small">Tầm nhìn & giá trị.</span>
+					<span class="text-danger fw-bold text-uppercase small">Tầm nhìn & giá trị</span>
+					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
 				</div>
-				<h2 class="display-5 fw-bold text-uppercase">@GetSt("setting.general.vision.main_title")</h2>
+				<h2 class="display-6 fw-bold text-uppercase text-center">@GetSt("setting.general.vision.main_title")</h2>
 			</div>
 		</div>
 
 		@* 2. THANH ĐIỀU HƯỚNG TAB (Đã tách ra ngoài để sửa lỗi click 2 lần) *@
 		<div class="row mb-4">
-			<div class="col-lg-6 offset-lg-6 ps-lg-5">
-				<ul class="nav nav-pills gap-3 justify-content-center justify-content-lg-start" id="visionTab" role="tablist">
+			<div class="col-lg-12">
+				<ul class="nav nav-pills gap-3 justify-content-center" id="visionTab" role="tablist">
 					@foreach (var idx in visionIndexes)
 					{
 						<li class="nav-item" role="presentation">
@@ -379,7 +386,7 @@
 		</div>
 
 		@* 3. NỘI DUNG TAB *@
-		<div class="tab-content" id="visionTabContent">
+		<div class="tab-content mt-5" id="visionTabContent">
 			@foreach (var idx in visionIndexes)
 			{
 				var isActive = (idx == visionIndexes.First()) ? "show active" : "";
@@ -394,7 +401,7 @@
 
 						<div class="col-lg-6 ps-lg-5 mt-4 mt-lg-0">
 							<div class="vision-content-box">
-								<h3 class="fw-bold mb-3 fs-2 text-uppercase">@GetSt($"setting.general.vision.title.{idx}")</h3>
+								<h3 class="fw-bold mb-3 fs-4 text-uppercase">@GetSt($"setting.general.vision.title.{idx}")</h3>
 								<p class="text-muted lh-lg mb-4" style="text-align: justify;">
 									@GetSt($"setting.general.vision.content.{idx}")
 								</p>
@@ -474,11 +481,12 @@
 		@* Tiêu đề *@
 		<div class="row mb-5">
 			<div class="col-12">
-				<div class="d-flex align-items-center mb-2" style="margin-left: 20%;">
+				<div class="d-flex justify-content-center align-items-center mb-4">
 					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
-					<span class="text-danger fw-bold text-uppercase small">dự án.</span>
+					<span class="text-danger fw-bold text-uppercase small">dự án</span>
+					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
 				</div>
-				<h2 class="display-4 fw-bold text-uppercase text-center">Dự án nổi bật</h2>
+				<h2 class="display-6 fw-bold text-uppercase text-center">Dự án nổi bật</h2>
 			</div>
 		</div>
 
@@ -513,7 +521,7 @@
 
 		@* Nút điều hướng *@
 		<div class="row mt-5">
-			<div class="col-12 d-flex gap-2 justify-content-center justify-content-lg-start" style="padding-left: 10%;">
+			<div class="col-12 d-flex gap-2 justify-content-center">
 				<button id="prevProject" class="btn btn-outline-light rounded-0 p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
 					<i class="fa-solid fa-arrow-left"></i>
 				</button>
@@ -657,11 +665,12 @@
 		@* TIÊU ĐỀ CHÍNH *@
 		<div class="row mb-5">
 			<div class="col-12 text-center">
-				<div class="d-flex align-items-center mb-2 ">
+				<div class="d-flex justify-content-center align-items-center mb-4">
 					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
-					<span class="text-danger fw-bold text-uppercase small">dịch vụ.</span>
+					<span class="text-danger fw-bold text-uppercase small">dịch vụ</span>
+					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
 				</div>
-				<h2 class="display-4 fw-bold text-uppercase">
+				<h2 class="display-6 fw-bold text-uppercase">
 					@GetSt("setting.general.services.titlemain")
 				</h2>
 			</div>
@@ -744,7 +753,7 @@
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
-		height: 3.2rem;
+		height: 4.2rem;
 	}
 
 	.content-limit {
@@ -778,15 +787,16 @@
 
 <section class="partners-section py-5 bg-light">
 	<div class="container">
-		<div class="row mb-4 align-items-center">
+		<div class="row mb-4 justify-content-center align-items-center">
 			<div class="col-md-auto">
-				<div class="d-flex align-items-center">
+				<div class="d-flex justify-content-center align-items-center">
 					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
-					<span class="text-danger fw-bold text-uppercase small" style="white-space: nowrap;">khách hàng & đối tác.</span>
+					<span class="text-danger fw-bold text-uppercase small" style="white-space: nowrap;">khách hàng & đối tác</span>
+					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
 				</div>
 			</div>
-			<div class="col border-top border-secondary-subtle ms-3 d-none d-md-block">
-			</div>
+			@* <div class="col border-top border-secondary-subtle ms-3 d-none d-md-block">
+			</div> *@
 		</div>
 
 		<div class="row">
@@ -878,11 +888,12 @@
 	<div class="container">
 		<div class="row mb-5">
 			<div class="col-12" style="text-align: center;">
-				<div class="d-flex align-items-center mb-2">
+				<div class="d-flex justify-content-center align-items-center mb-4">
 					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
-					<span class="text-danger fw-bold text-uppercase small">tin tức.</span>
+					<span class="text-danger fw-bold text-uppercase small">tin tức</span>
+					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
 				</div>
-				<h2 class="display-4 fw-bold text-uppercase">Bài viết mới</h2>
+				<h2 class="display-6 fw-bold text-uppercase">Bài viết mới</h2>
 			</div>
 		</div>
 
@@ -893,10 +904,17 @@
 					<div class="blog-card">
 						@* Phần ảnh và ngày tháng *@
 						<div class="blog-thumb position-relative overflow-hidden mb-3">
-							<a href="/tin-tuc/@item.Slug">
-								<img src="@item.Thumbnail" class="img-fluid w-100" alt="@item.Title">
-							</a>
+							@{
+								var thumbnail = string.IsNullOrEmpty(item.Thumbnail) 
+									? "/images/default.png" 
+									: item.Thumbnail;
+							}
 
+							<a href="/tin-tuc/@item.Slug">
+								<img src="@thumbnail"
+									class="img-fluid w-100"
+									alt="@item.Title">
+							</a>
 							@* Box ngày tháng đè lên ảnh *@
 							<div class="date-box position-absolute top-0 start-0 bg-white p-2 text-center shadow-sm">
 								<span class="d-block fw-bold fs-4 lh-1">@item.PublishedDate.Value.ToString("dd")</span>
@@ -912,7 +930,7 @@
 								.ToDictionary(c => (int)c.Id, c => (string)c.CategoryName);
 							}
 
-							<span class="text-muted small text-uppercase fw-bold">
+							<span class="blog-cate small">
 								@(
 															blogCats.ContainsKey(item.CategoryId ?? 0)
 															? blogCats[item.CategoryId ?? 0]
@@ -920,7 +938,7 @@
 															)
 							</span>
 
-							<h4 class="blog-title mb-3">
+							<h4 class="blog-title my-2">
 								<a href="/tin-tuc/@item.Slug" class="text-decoration-none text-dark fw-bold">
 									@item.Title
 								</a>
@@ -956,6 +974,17 @@
 			color: #333;
 		}
 
+	.blog-card {
+		border: 1px solid #eee;
+		border-radius: 0 0 10px 10px;
+		box-shadow: 3px 7px 8px #eee;
+		height: 100%;
+	}
+
+	.blog-content {
+		padding: 0 10px 30px;
+	}
+
 	/* Ảnh bài viết */
 	.blog-thumb img {
 		height: 250px;
@@ -969,13 +998,21 @@
 
 	/* Tiêu đề bài viết */
 	.blog-title {
-		font-size: 1.25rem;
+		font-size: 18px;
 		line-height: 1.4;
 		display: -webkit-box;
 		-webkit-line-clamp: 2; /* Giới hạn 2 dòng tiêu đề */
 		-webkit-box-orient: vertical;
 		overflow: hidden;
-		height: 3.5rem;
+		height: 2rem;
+	}
+
+	.blog-cate {
+		background: #e30613;
+		padding: 2px 6px;
+		color: #fff !important;
+		font-size: 12px;
+		border-radius: 3px;
 	}
 
 		.blog-title a:hover {
@@ -1015,7 +1052,8 @@
 			<div class="col-lg-4 mb-5 mb-lg-0">
 				<div class="d-flex align-items-center mb-2">
 					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
-					<span class="text-danger fw-bold text-uppercase small">con số ấn tượng.</span>
+					<span class="text-danger fw-bold text-uppercase small">con số ấn tượng</span>
+					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
 				</div>
 				<h2 class="display-3 fw-bold text-uppercase brand-text">VDCD</h2>
 			</div>
@@ -1028,8 +1066,8 @@
 							<span class="text-muted small text-uppercase fw-bold">Trung tâm</span>
 						</div>
 						<div class="d-flex align-items-center">
-							<h3 class="stat-number mb-0 me-3">12</h3>
-							<p class="stat-text mb-0 text-dark fw-bold">Trung tâm thuộc hệ sinh<br>thái công nghệ</p>
+							<h3 class="stat-number mb-0 me-3" data-target="12">0</h3>
+							<p class="stat-text mb-0 text-dark fw-bold">Trung tâm thuộc hệ sinh thái công nghệ</p>
 						</div>
 					</div>
 
@@ -1039,8 +1077,8 @@
 							<span class="text-muted small text-uppercase fw-bold">Kinh nghiệm</span>
 						</div>
 						<div class="d-flex align-items-center">
-							<h3 class="stat-number mb-0 me-3">20</h3>
-							<p class="stat-text mb-0 text-dark fw-bold">Năm nền tảng phát triển<br>về tài chính – nhân lực</p>
+							<h3 class="stat-number mb-0 me-3" data-target="20">0</h3>
+							<p class="stat-text mb-0 text-dark fw-bold">Năm nền tảng phát triển về tài chính – nhân lực</p>
 						</div>
 					</div>
 
@@ -1050,7 +1088,7 @@
 							<span class="text-muted small text-uppercase fw-bold">Nhân sự</span>
 						</div>
 						<div class="d-flex align-items-center">
-							<h3 class="stat-number mb-0 me-3">1500</h3>
+							<h3 class="stat-number mb-0 me-3" data-target="1500">0</h3>
 							<p class="stat-text mb-0 text-dark fw-bold">Nhân sự khắp cả nước</p>
 						</div>
 					</div>
@@ -1061,7 +1099,7 @@
 							<span class="text-muted small text-uppercase fw-bold">Dự án</span>
 						</div>
 						<div class="d-flex align-items-center">
-							<h3 class="stat-number mb-0 me-3">500</h3>
+							<h3 class="stat-number mb-0 me-3" data-target="500">0</h3>
 							<p class="stat-text mb-0 text-dark fw-bold">Dự án đã hoàn thành</p>
 						</div>
 					</div>
@@ -1073,7 +1111,7 @@
 <style>
 	.statistics-section {
 		background-color: #fff;
-		font-family: 'Inter', sans-serif; /* Hoặc font bạn đang dùng */
+		@* font-family: 'Inter', sans-serif; /* Hoặc font bạn đang dùng */ *@
 	}
 
 	.brand-text {
@@ -1114,6 +1152,37 @@
 		}
 	}
 </style>
+
+@* Counter *@
+<script>
+	$(document).ready(function () {
+		let counted = false;
+		$(window).on("scroll", function () {
+			let sectionTop = $(".statistics-section").offset().top - window.innerHeight + 100;
+			if (!counted && $(window).scrollTop() > sectionTop) {
+				$(".stat-number").each(function () {
+					let $this = $(this);
+					let target = parseInt($this.attr("data-target"));
+					$({ countNum: 0 }).animate(
+						{ countNum: target },
+						{
+							duration: 2000,
+							easing: "swing",
+							step: function () {
+								$this.text(Math.floor(this.countNum));
+							},
+							complete: function () {
+								$this.text(target);
+							}
+						}
+					);
+				});
+				counted = true;
+			}
+		});
+	});
+</script>
+
 <section class="ideals-section position-relative bg-black overflow-hidden">
 	<div class="container-fluid p-0">
 		<div class="row g-0 align-items-center" style="min-height: 550px;">
@@ -1122,11 +1191,12 @@
 				<div class="content-wrapper px-4 px-md-5">
 					<div class="d-flex align-items-center mb-4">
 						<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
-						<span class="text-danger fw-bold text-uppercase small">đồng hành & phát triển.</span>
+						<span class="text-danger fw-bold text-uppercase small">đồng hành & phát triển</span>
+						<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
 					</div>
 
-					<h2 class="text-white fw-bold display-4 text-uppercase mb-0" style="letter-spacing: -1px; line-height: 1.1;">
-						Cùng VDCD biến ý tưởng<br>
+					<h2 class="text-white fw-bold display-4 text-uppercase mb-0" style="letter-spacing: -1px; line-height: 1.5;">
+						Cùng VDCD biến ý tưởng
 						thành hiện thực
 					</h2>
 				</div>

@@ -32,6 +32,7 @@
         position: relative;
         display: flex;
         align-items: flex-end; /* Đẩy nội dung xuống đáy */
+        margin-top: 110px;
     }
 
     .hero-content {
@@ -47,7 +48,7 @@
     }
 
     .hero-content h1 {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        @* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; *@
         letter-spacing: -1px;
     }
 
@@ -85,17 +86,18 @@
 
 <section class="brand-story py-5" style="background-color: #fff;">
     <div class="container">
-        <div class="row mb-4">
+        <div class="row mb-5">
             <div class="col-12 text-center">
-                <h5 class="text-danger text-uppercase fw-bold" style="letter-spacing: 2px;">
+                <div class="text-danger text-uppercase fw-bold mb-4" style="letter-spacing: 2px;">
                     <span class="border-top border-danger border-3 me-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
-                    Câu chuyện thương hiệu
-                </h5>
-                <h1 class="display-4 fw-black mt-2" style="font-weight: 900; letter-spacing: -1px;">VDCD NINH BÌNH</h1>
+                    <span class="small">Câu chuyện thương hiệu</span>
+                    <span class="border-top border-danger border-3 ms-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
+                </div>
+                <h2 class="display-6 fw-bold text-uppercase">VDCD NINH BÌNH</h2>
             </div>
         </div>
 
-        <div class="row g-5 align-items-center">
+        <div class="row g-5">
             <div class="col-lg-6">
                 <div class="position-relative">
                     <img src="@GetSt("setting.general.trademark.image")" alt="VDCD Projects Map" class="img-fluid w-100 shadow-sm rounded">
@@ -104,9 +106,9 @@
 
             <div class="col-lg-6">
                 <div class="brand-info">
-                    <h2 class="text-danger fw-bold mb-3" style="line-height: 1.2;">
+                    <h4 class="text-danger fw-bold mb-3" style="line-height: 1.2;">
                         CÔNG TY CP TỔNG CÔNG TY CÔNG NGHỆ THIẾT KẾ XÂY DỰNG VIỆT NAM
-                    </h2>
+                    </h4>
 
                     <div class="mb-4">
                         <p class="mb-1"><strong>Tên viết tắt:</strong> @GetSt("setting.general.trademark.initials")</p>
@@ -130,9 +132,9 @@
         font-weight: 900;
     }
 
-    .brand-story {
+    @* .brand-story {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    } *@
 
     .text-danger {
         color: #e31e24 !important; /* Màu đỏ đặc trưng của thương hiệu */
@@ -144,7 +146,7 @@
     .strengths-section {
         background-color: #f8f9fa;
         padding: 80px 0;
-        font-family: 'Segoe UI', Arial, sans-serif;
+        @* font-family: 'Segoe UI', Arial, sans-serif; *@
     }
 
     .section-subtitle {
@@ -190,6 +192,12 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             border-bottom: 4px solid #e31e24 !important;
         }
+        .card-strength:hover .strength-number {
+            transition: all 0.3s ease;
+            background: #f00;
+            color: #fff;
+            border: none;
+        }
 
     .strength-number {
         font-size: 0.8rem;
@@ -203,7 +211,7 @@
     }
 
     .strength-title {
-        font-weight: 800;
+        font-weight: 700;
         font-size: 1.6rem;
         color: #111;
         margin-bottom: 20px;
@@ -216,7 +224,15 @@
         font-size: 0.95rem;
         line-height: 1.7;
         text-align: justify;
+        display: -webkit-box;
+        -webkit-line-clamp: 12;      /* số dòng muốn hiển thị */
+        -webkit-box-orient: vertical;
         overflow: hidden;
+    }
+
+    .strength-description:hover {
+        -webkit-line-clamp: unset;
+        overflow: auto;
     }
 
     /* Custom nút điều hướng Carousel */
@@ -234,7 +250,11 @@
     <div class="container">
         <div class="row mb-5 align-items-center">
             <div class="col-lg-3">
-                <h5 class="section-subtitle">Thế mạnh.</h5>
+                <div class="text-danger text-uppercase fw-bold" style="letter-spacing: 2px;">
+                <span class="border-top border-danger border-3 me-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
+                <span class="small">Thế mạnh</span>
+                <span class="border-top border-danger border-3 ms-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
+                </div>
             </div>
             <div class="col-lg-9">
                 <p class="mb-0 fw-bold text-muted" style="max-width: 800px;">
@@ -307,39 +327,23 @@
     .solutions-section {
         padding: 80px 0;
         background-color: #fff;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        @* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; *@
     }
 
     /* Tiêu đề chính giữa */
     .main-title {
-        font-weight: 900;
-        font-size: 3.5rem;
+        font-size: 2.5rem;
         text-align: center;
-        margin-bottom: 60px;
+        margin-bottom: 40px;
         color: #000;
         letter-spacing: -1px;
-    }
-
-    .label-solution {
-        color: #e31e24;
-        font-weight: 700;
         text-transform: uppercase;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
+        font-weight: 700;
     }
-
-        .label-solution::before {
-            content: "";
-            width: 25px;
-            height: 2px;
-            background: #e31e24;
-        }
 
     /* Tiêu đề cột (Giải pháp công nghệ, Tư vấn khảo sát...) */
     .column-title {
-        font-weight: 800;
+        font-weight: 700;
         font-size: 1.5rem;
         margin-bottom: 20px;
         color: #000;
@@ -380,13 +384,17 @@
 
 <section class="solutions-section">
     <div class="container">
-        <div class="d-flex justify-content-start mb-2">
-            <div class="label-solution">Giải pháp.</div>
+        <div class="d-flex justify-content-center justify-content-start mb-4">
+            <h5 class="text-danger text-uppercase fw-bold" style="letter-spacing: 2px;">
+                <span class="border-top border-danger border-3 me-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
+                <span class="small">Giải pháp</span>
+                <span class="border-top border-danger border-3 ms-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
+            </h5>
         </div>
 
         <h2 class="main-title">Lĩnh vực hoạt động</h2>
 
-        <div class="row g-5">
+        <div class="row g-5 mt-4">
             @{
                 int i1 = 0;
                 // Vòng lặp lấy dữ liệu từ setting.general.solution (theo ảnh image_0ed966.png)
@@ -417,15 +425,16 @@
 </section>
 <section class="partners-section py-5 bg-light">
     <div class="container">
-        <div class="row mb-4 align-items-center">
+        <div class="row mb-4 justify-content-center align-items-center">
             <div class="col-md-auto">
-                <div class="d-flex align-items-center">
-                    <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
-                    <span class="text-danger fw-bold text-uppercase small" style="white-space: nowrap;">khách hàng & đối tác.</span>
-                </div>
+                <h5 class="d-flex justify-content-center align-items-center">
+					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="text-danger fw-bold text-uppercase" style="white-space: nowrap;">khách hàng & đối tác</span>
+					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+				</h5>
             </div>
-            <div class="col border-top border-secondary-subtle ms-3 d-none d-md-block">
-            </div>
+            @* <div class="col border-top border-secondary-subtle ms-3 d-none d-md-block">
+            </div> *@
         </div>
 
         <div class="row">

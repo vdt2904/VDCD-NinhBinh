@@ -29,6 +29,7 @@
         position: relative;
         display: flex;
         align-items: flex-end; /* Đẩy nội dung xuống đáy */
+        margin-top: 110px;
     }
 
     .hero-content {
@@ -103,10 +104,16 @@
 </section>
 <style>
     /* Card Tin tức */
+    a {
+        text-decoration: none;
+        color: #000;
+    }
     .news-card {
-        border: none;
         transition: transform 0.3s ease;
         height: 100%;
+        border: 1px solid #eee;
+		border-radius: 0 0 10px 10px;
+		box-shadow: 3px 7px 8px #eee;
     }
 
         .news-card .card-img-top {
@@ -129,17 +136,22 @@
         line-height: 1;
     }
 
+    .card-body {
+        padding: 15px;
+    }
+
+    .news-category {
+		background: #e30613;
+		padding: 2px 6px;
+		color: #fff !important;
+		font-size: 12px;
+		border-radius: 3px;
+	}
+
     .date-month {
         font-size: 0.8rem;
         color: #666;
         text-transform: uppercase;
-    }
-
-    .news-category {
-        font-size: 0.75rem;
-        color: #999;
-        text-transform: uppercase;
-        letter-spacing: 1px;
     }
 
     .news-title {
@@ -256,20 +268,20 @@
 
             html += `
                     <div class="col-md-4 mb-4">
-                        <div class="card news-card h-100 shadow-sm border-0">
-                            <div class="position-relative">
+                        <div class="card news-card h-100">
+                            <a href="/tin-tuc/${item.slug}" class="position-relative">
                                 <div class="date-badge">
                                     <span class="date-day">${day}</span>
                                     <span class="date-month">${month}</span>
                                 </div>
-                                <img src="${item.thumbnail || '/images/default-news.jpg'}" class="card-img-top" alt="${item.title}" style="height: 220px; object-fit: cover;">
-                            </div>
-                            <div class="card-body pt-4 px-1">
-                                <p class="news-category mb-1 text-uppercase small text-muted font-weight-bold">${item.categoryName || 'Tin tức'}</p>
+                                <img src="${item.thumbnail || '/images/default.png'}" class="card-img-top" alt="${item.title}" style="height: 220px; object-fit: cover;">
+                            </a>
+                            <a href="/tin-tuc/${item.slug}" class="card-body">
+                                <span class="news-category mb-1 text-uppercase small text-muted font-weight-bold">${item.categoryName || 'Tin tức'}</span>
                                 <h3 class="news-title h5 font-weight-bold text-dark mb-2" title="${item.title}">${item.title}</h3>
                                 <p class="news-excerpt text-muted small mb-3">${item.summary || ''}</p>
-                                <a href="/tin-tuc/${item.slug}" class="read-more text-dark font-weight-bold text-decoration-underline">Đọc Thêm</a>
-                            </div>
+                                <span class="read-more text-dark font-weight-bold text-decoration-underline">Đọc Thêm</span>
+                            </a>
                         </div>
                     </div>
                 `;

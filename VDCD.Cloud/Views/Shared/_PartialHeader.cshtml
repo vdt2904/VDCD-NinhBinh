@@ -26,6 +26,11 @@
         font-family: var(--e-global-typography-text-font-family), sans-serif;
         padding: 0.5rem clamp(0.5rem, 1vw, 1.1rem) !important;
         transition: color 0.2s ease-in-out;
+        font-family: "Inter", sans-serif;
+    }
+
+    .nav-item:hover .nav-link {
+        color: #ff0000 !important;
     }
 
     .btn-login-custom {
@@ -39,12 +44,13 @@
         font-weight: bold;
         display: inline-block;
         transition: all 0.3s ease;
+        font-family: "Inter", sans-serif;
     }
 
     /* --- TỐI ƯU HERO SLIDER --- */
     .hero-title {
         /* Chữ tự động co giãn: Cực tiểu 35px, Linh hoạt 6vw, Cực đại 80px */
-        font-size: clamp(35px, 6vw, 80px) !important;
+        font-size: clamp(35px, 6vw, 60px) !important;
         font-weight: 900;
         color: #fff;
         margin: 10%;
@@ -52,7 +58,7 @@
     }
 
     .hero-subtitle {
-        font-size: clamp(25px, 4.5vw, 60px) !important;
+        font-size: clamp(25px, 4.5vw, 50px) !important;
         font-weight: 800;
         color: #fff;
         letter-spacing: 2px;
@@ -81,6 +87,14 @@
         z-index: 20;
     }
 
+    .header-main {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 999;
+        transition: all 0.3s ease;
+    }
     @@media (max-width: 768px) {
         .explore-button-wrapper {
             right: auto;
@@ -132,6 +146,7 @@
         width: 100%;
         height: 100vh; /* Full màn hình */
         overflow: hidden;
+        margin-top: 110px;
     }
 
     /* Hiệu ứng Zoom nhẹ cho ảnh nền */
@@ -184,12 +199,12 @@
         line-height: 1;
     }
 
-    .hero-subtitle {
+    @* .hero-subtitle {
         font-size: 60px;
         font-weight: 800;
         color: #fff;
         letter-spacing: 2px;
-    }
+    } *@
 
     .text-red {
         color: #ff0000;
@@ -198,12 +213,15 @@
     /* Nút Khám phá dự án */
     .explore-button-wrapper {
         position: absolute;
-        bottom: 50px;
-        right: 10%;
+        width: 100%;
+        top: 370px;
+        left: 0;
         z-index: 20;
+        text-align: center;
     }
 
     .btn-explore {
+        font-size: 18px;
         border: 1px solid #fff;
         color: #fff;
         padding: 10px 25px;
@@ -214,6 +232,7 @@
         align-items: center;
         transition: 0.3s;
         background: rgba(0,0,0,0.3);
+        display: ruby;
     }
 
     .icon-arrow {
@@ -234,8 +253,8 @@
 
     /* Indicators tùy chỉnh */
     .custom-indicators {
-        justify-content: flex-start;
-        left: 10%;
+        @* justify-content: flex-start;
+        left: 10%; *@
         margin-bottom: 50px;
     }
 

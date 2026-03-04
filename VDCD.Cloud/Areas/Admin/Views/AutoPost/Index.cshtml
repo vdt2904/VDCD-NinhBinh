@@ -224,8 +224,8 @@
                                 <div class="col-md-6">
                                     <label class="fw-bold">Tùy chọn tạo nội dung</label>
                                     <select class="form-select" id="fbContentOption" onchange="toggleAIOptions()">
-                                        <option value="manual">✍️ Tự viết nội dung</option>
-                                        <option value="ai">🤖 Tạo nội dung tự động bằng AI</option>
+                                        <option value="0">✍️ Tự viết nội dung</option>
+                                        <option value="1">🤖 Tạo nội dung tự động bằng AI</option>
                                     </select>
                                 </div>
                             </div>
@@ -901,7 +901,7 @@
     // Hàm toggle hiển thị options AI
     function toggleAIOptions() {
         const contentOption = $('#fbContentOption').val();
-        if (contentOption === 'ai') {
+        if (contentOption === '1') {
             $('#aiOptionsContainer').slideDown(300);
         } else {
             $('#aiOptionsContainer').slideUp(300);
@@ -1608,12 +1608,13 @@
     }
 
     // Tạo nội dung tự động bằng AI
+        // Tạo nội dung tự động bằng AI
     function generateAIContent() {
         const contentOption = $('#fbContentOption').val();
 
-        if (contentOption !== 'ai') {
+        if (contentOption !== 'ai' && contentOption !== '1') {
             if (confirm('Bạn muốn chuyển sang chế độ tạo nội dung bằng AI?')) {
-                $('#fbContentOption').val('ai').trigger('change');
+                $('#fbContentOption').val('1').trigger('change');
             } else {
                 return;
             }
@@ -1634,106 +1635,74 @@
             return;
         }
 
-        const generateBtn = event.target;
-        const originalText = generateBtn.innerHTML;
-        generateBtn.innerHTML = '<i class="bi bi-arrow-repeat me-1 spinner"></i>AI đang suy nghĩ...';
-        generateBtn.disabled = true;
+        // Try to find the calling button for ui feedback
+        let generateBtn = (typeof event !== 'undefined' && event?.target) ? event.target : document.activeElement;
+        if (generateBtn && generateBtn.tagName !== 'BUTTON' && generateBtn.tagName !== 'INPUT') {
+            generateBtn = null;
+        }
+        const originalText = generateBtn ? $(generateBtn).html() : null;
+        if (generateBtn) {
+            $(generateBtn).html('<i class="bi bi-arrow-repeat me-1 spinner"></i>AI đang suy nghĩ...').prop('disabled', true);
+        }
 
         $('#uploadProgress').removeClass('d-none').find('.progress-bar').css('width', '30%');
 
-        setTimeout(() => {
-            let content = '';
+        // Prepare attachments as full URLs
+        const attachments = selectedAttachments.map(a => {
+            const url = a.url || a;
+            return url.startsWith('http') ? url : (baseUrl + url);
+        });
 
-            switch (type) {
-                case 'activity':
-                    content = `<p>📸 <strong>${title}</strong></p>
-    <p>${prompt}</p>
-    <p>✨ <strong>Những khoảnh khắc đáng nhớ:</strong></p>
-    <ul>
-    <li>Hoạt động team building sôi nổi với sự tham gia của tất cả CBCNV</li>
-    <li>Những tiếng cười và niềm vui lan tỏa khắp buổi hoạt động</li>
-    <li>Gắn kết tình đồng đội và tạo động lực làm việc</li>
-    </ul>
-    <p>Cảm ơn tất cả mọi người đã tham gia và tạo nên thành công cho chương trình! ❤️</p>`;
-                    break;
-                case 'event':
-                    content = `<p>🎉 <strong>${title}</strong></p>
-    <p>${prompt}</p>
-    <p>📅 <strong>Thời gian:</strong> ${$('#scheduleDate').val()} lúc ${$('#scheduleTime').val()}<br>
-    📍 <strong>Địa điểm:</strong> Tòa nhà VDCD, Hà Nội</p>
-    <p>✨ <strong>Nội dung chương trình:</strong></p>
-    <ul>
-    <li>Chia sẻ từ chuyên gia hàng đầu trong lĩnh vực</li>
-    <li>Workshop thực hành với các chủ đề hot</li>
-    <li>Networking với các doanh nghiệp và đối tác</li>
-    </ul>
-    <p>Đăng ký ngay: https://vdcd.vn/event-dang-ky</p>`;
-                    break;
-                case 'recruitment':
-                    content = `<p>💼 <strong>${title}</strong></p>
-    <p>${prompt}</p>
-    <p>✅ <strong>Yêu cầu:</strong></p>
-    <ul>
-    <li>Kinh nghiệm 3-5 năm trong lĩnh vực liên quan</li>
-    <li>Kỹ năng làm việc nhóm và giao tiếp tốt</li>
-    <li>Tiếng Anh giao tiếp thành thạo</li>
-    <li>Tư duy logic và giải quyết vấn đề</li>
-    </ul>
-    <p>✅ <strong>Quyền lợi:</strong></p>
-    <ul>
-    <li>Mức lương hấp dẫn và thưởng theo dự án</li>
-    <li>Môi trường làm việc chuyên nghiệp, năng động</li>
-    <li>Cơ hội thăng tiến và đào tạo chuyên sâu</li>
-    <li>Chế độ phúc lợi đầy đủ theo quy định</li>
-    </ul>
-    <p>Ứng tuyển ngay: https://vdcd.vn/tuyen-dung</p>`;
-                    break;
-                case 'tech':
-                    content = `<p>💡 <strong>${title}</strong></p>
-    <p>${prompt}</p>
-    <p>🔧 <strong>Công nghệ chính được áp dụng:</strong></p>
-    <ul>
-    <li>.NET Core 8.0 với hiệu suất vượt trội</li>
-    <li>ReactJS kết hợp TypeScript cho frontend</li>
-    <li>Microservices architecture linh hoạt</li>
-    <li>Containerization với Docker & Kubernetes</li>
-    </ul>
-    <p>📝 <strong>Bài học kinh nghiệm:</strong></p>
-    <ul>
-    <li>Tối ưu hiệu suất và tài nguyên hệ thống</li>
-    <li>Bảo mật đa tầng cho ứng dụng</li>
-    <li>Dễ dàng mở rộng và bảo trì</li>
-    </ul>
-    <p>Các bạn có thắc mắc gì cứ comment bên dưới nhé! 👨‍💻</p>`;
-                    break;
-                default:
-                    content = `<p>📝 <strong>${title}</strong></p>
-    <p>${prompt}</p>
-    <p>✅ <strong>Thông tin chi tiết:</strong></p>
-    <ul>
-    <li>Điểm nổi bật thứ nhất về nội dung</li>
-    <li>Điểm nổi bật thứ hai cần lưu ý</li>
-    <li>Điểm nổi bật thứ ba để mọi người cùng biết</li>
-    </ul>
-    <p>Mọi thắc mắc xin vui lòng liên hệ Phòng HCNS để được hỗ trợ.</p>`;
-            }
+        const payload = {
+            topic: prompt,
+            fbAttachmentsList: attachments
+        };
 
-            if (editorInstance) {
-                editorInstance.setData(content);
-            } else {
-                $('#fbEditor').val(content);
-            }
+        $.ajax({
+            url: '/api/Admin/Ai/generate',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                $('#uploadProgress').find('.progress-bar').css('width', '100%');
+                setTimeout(() => {
+                    $('#uploadProgress').addClass('d-none').find('.progress-bar').css('width', '0%');
+                }, 500);
 
-            $('#uploadProgress').find('.progress-bar').css('width', '100%');
-            setTimeout(() => {
+                if (generateBtn) {
+                    $(generateBtn).html(originalText).prop('disabled', false);
+                }
+
+                if (response && response.success) {
+                    // The API returns ApiResponse<FbPost>, so response.data is the FbPost object
+                    const fbPost = response.data || {};
+                    // Try several possible casing keys for content
+                    const generatedContent = fbPost.content || fbPost.Content || fbPost.Message || '';
+
+                    if (generatedContent) {
+                        if (editorInstance) {
+                            editorInstance.setData(generatedContent);
+                        } else {
+                            $('#fbEditor').val(generatedContent);
+                        }
+                        toastr.success('AI đã tạo nội dung thành công!');
+                    } else {
+                        toastr.warning('AI trả về nhưng không có nội dung. Vui lòng thử lại.');
+                    }
+                } else {
+                    const msg = (response && response.message) ? response.message : 'Có lỗi khi gọi API tạo nội dung';
+                    toastr.error(msg);
+                }
+            },
+            error: function (xhr, status, error) {
                 $('#uploadProgress').addClass('d-none').find('.progress-bar').css('width', '0%');
-            }, 500);
-
-            generateBtn.innerHTML = originalText;
-            generateBtn.disabled = false;
-
-            toastr.success('AI đã tạo nội dung thành công!');
-        }, 2000);
+                if (generateBtn) {
+                    $(generateBtn).html(originalText).prop('disabled', false);
+                }
+                console.error('AI generate error:', status, error, xhr.responseText);
+                toastr.error('Không thể kết nối đến dịch vụ AI. Vui lòng thử lại sau.');
+            }
+        });
     }
     // Xem trước bài viết hiện tại
     function previewCurrentPost() {

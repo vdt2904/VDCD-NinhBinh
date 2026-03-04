@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -178,6 +179,54 @@ namespace VDCD.Business.Helper
 			}
 
 			return sb.ToString();
+		}
+
+		// New: convert plain AI text into HTML suitable for CKEditor
+		public static string ToHtmlForEditor(string? text)
+		{
+			if (string.IsNullOrWhiteSpace(text))
+				return string.Empty;
+
+			var trimmed = text.Trim();
+
+			// If there are obvious HTML tags, assume already HTML and return as-is
+			if (Regex.IsMatch(trimmed, @"<\s*\/?\s*(p|br|div|ul|ol|li|strong|b|em|i|h[1-6]|a|img)[\s>]", RegexOptions.IgnoreCase))
+				return trimmed;
+
+			// Normalize new lines
+			trimmed = trimmed.Replace("\r\n", "\n").Replace("\r", "\n");
+
+			var paragraphs = trimmed.Split(new string[] { "\n\n" }, StringSplitOptions.None)
+				.Select(p => p.Trim())
+				.Where(p => !string.IsNullOrEmpty(p))
+				.ToList();
+
+			var sb = new StringBuilder();
+
+			foreach (var para in paragraphs)
+			{
+				// Detect bullet list lines: start with -, *, • or number + dot
+				var lines = para.Split('\n').Select(l => l.Trim()).Where(l => l.Length > 0).ToList();
+				bool isBulletList = lines.All(l => Regex.IsMatch(l, @"^(\- |\* |• |\d+\.\s)"));
+				if (isBulletList && lines.Count > 0)
+				{
+					sb.AppendLine("<ul>");
+					foreach (var line in lines)
+					{
+						var li = Regex.Replace(line, @"^(\- |\* |• |\d+\.\s)", "").Trim();
+						sb.AppendLine($"  <li>{WebUtility.HtmlEncode(li)}</li>");
+					}
+					sb.AppendLine("</ul>");
+				}
+				else
+				{
+					// Replace single newlines inside paragraph with <br/>
+					var inner = string.Join("<br/>", lines.Select(l => WebUtility.HtmlEncode(l)));
+					sb.AppendLine($"<p>{inner}</p>");
+				}
+			}
+
+			return sb.ToString().Trim();
 		}
 	}
 }

@@ -7,6 +7,8 @@ using VDCD.Business.Infrastructure;
 using VDCD.DataAccess;
 using VDCD.Entities.Cache;
 using VDCD.Entities.Custom;
+using Microsoft.AspNetCore.Http;
+using VDCD.Entities.Enums;
 
 namespace VDCD.Business.Service
 {
@@ -16,15 +18,22 @@ namespace VDCD.Business.Service
         private readonly ICacheService _cache;
         protected readonly AppDbContext _context;
         private readonly IRepository<SeoMeta> _seoRepo;
+        private readonly IActivityLogService _activityLogService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
         public PostsService(IRepository<Posts> postsRepo,
                               ICacheService cache,
                               AppDbContext context,
-                              IRepository<SeoMeta> seoRepo)
+                              IRepository<SeoMeta> seoRepo,
+                              IActivityLogService activityLogService,
+                              IHttpContextAccessor httpContextAccessor)
         {
             _postsRepo = postsRepo;
             _cache = cache;
             _context = context;
             _seoRepo = seoRepo;
+            _activityLogService = activityLogService;
+            _httpContextAccessor = httpContextAccessor;
         }
         public IReadOnlyList<Posts> GetAll()
         {
@@ -110,6 +119,13 @@ namespace VDCD.Business.Service
             _context.SaveChanges();
             ClearCache();
             SaveSeo(model, keywords);
+
+            // Log activity (synchronous wait to avoid changing method signature)
+            var action = model.Id == 0 ? "Created" : "Updated";
+            _activityLogService
+                .LogAsync(ActivityLogType.Post, $"{action} post '{model.Title}'", _httpContextAccessor.HttpContext)
+                .GetAwaiter()
+                .GetResult();
         }
         public Posts? GetById(int id)
         {
@@ -144,6 +160,12 @@ namespace VDCD.Business.Service
             _context.SaveChanges();
 
             ClearCache();
+
+            // Log delete
+            _activityLogService
+                .LogAsync(ActivityLogType.Post, $"Deleted post '{entity.Title}'", _httpContextAccessor.HttpContext)
+                .GetAwaiter()
+                .GetResult();
         }
 
         // =======================

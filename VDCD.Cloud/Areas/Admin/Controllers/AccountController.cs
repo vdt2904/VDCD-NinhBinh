@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using VDCD.Business.Service;
+using VDCD.Business.Infrastructure;
 using VDCD.Entities.Security;
 using VDCD.Extensions;
+using VDCD.Entities.Enums;
+
 namespace VDCD.Cloud.Areas.Admin.Controllers
 {
     [Area("Admin")]
@@ -14,17 +17,20 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
         private readonly UserService _userService;
         private readonly UserRoleService _userRoleService;
         private readonly RbacDemoSeedService _rbacDemoSeedService;
+        private readonly IActivityLogService _activityLogService;
 
         public AccountController(
             CacheSevice cacheSevice,
             UserService userService,
             UserRoleService userRoleService,
-            RbacDemoSeedService rbacDemoSeedService)
+            RbacDemoSeedService rbacDemoSeedService,
+            IActivityLogService activityLogService)
         {
             _cacheSevice = cacheSevice;
             _userService = userService;
             _userRoleService = userRoleService;
             _rbacDemoSeedService = rbacDemoSeedService;
+            _activityLogService = activityLogService;
         }
 
         [AllowAnonymous]
@@ -92,6 +98,12 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
 
             await HttpContext.SignInAsync("AdminAuth", principal, authProperties);
 
+            // Log login
+            await _activityLogService.LogAsync(
+                ActivityLogType.Login,
+                $"User '{foundUser?.UserName ?? username}' logged in",
+                HttpContext);
+
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
 
@@ -136,6 +148,14 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
         [HttpGet("/admin/account/logout")]
         public async Task<IActionResult> Logout()
         {
+            var username = User.GetUsername();
+
+            // Log logout before sign-out so HttpContext still contains the user info
+            await _activityLogService.LogAsync(
+                ActivityLogType.Logout,
+                $"User '{username}' logged out",
+                HttpContext);
+
             await HttpContext.SignOutAsync("AdminAuth");
             return RedirectToAction("Login");
         }

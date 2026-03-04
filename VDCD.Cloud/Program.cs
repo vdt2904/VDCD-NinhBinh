@@ -1,15 +1,16 @@
 ﻿using Hangfire;
-using System;
+using Hangfire.Dashboard;
 using Hangfire.MySql;
-using System.Transactions;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Transactions;
 using VDCD.Business;
 using VDCD.Business.Infrastructure;
 using VDCD.Business.Service;
 using VDCD.DataAccess;
-using VDCD.Hubs;
-using Microsoft.AspNetCore.Http.Features;
 using VDCD.Entities.Security;
+using VDCD.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,13 @@ builder.Services.AddScoped<SettingService>();
 builder.Services.AddScoped<FileManagerService>();
 builder.Services.AddScoped<CacheSevice>();
 builder.Services.AddScoped<CategoryService>();*/
+builder.Services.AddHttpClient<IAiService, AiService>(client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(5); // tăng lên 5 phút
+});
+
+builder.Services.AddScoped<IAiPostService, AiPostService>();
+builder.Services.AddScoped<IActivityLogService, ActivityLogService>();
 
 builder.Services.AddControllersWithViews();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -80,6 +88,7 @@ builder.Services.AddAuthentication("AdminAuth")
 
 builder.Services.AddAuthorization();
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -155,8 +164,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseHangfireDashboard("/admin/hangfire", new DashboardOptions
 {
-    // Cho phép tất cả mọi người truy cập (Chỉ dùng khi test, sau này nên thêm Filter)
-    Authorization = new[] { new Hangfire.Dashboard.LocalRequestsOnlyAuthorizationFilter() }
+	// Cho phép tất cả mọi người truy cập (Chỉ dùng khi test, sau này nên thêm Filter)
+	Authorization = new[] { new HangfireCustomAuthFilter() }
 });
 app.UseAuthorization();
 app.MapControllerRoute(
@@ -239,3 +248,10 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapHub<NotificationHub>("/hub/notification");
 app.Run();
+public class HangfireCustomAuthFilter : IDashboardAuthorizationFilter
+{
+	public bool Authorize(DashboardContext context)
+	{
+		return true; // Cho phép tất cả
+	}
+}

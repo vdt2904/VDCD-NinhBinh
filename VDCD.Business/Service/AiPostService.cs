@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
+using VDCD.Business.Helper;
 using VDCD.Business.Infrastructure;
 using VDCD.DataAccess;
 using VDCD.Entities.Custom;
@@ -24,12 +25,15 @@ namespace VDCD.Business.Service
         // Accept attachments and persist them as serialized JSON in FbPost.Files
         public async Task<FbPost> GenerateAndSave(string topic, List<string>? fbAttachmentsList = null)
         {
-            var content = await _ai.GeneratePost(topic, fbAttachmentsList);
+            var rawContent = await _ai.GeneratePost(topic, fbAttachmentsList);
+
+            // Format content for CKEditor: if AI returned plain text, convert to HTML paragraphs/lists.
+            var formatted = SocialContentFormatter.ToHtmlForEditor(rawContent);
 
             var post = new FbPost
             {
                 Topic = topic,
-                Content = content,
+                Content = formatted,
                 Status = "Draft",
                 Files = fbAttachmentsList is null ? null : JsonSerializer.Serialize(fbAttachmentsList)
             };

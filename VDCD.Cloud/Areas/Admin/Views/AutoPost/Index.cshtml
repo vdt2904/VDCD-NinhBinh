@@ -9,7 +9,8 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.ckeditor.com/ckeditor5/40.0.0/classic/ckeditor.js"></script>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <div class="container-fluid px-4">
     <!-- Header -->
     <div class="row mt-4">
@@ -1258,6 +1259,13 @@
             const urls = event.data.url;
 
             if (fbFmType === 'image') {
+                // Prevent selecting images when a video is already selected (Facebook doesn't allow video + images)
+                if (selectedVideos.length > 0) {
+                    toastr.error('Facebook không cho phép đăng video và ảnh cùng lúc. Vui lòng chỉ chọn một loại (chỉ ảnh hoặc chỉ video).');
+                    bootstrap.Modal.getInstance(document.getElementById('fbFileManagerModal')).hide();
+                    return;
+                }
+
                 if (Array.isArray(urls)) {
                     urls.forEach(imgUrl => {
                         // Lưu đường dẫn tương đối (loại bỏ domain)
@@ -1280,6 +1288,13 @@
                 }
                 updateImageGrid();
             } else if (fbFmType === 'video') {
+                // Prevent selecting video when any images are already selected (Facebook doesn't allow video + images)
+                if (selectedImages.length > 0) {
+                    toastr.error('Facebook không cho phép đăng video và ảnh cùng lúc. Vui lòng chỉ chọn một loại (chỉ ảnh hoặc chỉ video).');
+                    bootstrap.Modal.getInstance(document.getElementById('fbFileManagerModal')).hide();
+                    return;
+                }
+
                 if (Array.isArray(urls)) {
                     urls.forEach(videoUrl => {
                         let relativeUrl = videoUrl;
@@ -1940,6 +1955,17 @@
         const content = editorInstance ? editorInstance.getData() : '';
         if (!content) {
             alert('Vui lòng nhập nội dung bài viết');
+            return;
+        }
+
+        // Validate: Facebook Graph API does not support posting both video and images in the same feed item.
+        if (selectedImages.length > 0 && selectedVideos.length > 0) {
+            // Use toastr if available, fallback to alert
+            if (typeof toastr !== 'undefined') {
+                toastr.error('Facebook không cho phép đăng video và ảnh cùng lúc. Vui lòng bỏ chọn ảnh hoặc video trước khi lưu.');
+            } else {
+                alert('Facebook không cho phép đăng video và ảnh cùng lúc. Vui lòng bỏ chọn ảnh hoặc video trước khi lưu.');
+            }
             return;
         }
 

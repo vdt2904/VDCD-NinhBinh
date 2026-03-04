@@ -177,5 +177,9 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
 			};
             return Ok(user);
         }
+        public IActionResult DateNow()
+        {
+                       return Ok(DateTime.Now);
+		}
     }
 }

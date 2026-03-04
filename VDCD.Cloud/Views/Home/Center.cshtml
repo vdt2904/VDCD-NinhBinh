@@ -53,6 +53,7 @@
     position: relative;
     display: flex;
     align-items: flex-end; /* Đẩy nội dung xuống đáy */
+    margin-top: 110px;
 }
 
 .hero-content {
@@ -85,16 +86,15 @@
 
 <section class="centers-section py-5">
     <div class="container">
-        <div class="row mb-5 align-items-center">
-            <div class="col-md-4">
-                <div class="d-flex align-items-center mb-2">
-                    <span class="red-line me-2"></span>
-                    <span class="text-danger fw-bold text-uppercase small">hệ sinh thái tập đoàn.</span>
-                </div>
+        <div class="col-12 text-center mb-5">
+            <div class="d-flex justify-content-center align-items-center mb-4">
+                <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+                <span class="text-danger fw-bold text-uppercase small">hệ sinh thái tập đoàn</span>
+                <span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
             </div>
-            <div class="col-md-8">
-                <h2 class="fw-bold display-6 text-uppercase">Hệ thống 12 trung tâm - <br> Viện nghiên cứu trực thuộc</h2>
-            </div>
+            <h2 class="display-6 fw-bold text-uppercase">
+                Hệ thống 12 trung tâm <br> Viện nghiên cứu trực thuộc
+            </h2>
         </div>
 
         <div class="row g-4">
@@ -106,7 +106,7 @@
                             <img src="@center.Image" class="img-fluid rounded-0" alt="@center.Name">
                         </div>
 
-                        <div class="card-body px-0">
+                        <div class="card-body">
                             <h4 class="fw-bold mb-3 center-title">@center.Name</h4>
                             <hr class="w-25 mb-3">
                             <a href="@center.Url" class="text-danger text-decoration-none fw-bold d-flex align-items-center learn-more">
@@ -131,9 +131,23 @@
     /* Định dạng tiêu đề trung tâm */
     .center-title {
         font-size: 1.5rem;
-        min-height: 3.6rem; /* Giữ cho các tiêu đề đều nhau nếu chữ dài ngắn khác nhau */
         line-height: 1.2;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;      /* số dòng muốn hiển thị */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
+
+    .center-card {
+        border: 1px solid #eee;
+		border-radius: 0 0 10px 10px;
+		box-shadow: 3px 7px 8px #eee;
+		height: 100%;
+    }
+
+    .card-body {
+		padding: 0 10px 30px;
+	}
 
     /* Hiệu ứng cho ảnh */
     .img-wrapper {
@@ -158,8 +172,9 @@
         transition: gap 0.3s ease;
     }
 
-        .learn-more:hover {
-            gap: 10px; /* Tạo hiệu ứng mũi tên dịch chuyển */
+        .center-card:hover .bi-arrow-up-right {
+            transform: rotate(40deg);
+            transition: 0.3s all;
         }
 
     /* Tùy chỉnh font chữ tiêu đề lớn */
@@ -170,16 +185,15 @@
 
 <section class="collaboration-section py-5">
     <div class="container">
-        <div class="row mb-5 align-items-center">
-            <div class="col-md-3">
-                <div class="d-flex align-items-center mb-2">
-                    <span class="red-line me-2"></span>
-                    <span class="text-danger fw-bold text-uppercase small">cách thức vận hành.</span>
-                </div>
+        <div class="col-12 text-center mb-5">
+            <div class="d-flex justify-content-center align-items-center mb-4">
+                <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+                <span class="text-danger fw-bold text-uppercase small">cách thức vận hành</span>
+                <span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
             </div>
-            <div class="col-md-9">
-                <h2 class="fw-bold display-5 text-uppercase">@GetSt("setting.general.operation.main_title")</h2>
-            </div>
+            <h2 class="display-6 fw-bold text-uppercase">
+                @GetSt("setting.general.operation.main_title")
+            </h2>
         </div>
 
         <div class="row mt-4">
@@ -311,9 +325,10 @@
 <section class="contact-section py-5 bg-light">
     <div class="container">
         <div class="mb-4">
-            <div class="d-flex align-items-center mb-2">
-                <span class="red-line-short me-2"></span>
-                <span class="text-danger fw-bold text-uppercase small">liên hệ.</span>
+            <div class="d-flex align-items-center mb-4">
+                <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+                <span class="text-danger fw-bold text-uppercase small">liên hệ</span>
+                <span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
             </div>
             <h2 class="fw-bold display-6 text-uppercase">Liên hệ với chúng tôi</h2>
         </div>
@@ -378,24 +393,36 @@
     .btn-submit-circle {
         display: flex;
         align-items: center;
-        background: white;
+        background: #dc3545;
+        color: #fff;
         border: 1px solid #dee2e6;
         border-radius: 50px;
-        padding: 5px 5px 5px 25px;
+        padding: 10px 10px 10px 35px;
         font-weight: bold;
         transition: all 0.3s;
+        font-size: 20px;
     }
 
         .btn-submit-circle .icon-circle {
             width: 40px;
             height: 40px;
-            background: black;
-            color: white;
+            background: rgb(255, 255, 255);
+            color: #dc3545;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-left: 15px;
+        }
+
+    .btn-submit-circle:hover {
+        background: #a11926;
+        color: #fff;
+    }
+
+        .btn-submit-circle:hover .icon-circle {
+            transform: rotate(45deg);
+            transition: 0.3s all;
         }
 
     /* --- FOOTER --- */

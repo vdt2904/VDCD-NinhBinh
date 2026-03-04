@@ -7,9 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageReference Include="MailKit" Version="4.14.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.9" />
     <PackageReference Include="MimeKit" Version="4.14.0" />
+    <PackageReference Include="PdfPig" Version="0.1.13" />
   </ItemGroup>
 
   <ItemGroup>

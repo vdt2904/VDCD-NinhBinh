@@ -32,6 +32,7 @@
         position: relative;
         display: flex;
         align-items: flex-end; /* Đẩy nội dung xuống đáy */
+        margin-top: 110px;
     }
 
     .hero-content {
@@ -85,7 +86,7 @@
 
 <section class="py-5">
     <div class="container">
-        <h2 class="text-center text-danger fw-bold mb-4 text-uppercase">Dự án của chúng tôi</h2>
+        <h2 class="text-center display-6 fw-bold mb-4 text-uppercase">Dự án của chúng tôi</h2>
 
         <div class="d-flex justify-content-center flex-wrap gap-2 mb-5">
             @* Nút All Projects: Quay về trang danh sách chính *@
@@ -113,7 +114,9 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="project-card position-relative overflow-hidden rounded shadow-sm">
 
-                        <img src="@project.Image" class="img-fluid w-100" alt="@project.ProjectName" style="height: 350px; object-fit: cover;">
+                        <a href="/du-an/@project.Plug" class="text-white stretched-link">
+                            <img src="@project.Image" class="img-fluid w-100" alt="@project.ProjectName" style="height: 350px; object-fit: cover;">
+                        </a>
 
                         <div class="project-overlay d-flex flex-column justify-content-end p-4">
                             <div class="d-flex justify-content-between align-items-start mb-2">
@@ -155,20 +158,34 @@
     /* Container của toàn bộ card */
     .project-card {
         position: relative;
-        border-bottom: 5px solid #ff0000; /* Thanh đỏ dưới cùng */
         transition: all 0.3s ease;
         cursor: pointer;
+    }
+    .project-overlay::before {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 4px;
+        width: 100%;
+        background-color: #E80002;
+        transition: all ease 0.35s;
+        z-index: -1;
+    }
+    .project-card:hover .project-overlay::before {
+        height: 100%;
+        z-index: 1;
     }
 
     /* Lớp phủ để làm tối ảnh, giúp chữ trắng nổi bật */
     .project-overlay {
         position: absolute;
-        top: 0;
+        top: auto;
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%);
-        z-index: 1;
+        background: linear-gradient(to top, rgb(0 0 0 / 90%) 0%, rgb(0 0 0 / 30%) 60%, #00000000 100%);
+        z-index: 100;
     }
 
         /* Đảm bảo nội dung nằm trên lớp phủ */
@@ -203,18 +220,28 @@
         transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
     }
+    .project-card:hover .stretched-link {
+        transform: rotate(45deg);
+        transition: 0.6s all;
+    }
 
     /* Chỉnh nút filter phía trên cho giống mẫu */
     .btn-light {
-        background-color: #f1f3f5;
+        background-color: #fff;
         border: none;
-        color: #666;
+        color: #ff0000;
+        border: 1px solid #ff0000;
     }
 
         .btn-light.active {
-            background-color: #ffffff;
+            background-color: #ff0000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            color: #000;
+            color: #fff;
+        }
+        .btn-light:hover {
+            background-color: #ff0000;
+            color: #fff;
+            transition: 0.5s all;
         }
     /* Tùy chỉnh phân trang */
     .pagination .page-link {

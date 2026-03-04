@@ -1,12 +1,13 @@
 ﻿@{
     ViewData["Title"] = "Quản lý đăng bài Facebook";
+
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js">    </script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.ckeditor.com/ckeditor5/40.0.0/classic/ckeditor.js"></script>
 
 <div class="container-fluid px-4">
@@ -25,16 +26,15 @@
             </div>
         </div>
     </div>
-
-    <!-- Báo cáo đơn giản: Bài đã đăng và chờ đăng -->
+    <!-- Báo cáo đơn giản: Bài đã đăng, đã duyệt và chờ duyệt -->
     <div class="row mt-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card border-left-primary">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="text-muted mb-2">Bài đã đăng hôm nay</h6>
-                            <h2 class="mb-0">5</h2>
+                            <h6 class="text-muted mb-2">Bài đã đăng</h6>
+                            <h2 class="mb-0" id="totalPosted">0</h2>
                         </div>
                         <div class="bg-primary bg-opacity-10 p-3 rounded">
                             <i class="fa-solid fa-check-circle fa-2x text-primary"></i>
@@ -43,13 +43,28 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
+            <div class="card border-left-success">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h6 class="text-muted mb-2">Bài đã duyệt</h6>
+                            <h2 class="mb-0" id="approvedCount">0</h2>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="fa-solid fa-check-double fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
             <div class="card border-left-warning">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="text-muted mb-2">Bài chờ đăng</h6>
-                            <h2 class="mb-0">8</h2>
+                            <h6 class="text-muted mb-2">Bài chờ duyệt</h6>
+                            <h2 class="mb-0" id="pendingCount">0</h2>
                         </div>
                         <div class="bg-warning bg-opacity-10 p-3 rounded">
                             <i class="fa-solid fa-clock fa-2x text-warning"></i>
@@ -69,14 +84,29 @@
                         <h5 class="mb-0">
                             <i class="fa-regular fa-newspaper me-2"></i>Danh sách bài viết
                         </h5>
-                        <div class="d-flex gap-2">
-                            <input type="text" class="form-control form-control-sm" style="width:250px" placeholder="Tìm kiếm bài viết..." id="searchInput">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <input type="text" class="form-control form-control-sm" style="width:200px" placeholder="Tìm kiếm tiêu đề..." id="searchInput">
+
                             <select class="form-select form-select-sm" style="width:150px" id="statusFilter">
                                 <option value="">Tất cả trạng thái</option>
-                                <option value="published">Đã đăng</option>
-                                <option value="pending">Chờ duyệt</option>
-                                <option value="approved">Đã duyệt</option>
-                                <option value="scheduled">Đã lên lịch</option>
+                                <option value="1">Chờ duyệt</option>
+                                <option value="2">Đã duyệt</option>
+                                <option value="3">Đã đăng</option>
+                            </select>
+
+                            <select class="form-select form-select-sm" style="width:150px" id="typeFilter">
+                                <option value="">Tất cả loại</option>
+                                <option value="activity">📸 Hoạt động</option>
+                                <option value="event">🎉 Sự kiện</option>
+                                <option value="recruitment">💼 Tuyển dụng</option>
+                                <option value="tech">💡 Công nghệ</option>
+                                <option value="partner">🤝 Đối tác</option>
+                                <option value="other">📝 Khác</option>
+                            </select>
+
+                            <select class="form-select form-select-sm" style="width:180px" id="userFilter">
+                                <option value="">Tất cả người đăng</option>
+                                <!-- Options sẽ được load động từ users array -->
                             </select>
                         </div>
                     </div>
@@ -90,185 +120,12 @@
                                     <th>Loại</th>
                                     <th>Lịch đăng</th>
                                     <th>Trạng thái</th>
+                                    <th>Người đăng</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody id="tableBody">
-                                <tr>
-                                    <td class="fw-bold">Workshop Chuyển đổi số trong doanh nghiệp</td>
-                                    <td><span class="badge bg-info">Sự kiện</span></td>
-                                    <td><span class="badge bg-light text-dark">25/01/2024 14:30</span></td>
-                                    <td><span class="badge bg-success">Đã Duyệt</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(1)">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-info" onclick="previewFBPost(1)">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="deletePost(1)">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Tuyển dụng Senior Developer</td>
-                                    <td><span class="badge bg-primary">Tuyển dụng</span></td>
-                                    <td><span class="badge bg-light text-dark">26/01/2024 9:00</span></td>
-                                    <td><span class="badge bg-success">Đã Duyệt</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(2)">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-info" onclick="previewFBPost(2)">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="deletePost(2)">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Giới thiệu đối tác mới</td>
-                                    <td><span class="badge bg-success">Đối tác</span></td>
-                                    <td><span class="badge bg-light text-dark">26/01/2024 15:45</span></td>
-                                    <td><span class="badge bg-warning">Chờ duyệt</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(3)">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-info" onclick="previewFBPost(3)">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="deletePost(3)">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Hoạt động team building Q1</td>
-                                    <td><span class="badge bg-secondary">Hoạt động</span></td>
-                                    <td><span class="badge bg-light text-dark">27/01/2024 20:00</span></td>
-                                    <td><span class="badge bg-success">Đã Duyệt</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(4)">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-info" onclick="previewFBPost(4)">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger" onclick="deletePost(4)">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Chia sẻ công nghệ mới</td>
-                                    <td><span class="badge bg-dark">Công nghệ</span></td>
-                                    <td><span class="badge bg-light text-dark">22/01/2024 10:15</span></td>
-                                    <td><span class="badge bg-secondary">Đã đăng</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary invisible"
-                                                onclick="editFBPost(5)">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-info"
-                                                onclick="previewFBPost(5)">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger"
-                                                onclick="deletePost(5)">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <!-- Thêm dữ liệu mẫu để thấy phân trang -->
-                                <tr>
-                                    <td class="fw-bold">Hội thảo AI trong doanh nghiệp</td>
-                                    <td><span class="badge bg-info">Sự kiện</span></td>
-                                    <td><span class="badge bg-light text-dark">28/01/2024 09:30</span></td>
-                                    <td><span class="badge bg-success">Đã duyệt</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
-                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></button>
-                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Tuyển dụng Frontend Developer</td>
-                                    <td><span class="badge bg-primary">Tuyển dụng</span></td>
-                                    <td><span class="badge bg-light text-dark">29/01/2024 10:00</span></td>
-                                    <td><span class="badge bg-warning">Chờ duyệt</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
-                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></button>
-                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Giới thiệu đối tác chiến lược</td>
-                                    <td><span class="badge bg-success">Đối tác</span></td>
-                                    <td><span class="badge bg-light text-dark">30/01/2024 14:00</span></td>
-                                    <td><span class="badge bg-success">Đã duyệt</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
-                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></button>
-                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Workshop React Native cơ bản</td>
-                                    <td><span class="badge bg-info">Sự kiện</span></td>
-                                    <td><span class="badge bg-light text-dark">31/01/2024 08:30</span></td>
-                                    <td><span class="badge bg-success">Đã duyệt</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
-                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></button>
-                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Tuyển dụng DevOps Engineer</td>
-                                    <td><span class="badge bg-primary">Tuyển dụng</span></td>
-                                    <td><span class="badge bg-light text-dark">01/02/2024 11:00</span></td>
-                                    <td><span class="badge bg-warning">Chờ duyệt</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
-                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></button>
-                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Chia sẻ về Microservices</td>
-                                    <td><span class="badge bg-dark">Công nghệ</span></td>
-                                    <td><span class="badge bg-light text-dark">02/02/2024 15:30</span></td>
-                                    <td><span class="badge bg-secondary">Đã đăng</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary invisible"
-                                                onclick="editFBPost(5)">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-info"
-                                                onclick="previewFBPost(5)">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger"
-                                                onclick="deletePost(5)">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="fw-bold">Team building đầu năm</td>
-                                    <td><span class="badge bg-secondary">Hoạt động</span></td>
-                                    <td><span class="badge bg-light text-dark">03/02/2024 09:00</span></td>
-                                    <td><span class="badge bg-success">Đã duyệt</span></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></button>
-                                        <button class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></button>
-                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                                    </td>
-                                </tr>
+                                <!-- Data will be loaded dynamically -->
                             </tbody>
                         </table>
                     </div>
@@ -276,20 +133,10 @@
                     <!-- Phân trang -->
                     <div class="d-flex justify-content-between align-items-center p-3 border-top">
                         <div class="text-muted small">
-                            Hiển thị <span id="pageStart">1</span> - <span id="pageEnd">5</span> trên tổng số <span id="totalRecords">12</span> bài viết
+                            Hiển thị <span id="pageStart">0</span> - <span id="pageEnd">0</span> trên tổng số <span id="totalRecords">0</span> bài viết
                         </div>
                         <nav aria-label="Page navigation">
-                            <ul class="pagination pagination-sm mb-0" id="pagination">
-                                <li class="page-item disabled" id="prevPage">
-                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a>
-                                </li>
-                                <li class="page-item active"><a class="page-link" href="#" data-page="1">1</a></li>
-                                <li class="page-item"><a class="page-link" href="#" data-page="2">2</a></li>
-                                <li class="page-item"><a class="page-link" href="#" data-page="3">3</a></li>
-                                <li class="page-item" id="nextPage">
-                                    <a class="page-link" href="#">Sau</a>
-                                </li>
-                            </ul>
+                            <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
                         </nav>
                         <div class="d-flex align-items-center gap-2">
                             <span class="text-muted small">Hiển thị:</span>
@@ -318,121 +165,8 @@
                 <div class="card-body">
                     <div class="mt-2">
                         <div class="week-scroll-container">
-                            <div class="week-scroll-wrapper">
-                                <!-- Thứ 2 -->
-                                <div class="day-card">
-                                    <div class="card bg-light h-100">
-                                        <div class="card-header bg-white py-2">
-                                            <h6 class="mb-0">Thứ 2 - 22/01</h6>
-                                        </div>
-                                        <div class="card-body p-2">
-                                            <div class="p-2 bg-white rounded mb-2 border">
-                                                <span class="badge bg-light text-secondary border">14:30</span>
-                                                <p class="mb-0 small mt-1 fw-bold">Workshop Chuyển đổi số</p>
-                                                <small class="badge bg-info">Sự kiện</small><br />
-                                                <small class="text-muted">Người đăng: Minh Khiết</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Thứ 3 -->
-                                <div class="day-card">
-                                    <div class="card bg-light h-100">
-                                        <div class="card-header bg-white py-2">
-                                            <h6 class="mb-0">Thứ 3 - 23/01</h6>
-                                        </div>
-                                        <div class="card-body p-2">
-                                            <div class="p-2 bg-white rounded mb-2 border">
-                                                <span class="badge bg-light text-secondary border">9:00</span>
-                                                <p class="mb-0 small mt-1 fw-bold">Tuyển dụng Developer</p>
-                                                <small class="badge bg-primary">Tuyển dụng</small><br />
-                                                <small class="text-muted">Người đăng: Minh Khiết</small>
-                                            </div>
-                                            <div class="p-2 bg-white rounded border">
-                                                <span class="badge bg-light text-secondary border">15:45</span>
-                                                <p class="mb-0 small mt-1 fw-bold">Giới thiệu đối tác</p>
-                                                <small class="badge bg-success">Đối tác</small><br />
-                                                <small class="text-muted">Người đăng: Thái Vũ</small>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Thứ 4 -->
-                                <div class="day-card">
-                                    <div class="card bg-light h-100">
-                                        <div class="card-header bg-white py-2">
-                                            <h6 class="mb-0">Thứ 4 - 24/01</h6>
-                                        </div>
-                                        <div class="card-body p-2">
-                                            <div class="p-2 bg-white rounded border">
-                                                <span class="badge bg-light text-secondary border">10:15</span>
-                                                <p class="mb-0 small mt-1 fw-bold">Chia sẻ công nghệ</p>
-                                                <span class="badge bg-info">Công nghệ</span><br />
-                                                <small class="text-muted">Người đăng: Đức Duy</small>
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Thứ 5 -->
-                                <div class="day-card">
-                                    <div class="card bg-light h-100">
-                                        <div class="card-header bg-white py-2">
-                                            <h6 class="mb-0">Thứ 5 - 25/01</h6>
-                                        </div>
-                                        <div class="card-body p-2">
-                                            <div class="p-2 bg-white rounded border text-muted fst-italic">
-                                                Chưa có lịch
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Thứ 6 -->
-                                <div class="day-card">
-                                    <div class="card bg-light h-100">
-                                        <div class="card-header bg-white py-2">
-                                            <h6 class="mb-0">Thứ 6 - 26/01</h6>
-                                        </div>
-                                        <div class="card-body p-2">
-                                            <div class="p-2 bg-white rounded border text-muted fst-italic">
-                                                Chưa có lịch
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Thứ 7 -->
-                                <div class="day-card">
-                                    <div class="card bg-light h-100">
-                                        <div class="card-header bg-white py-2">
-                                            <h6 class="mb-0">Thứ 7 - 27/01</h6>
-                                        </div>
-                                        <div class="card-body p-2">
-                                            <div class="p-2 bg-white rounded border text-muted fst-italic">
-                                                Chưa có lịch
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Chủ nhật -->
-                                <div class="day-card">
-                                    <div class="card bg-light h-100">
-                                        <div class="card-header bg-white py-2">
-                                            <h6 class="mb-0">Chủ nhật - 28/01</h6>
-                                        </div>
-                                        <div class="card-body p-2">
-                                            <div class="p-2 bg-white rounded border text-muted fst-italic">
-                                                Chưa có lịch
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="week-scroll-wrapper" id="weeklySchedule">
+                                <!-- Weekly schedule will be loaded dynamically -->
                             </div>
                         </div>
                     </div>
@@ -474,8 +208,7 @@
                                 <label class="fw-bold">Tiêu đề bài viết <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="fbPostTitle" placeholder="Nhập tiêu đề bài viết...">
                             </div>
-
-                            <!-- Loại nội dung và Trạng thái -->
+                            <!-- Phần loại nội dung và tùy chọn tạo nội dung -->
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label class="fw-bold">Loại nội dung</label>
@@ -488,7 +221,47 @@
                                         <option value="other">📝 Nội dung khác</option>
                                     </select>
                                 </div>
+                                <div class="col-md-6">
+                                    <label class="fw-bold">Tùy chọn tạo nội dung</label>
+                                    <select class="form-select" id="fbContentOption" onchange="toggleAIOptions()">
+                                        <option value="0">✍️ Tự viết nội dung</option>
+                                        <option value="1">🤖 Tạo nội dung tự động bằng AI</option>
+                                    </select>
+                                </div>
                             </div>
+
+                            <!-- Phần dành cho AI (ẩn mặc định) -->
+                            <div id="aiOptionsContainer" style="display: none;">
+                                <!-- Textarea cho mô tả ngắn (dùng cho AI) -->
+                                <div class="form-group mb-3">
+                                    <label class="fw-bold">Mô tả ngắn / Ý tưởng chính <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="fbAIPrompt" rows="3"
+                                              placeholder="Nhập ý tưởng, chủ đề hoặc mô tả ngắn để AI tạo nội dung tự động..."></textarea>
+                                    <small class="text-muted">Nội dung này sẽ được AI sử dụng để tạo bài viết tự động</small>
+                                </div>
+
+                                <!-- Chọn nhiều file đính kèm (cho AI tham khảo) -->
+                                <div class="form-group mb-3">
+                                    <label class="fw-bold d-block">File tham khảo (chọn được nhiều file)</label>
+                                    <div class="border rounded p-3">
+                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="openFBMultiFileManager()">
+                                                <i class="bi bi-paperclip me-1"></i>Chọn nhiều file
+                                            </button>
+                                            <span class="text-muted small" id="fbAttachmentsCount">Chưa có file nào</span>
+                                        </div>
+
+                                        <!-- Hiển thị danh sách file đã chọn -->
+                                        <div class="mt-3" id="fbAttachmentsList"></div>
+
+                                        <!-- Thanh tiến trình upload (nếu cần) -->
+                                        <div class="progress mt-2 d-none" id="uploadProgress" style="height: 5px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
 
                             <!-- Nội dung bài viết - CKEditor -->
                             <div class="form-group mb-3">
@@ -564,11 +337,15 @@
             </div>
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-warning me-2" onclick="saveAsDraft()">
+
+                <!-- Nút Chờ duyệt - chỉ hiển thị với ContentManager -->
+                <button type="button" class="btn btn-warning me-2" onclick="saveAsDraft()" id="draftButton">
                     <i class="fa-regular fa-floppy-disk me-1"></i>Chờ duyệt
                 </button>
-                <button type="button" class="btn btn-primary px-4" onclick="saveFBPost()">
-                    <i class="fa-regular fa-paper-plane me-1"></i>Duyệt
+
+                <!-- Nút Duyệt - chỉ hiển thị với SuperAdmin -->
+                <button type="button" class="btn btn-primary px-4" onclick="saveAndSchedule()" id="approveButton">
+                    <i class="fa-regular bi bi-calendar-check"></i> Duyệt
                 </button>
             </div>
         </div>
@@ -612,11 +389,6 @@
                         <!-- Video đính kèm -->
                         <div class="post-videos mt-2" id="previewVideos"></div>
 
-                        <!-- Lịch đăng (nếu có) -->
-                        <div class="post-schedule mt-2 p-2 bg-light rounded small" id="previewSchedule" style="display: none;">
-                            <i class="fa-regular fa-calendar me-1 text-primary"></i>
-                            Lịch đăng: <span id="previewScheduleText" class="fw-bold"></span>
-                        </div>
                     </div>
 
                     <!-- Footer với các nút tương tác (đơn giản) -->
@@ -643,887 +415,1717 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0 h-100">
-                <iframe id="fbFileManagerIframe" src="" style="width:100%; height:100%; border:none;"></iframe>
+                <iframe id="fbFileManagerIframe" src="/Admin/FileManager/Index" style="width:100%; height:100%; border:none;"></iframe>
             </div>
         </div>
     </div>
 </div>
 
-<!-- CKEditor Script -->
-<script src="https://cdn.ckeditor.com/ckeditor5/43.3.1/ckeditor5.js"></script>
-
 <script>
-        let fbFmType = 'image';
-        let currentFBPostId = 0;
-        let selectedImages = []; // Mảng chứa ảnh
-        let selectedVideos = []; // Mảng chứa video
-        let editorInstance = null;
+    let fbFmType = 'image';
+    let currentFBPostId = 0;
+    let selectedImages = [];
+    let selectedVideos = [];
+    let selectedAttachments = [];
+    let editorInstance = null;
+    let currentPage = 1;
+    let pageSize = 5;
+    let totalPages = 1;
+    let allPosts = []; // Lưu tất cả bài viết để thống kê
+    let users = [];
+    let currentUser = null;
+    let currentUserId = null;
 
-        // Khởi tạo CKEditor
-        async function initCKEditor() {
-            const editorElement = document.querySelector('#fbEditor');
-
-            if (!editorElement) return;
-
-            // Xóa CKEditor cũ nếu có
-            if (editorInstance) {
-                await editorInstance.destroy();
-                editorInstance = null;
-            }
-
-            try {
-                editorInstance = await ClassicEditor.create(editorElement, {
-                    toolbar: {
-                        items: [
-                            'heading', '|',
-                            'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
-                            'blockQuote', 'insertTable', '|',
-                            'undo', 'redo'
-                        ],
-                        shouldNotGroupWhenFull: true
-                    },
-                    language: 'vi',
-                    placeholder: 'Nhập nội dung bài viết...',
-                    table: {
-                        contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
-                    },
-                    removePlugins: ['Title'],
-                    initialData: $('#fbEditor').val() || ''
-                });
-
-                console.log('CKEditor initialized successfully');
-            } catch (error) {
-                console.error('Lỗi khởi tạo CKEditor:', error);
-            }
+    @if (ViewBag.ListUser != null)
+    {
+        <text>
+                users = @Html.Raw(Json.Serialize(ViewBag.ListUser));
+        </text>
+    }
+        // Hàm lấy thông tin user hiện tại
+        function getCurrentUser() {
+            $.ajax({
+                url: '/admin/account/getcurrentuser',
+                type: 'GET',
+                async: false, // Đồng bộ để đảm bảo có dữ liệu trước khi render
+                success: function (response) {
+                    currentUser = response;
+                    currentUserId = response.userId;
+                    console.log('Current user:', currentUser);
+                },
+                error: function () {
+                    console.error('Không thể lấy thông tin user');
+                }
+            });
         }
 
-        // Mở editor để thêm bài mới
-        function openFBEditor() {
-            resetFBForm();
-            currentFBPostId = 0;
-            $('#fbPostId').val(0);
-            $('#editorModalTitle').text('THÊM BÀI VIẾT MỚI');
+    // Hàm kiểm tra quyền
+    function hasPermission(action) {
+        if (!currentUser) return false;
 
-            const modal = new bootstrap.Modal(document.getElementById('fbEditorModal'));
-            modal.show();
+        const role = currentUser.userRole;
 
-            // Khởi tạo CKEditor sau khi modal hiển thị
-            setTimeout(initCKEditor, 500);
+        switch (action) {
+            case 'approve': // Quyền duyệt bài
+                return role === 'SuperAdmin';
+            case 'edit': // Quyền sửa bài
+                return role === 'ContentManager' || role === 'SuperAdmin';
+            case 'create': // Quyền tạo bài
+                return role === 'ContentManager' || role === 'SuperAdmin';
+            case 'recall': // Quyền thu hồi bài (chuyển về chờ duyệt)
+                return role === 'ContentManager';
+            case 'delete': // Quyền xóa bài
+                return role === 'ContentManager' || role === 'SuperAdmin';
+            default:
+                return false;
+        }
+    }
+
+        // Hàm lấy tên user theo ID
+        function getUserNameById(userId) {
+            if (!userId) return 'N/A';
+
+            console.log('Looking for userId:', userId);
+            console.log('Type of userId:', typeof userId);
+            console.log('Users array:', users);
+
+            // Không cần parseInt vì userId có thể là string
+            // So sánh trực tiếp (== thay vì ===) để tự động convert kiểu
+            const user = users.find(u => u.userId == userId);
+            console.log('Found user:', user);
+
+            return user ? user.fullName : 'N/A';
         }
 
-        // Mở editor để sửa bài
-        function editFBPost(id) {
-            resetFBForm();
-            currentFBPostId = id;
-            $('#fbPostId').val(id);
-            $('#editorModalTitle').text('CHỈNH SỬA BÀI VIẾT');
+    // Base URL để thêm vào đường dẫn ảnh
+    const baseUrl = window.location.origin; // Lấy domain hiện tại (http://localhost:port)
 
-            // Giả lập load dữ liệu (sau này sẽ call API)
-            if (id === 1) {
-                $('#fbPostTitle').val('Workshop Chuyển đổi số trong doanh nghiệp');
-                $('#fbPostType').val('event');
-                $('#fbPostStatus').val('scheduled');
-                $('#fbEditor').val('<p>📅 <strong>VDCD Group</strong> tổ chức workshop "Chuyển đổi số trong doanh nghiệp" với sự tham gia của các chuyên gia hàng đầu.</p><p>Thời gian: 14:00, Thứ 6 ngày 25/01/2024<br>Địa điểm: Tòa nhà VDCD, Hà Nội</p><p>Link đăng ký: <a href="#">https://vdcd.vn/workshop</a></p>');
-                $('#scheduleDate').val('2024-01-25');
-                $('#scheduleTime').val('14:30');
+    // Khởi tạo CKEditor
+    async function initCKEditor() {
+        const editorElement = document.querySelector('#fbEditor');
 
-                selectedImages = [
-                    'https://via.placeholder.com/300x200/0d6efd/ffffff?text=Workshop+1',
-                    'https://via.placeholder.com/300x200/198754/ffffff?text=Workshop+2'
-                ];
-                updateImageGrid();
-            } else if (id === 2) {
-                $('#fbPostTitle').val('Tuyển dụng Senior Developer');
-                $('#fbPostType').val('recruitment');
-                $('#fbPostStatus').val('scheduled');
-                $('#fbEditor').val('<p>💼 <strong>VDCD Group</strong> đang tìm kiếm Senior Developer tài năng để gia nhập đội ngũ phát triển sản phẩm.</p><p><strong>Yêu cầu:</strong></p><ul><li>5+ năm kinh nghiệm</li><li>Thành thạo .NET Core, ReactJS</li><li>Kinh nghiệm làm việc với microservices</li></ul><p><strong>Quyền lợi:</strong> Lương thưởng hấp dẫn, môi trường chuyên nghiệp</p>');
-                $('#scheduleDate').val('2024-01-26');
-                $('#scheduleTime').val('09:00');
+        if (!editorElement) return;
 
-                selectedImages = [
-                    'https://via.placeholder.com/300x200/0d6efd/ffffff?text=Tuyen+Dung'
-                ];
-                updateImageGrid();
-            }
-
-            const modal = new bootstrap.Modal(document.getElementById('fbEditorModal'));
-            modal.show();
-
-            // Khởi tạo CKEditor sau khi modal hiển thị
-            setTimeout(initCKEditor, 500);
+        // Xóa CKEditor cũ nếu có
+        if (editorInstance) {
+            await editorInstance.destroy();
+            editorInstance = null;
         }
 
-        // Mở File Manager cho ảnh hoặc video
-        function openFBFileManager(type) {
-            fbFmType = type;
-            document.getElementById('fbFileManagerIframe').src = '/Admin/FileManager/Index';
-            new bootstrap.Modal(document.getElementById('fbFileManagerModal')).show();
+        try {
+            editorInstance = await ClassicEditor.create(editorElement, {
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
+                        'blockQuote', 'insertTable', '|',
+                        'undo', 'redo'
+                    ],
+                    shouldNotGroupWhenFull: true
+                },
+                language: 'vi',
+                placeholder: 'Nhập nội dung bài viết...',
+                table: {
+                    contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells']
+                },
+                removePlugins: ['Title'],
+                initialData: $('#fbEditor').val() || ''
+            });
+
+            console.log('CKEditor initialized successfully');
+        } catch (error) {
+            console.error('Lỗi khởi tạo CKEditor:', error);
         }
+    }
 
-        // Nhận URL từ File Manager
-        window.addEventListener('message', function (event) {
-            if (event.data && event.data.type === 'getFileUrl') {
-                const urls = event.data.url;
+    // Load danh sách bài viết
+    function loadPosts(page = 1) {
+        $.ajax({
+            url: '/Admin/Facebook/GetAll',
+            type: 'GET',
+            data: {
+                page: page,
+                pagesize: pageSize
+            },
+            success: function (response) {
+                if (response.success) {
+                    // Lưu dữ liệu trang hiện tại để hiển thị
+                    renderPosts(response.data);
+                    updatePagination(response.page, response.totalPages, response.total);
 
-                if (fbFmType === 'image') {
-                    // Thêm nhiều ảnh
-                    if (Array.isArray(urls)) {
-                        urls.forEach(imgUrl => {
-                            if (!selectedImages.includes(imgUrl)) {
-                                selectedImages.push(imgUrl);
+                    // Gọi API riêng để lấy tất cả bài viết cho thống kê và lịch tuần
+                    $.ajax({
+                        url: '/Admin/Facebook/GetAll',
+                        type: 'GET',
+                        data: {
+                            page: 1,
+                            pagesize: 1000 // Lấy tối đa 1000 bài để thống kê và lịch tuần
+                        },
+                        success: function (allResponse) {
+                            if (allResponse.success) {
+                                allPosts = allResponse.data;
+                                updateStats(allPosts);
+                                updateWeeklySchedule(allPosts); // Cập nhật lịch tuần với tất cả dữ liệu
+                                loadUserFilter();
                             }
-                        });
-                    } else {
-                        if (!selectedImages.includes(urls)) {
-                            selectedImages.push(urls);
                         }
-                    }
-                    updateImageGrid();
-                } else if (fbFmType === 'video') {
-                    // Thêm nhiều video
-                    if (Array.isArray(urls)) {
-                        urls.forEach(videoUrl => {
-                            // Kiểm tra xem video đã tồn tại chưa
-                            if (!selectedVideos.some(v => v.url === videoUrl)) {
-                                // Xác định loại video dựa trên đuôi file
-                                let videoType = 'other';
-                                let thumbnailUrl = videoUrl;
+                    });
+                }
+            },
+            error: function () {
+                toastr.error('Không thể tải danh sách bài viết');
+            }
+        });
+    }
 
-                                if (videoUrl.match(/\.(mp4|webm|ogg)$/i)) {
-                                    videoType = 'mp4';
-                                    thumbnailUrl = 'https://via.placeholder.com/300x200/6c757d/ffffff?text=MP4+Video';
-                                } else if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-                                    videoType = 'youtube';
-                                    let videoId = '';
-                                    if (videoUrl.includes('youtube.com/watch?v=')) {
-                                        videoId = videoUrl.split('v=')[1]?.split('&')[0];
-                                    } else if (videoUrl.includes('youtu.be/')) {
-                                        videoId = videoUrl.split('youtu.be/')[1]?.split('?')[0];
-                                    }
-                                    if (videoId) {
-                                        thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-                                    }
-                                } else if (videoUrl.includes('vimeo.com')) {
-                                    videoType = 'vimeo';
-                                    thumbnailUrl = 'https://via.placeholder.com/300x200/ff69b4/ffffff?text=Vimeo+Video';
-                                }
+    // Thống kê theo toàn bộ dữ liệu
+    function updateStats(posts) {
+        // Đếm bài đã đăng (status = 3)
+        const totalPosted = posts.filter(p => p.status === 3).length;
 
-                                selectedVideos.push({
-                                    url: videoUrl,
-                                    thumbnail: thumbnailUrl,
-                                    type: videoType
-                                });
-                            }
-                        });
+        // Đếm bài đã duyệt (status = 2)
+        const approvedCount = posts.filter(p => p.status === 2).length;
+
+        // Đếm bài chờ duyệt (status = 1)
+        const pendingCount = posts.filter(p => p.status === 1).length;
+
+        $('#totalPosted').text(totalPosted);
+        $('#approvedCount').text(approvedCount);
+        $('#pendingCount').text(pendingCount);
+    }
+    // Refresh thống kê tổng
+    function refreshStats() {
+        $.ajax({
+            url: '/Admin/Facebook/GetAll',
+            type: 'GET',
+            data: {
+                page: 1,
+                pagesize: 1000 // Lấy tối đa 1000 bài để thống kê
+            },
+            success: function (response) {
+                if (response.success) {
+                    allPosts = response.data;
+                    updateStats(allPosts);
+                    updateWeeklySchedule(allPosts);
+                }
+            }
+        });
+    }
+
+    // Render posts to table
+    function renderPosts(posts) {
+        const tbody = $('#tableBody');
+        tbody.empty();
+
+        posts.forEach(post => {
+            const statusClass = getStatusClass(post.status);
+            const statusText = getStatusText(post.status);
+            const typeBadge = getTypeBadge(post.typePost);
+
+            // Format scheduled date
+            let scheduleDate = 'Chưa có lịch';
+            if (post.scheduledDate) {
+                const date = new Date(post.scheduledDate);
+                scheduleDate = date.toLocaleDateString('vi-VN') + ' ' +
+                    date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            }
+
+            // Lấy tên người dùng từ users array
+            let nguoiDang = 'N/A';
+            if (post.userCreateId) {
+                nguoiDang = getUserNameById(post.userCreateId);
+            } else if (post.userCreate?.fullName) {
+                nguoiDang = post.userCreate.fullName;
+            }
+
+            // Kiểm tra quyền sở hữu
+            const isOwner = currentUserId && post.userCreateId && currentUserId == post.userCreateId;
+            const isSuperAdmin = currentUser?.userRole === 'SuperAdmin';
+
+            // Xây dựng các nút thao tác
+            let actionButtons = '';
+
+            // Nút sửa - SuperAdmin sửa được tất cả, ContentManager chỉ sửa bài của mình
+            if (post.status !== 3) {
+                if (isSuperAdmin || (isOwner && currentUser?.userRole === 'ContentManager')) {
+                    actionButtons += `
+                        <button class="btn btn-sm btn-outline-primary" onclick="editFBPost(${post.id})" title="Sửa bài viết">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    `;
+                }
+            }
+
+            // Nút xem trước - ai cũng xem được
+            actionButtons += `
+                <button class="btn btn-sm btn-outline-info" onclick="previewFBPost(${post.id})" title="Xem trước">
+                    <i class="bi bi-eye"></i>
+                </button>
+            `;
+
+            // SUPERADMIN: Nút duyệt (khi bài ở trạng thái chờ duyệt)
+            if (isSuperAdmin && post.status === 1) {
+                actionButtons += `
+                    <button class="btn btn-sm btn-outline-success" onclick="approvePost(${post.id})" title="Duyệt bài">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+                `;
+            }
+
+            // CONTENT MANAGER: Nút thu hồi (chỉ bài của mình và ở trạng thái đã duyệt)
+            if (currentUser?.userRole === 'ContentManager' && isOwner && post.status === 2) {
+                actionButtons += `
+                    <button class="btn btn-sm btn-outline-warning" onclick="recallPost(${post.id})" title="Thu hồi về chờ duyệt">
+                        <i class="bi bi-arrow-return-left"></i>
+                    </button>
+                `;
+            }
+
+            // Nút xóa - xử lý theo phân quyền
+            if (isSuperAdmin) {
+                // SuperAdmin: xóa hẳn mọi trạng thái
+                actionButtons += `
+                    <button class="btn btn-sm btn-outline-danger" onclick="deletePost(${post.id})" title="Xóa hẳn">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                `;
+            } else if (currentUser?.userRole === 'ContentManager' && isOwner) {
+                // ContentManager: chỉ xóa hẳn được bài của mình ở trạng thái chờ duyệt
+                if (post.status === 1) {
+                    actionButtons += `
+                        <button class="btn btn-sm btn-outline-danger" onclick="deletePost(${post.id})" title="Xóa hẳn">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    `;
+                }
+            }
+
+            const row = `
+                <tr>
+                    <td class="fw-bold">${post.title || ''}</td>
+                    <td><span class="badge ${typeBadge.class}">${typeBadge.text}</span></td>
+                    <td><span class="badge bg-light text-dark">${scheduleDate}</span></td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td>${nguoiDang}</td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            ${actionButtons}
+                        </div>
+                    </td>
+                </tr>
+            `;
+            tbody.append(row);
+        });
+    }
+
+    // Thu hồi bài (chuyển từ đã duyệt về chờ duyệt)
+    function recallPost(id) {
+        if (confirm('Thu hồi bài viết này về trạng thái chờ duyệt?')) {
+            $.ajax({
+                url: '/Admin/Facebook/DeleteScheculePostFaceBooke',
+                type: 'GET',
+                data: {
+                    id: id,
+                    status: 1 // Chuyển về chờ duyệt
+                },
+                success: function (response) {
+                    if (response.success) {
+                        alert('Đã thu hồi bài viết về trạng thái chờ duyệt');
+                        loadPosts(currentPage);
+                        refreshStats();
                     } else {
-                        if (!selectedVideos.some(v => v.url === urls)) {
-                            let videoType = 'other';
-                            let thumbnailUrl = urls;
+                        alert(response.message || 'Có lỗi xảy ra');
+                    }
+                },
+                error: function () {
+                    alert('Không thể thu hồi bài viết');
+                }
+            });
+        }
+    }
 
-                            if (urls.match(/\.(mp4|webm|ogg)$/i)) {
-                                videoType = 'mp4';
-                                thumbnailUrl = 'https://via.placeholder.com/300x200/6c757d/ffffff?text=MP4+Video';
-                            } else if (urls.includes('youtube.com') || urls.includes('youtu.be')) {
-                                videoType = 'youtube';
-                                let videoId = '';
-                                if (urls.includes('youtube.com/watch?v=')) {
-                                    videoId = urls.split('v=')[1]?.split('&')[0];
-                                } else if (urls.includes('youtu.be/')) {
-                                    videoId = urls.split('youtu.be/')[1]?.split('?')[0];
-                                }
-                                if (videoId) {
-                                    thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-                                }
-                            } else if (urls.includes('vimeo.com')) {
-                                videoType = 'vimeo';
-                                thumbnailUrl = 'https://via.placeholder.com/300x200/ff69b4/ffffff?text=Vimeo+Video';
+    // Get status class
+    function getStatusClass(status) {
+        switch (status) {
+            case 1: return 'bg-warning';
+            case 2: return 'bg-success';
+            case 3: return 'bg-secondary';
+            case 4: return 'bg-info';
+            default: return 'bg-secondary';
+        }
+    }
+
+    // Get status text
+    function getStatusText(status) {
+        switch (status) {
+            case 1: return 'Chờ duyệt';
+            case 2: return 'Đã duyệt';
+            case 3: return 'Đã đăng';
+            default: return 'Không xác định';
+        }
+    }
+
+    // Get type badge
+    function getTypeBadge(type) {
+        switch (type) {
+            case 'activity': return { class: 'bg-info', text: 'Hoạt động' };
+            case 'event': return { class: 'bg-success', text: 'Sự kiện' };
+            case 'recruitment': return { class: 'bg-primary', text: 'Tuyển dụng' };
+            case 'tech': return { class: 'bg-dark', text: 'Công nghệ' };
+            case 'partner': return { class: 'bg-warning text-dark', text: 'Đối tác' };
+            default: return { class: 'bg-secondary', text: 'Khác' };
+        }
+    }
+
+    // Update weekly schedule với tất cả bài viết
+    function updateWeeklySchedule(posts) {
+        const wrapper = $('#weeklySchedule');
+        wrapper.empty();
+
+        const today = new Date();
+        const weekDays = [];
+
+        // Lấy ngày đầu tuần (Thứ 2)
+        const firstDayOfWeek = new Date(today);
+        const day = today.getDay(); // 0: Chủ nhật, 1: Thứ 2, ..., 6: Thứ 7
+        const diff = day === 0 ? 6 : day - 1; // Nếu Chủ nhật thì lùi 6 ngày, nếu không thì lùi (day-1) ngày
+        firstDayOfWeek.setDate(today.getDate() - diff);
+
+        // Tạo mảng 7 ngày trong tuần (từ Thứ 2 đến Chủ nhật)
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(firstDayOfWeek);
+            date.setDate(firstDayOfWeek.getDate() + i);
+            weekDays.push(date);
+        }
+
+        weekDays.forEach(date => {
+            const dayName = getDayName(date);
+            const dateStr = date.toLocaleDateString('vi-VN');
+            const dateKey = date.toDateString();
+
+            // Lọc tất cả bài viết có lịch đăng trong ngày (từ tất cả dữ liệu)
+            const dayPosts = posts.filter(p => {
+                if (p.scheduledDate) {
+                    const postDate = new Date(p.scheduledDate);
+                    return postDate.toDateString() === dateKey;
+                }
+                return false;
+            });
+
+            let content = '';
+            if (dayPosts.length > 0) {
+                // Sắp xếp theo giờ đăng
+                dayPosts.sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate));
+                dayPosts.forEach(post => {
+                    const postTime = new Date(post.scheduledDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                    const typeBadge = getTypeBadge(post.typePost);
+                    const statusClass = getStatusClass(post.status);
+                    const statusText = getStatusText(post.status);
+                    // Lấy tên người dùng từ users array
+                    let nguoiDang = 'N/A';
+                    if (post.userCreateId) {
+                        nguoiDang = getUserNameById(post.userCreateId);
+                    } else if (post.userCreate?.fullName) {
+                        nguoiDang = post.userCreate.fullName;
+                    }
+
+                    content += `
+                                <div class="p-2 bg-white rounded mb-2 border">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-light text-secondary border">${postTime}</span>
+                                        <span class="badge ${statusClass}">${statusText}</span>
+                                    </div>
+                                    <p class="mb-0 small mt-1 fw-bold">${post.title || ''}</p>
+                                    <small class="badge ${typeBadge.class}">${typeBadge.text}</small><br>
+                                        <small class="text-muted">Người đăng: ${nguoiDang || 'N/A'}</small>
+                                </div>
+                            `;
+                });
+            } else {
+                content = '<div class="p-2 bg-white rounded border text-muted fst-italic">Chưa có lịch</div>';
+            }
+
+            const dayCard = `
+                        <div class="day-card">
+                            <div class="card bg-light h-100">
+                                <div class="card-header bg-white py-2">
+                                    <h6 class="mb-0">${dayName} - ${dateStr}</h6>
+                                </div>
+                                <div class="card-body p-2" style="max-height: 400px; overflow-y: auto;">
+                                    ${content}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+            wrapper.append(dayCard);
+        });
+    }
+
+    // Get day name in Vietnamese
+    function getDayName(date) {
+        const days = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+        return days[date.getDay()];
+    }
+
+    // Update pagination
+    function updatePagination(page, totalPagesCount, total) {
+        currentPage = page;
+        totalPages = totalPagesCount;
+
+        $('#pageStart').text(((page - 1) * pageSize) + 1);
+        $('#pageEnd').text(Math.min(page * pageSize, total));
+        $('#totalRecords').text(total);
+
+        let paginationHtml = '';
+        paginationHtml += `<li class="page-item ${page === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="loadPosts(${page - 1}); return false;">Trước</a>
+                </li>`;
+
+        let startPage = Math.max(1, page - 2);
+        let endPage = Math.min(totalPagesCount, startPage + 4);
+        startPage = Math.max(1, endPage - 4);
+
+        for (let i = startPage; i <= endPage; i++) {
+            paginationHtml += `<li class="page-item ${i === page ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="loadPosts(${i}); return false;">${i}</a>
+                    </li>`;
+        }
+
+        paginationHtml += `<li class="page-item ${page === totalPagesCount ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="loadPosts(${page + 1}); return false;">Sau</a>
+                </li>`;
+
+        $('#pagination').html(paginationHtml);
+    }
+
+    // Hàm toggle hiển thị options AI
+    function toggleAIOptions() {
+        const contentOption = $('#fbContentOption').val();
+        if (contentOption === '1') {
+            $('#aiOptionsContainer').slideDown(300);
+        } else {
+            $('#aiOptionsContainer').slideUp(300);
+            // Reset dữ liệu AI khi ẩn
+            $('#fbAIPrompt').val('');
+            selectedAttachments = [];
+            updateAttachmentsList();
+        }
+    }
+
+    // Mở File Manager để chọn nhiều file
+    function openFBMultiFileManager() {
+        fbFmType = 'multiple-attachment';
+
+        const iframe = document.getElementById('fbFileManagerIframe');
+        if (iframe) {
+            iframe.contentWindow.postMessage({
+                type: 'setMultiSelect',
+                enabled: true
+            }, '*');
+        }
+
+        new bootstrap.Modal(document.getElementById('fbFileManagerModal')).show();
+    }
+
+    // Mở editor để thêm bài mới
+    function openFBEditor() {
+        resetFBForm();
+        currentFBPostId = 0;
+        $('#fbPostId').val(0);
+        $('#editorModalTitle').text('THÊM BÀI VIẾT MỚI');
+
+        // Ẩn/hiện nút dựa trên role
+        if (currentUser && currentUser.userRole === 'SuperAdmin') {
+            $('#draftButton').hide(); // Ẩn nút Chờ duyệt
+            $('#approveButton').show(); // Hiện nút Duyệt
+        } else if (currentUser && currentUser.userRole === 'ContentManager') {
+            $('#draftButton').show(); // Hiện nút Chờ duyệt
+            $('#approveButton').hide(); // Ẩn nút Duyệt
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('fbEditorModal'));
+        modal.show();
+
+        // Khởi tạo CKEditor sau khi modal hiển thị
+        setTimeout(initCKEditor, 500);
+    }
+
+    // Mở editor để sửa bài
+    function editFBPost(id) {
+        $.ajax({
+            url: '/Admin/Facebook/GetAll',
+            type: 'GET',
+            data: { page: 1, pagesize: 100 },
+            success: function (response) {
+                if (response.success) {
+                    const post = response.data.find(p => p.id === id);
+                    if (post) {
+                        resetFBForm();
+                        currentFBPostId = id;
+                        $('#fbPostId').val(id);
+                        $('#editorModalTitle').text('CHỈNH SỬA BÀI VIẾT');
+                        $('#fbPostTitle').val(post.title || '');
+                        $('#fbPostType').val(post.typePost || 'activity');
+                        // Mặc định là manual khi sửa
+                        $('#fbContentOption').val('manual');
+                        $('#aiOptionsContainer').hide();
+
+                        // Ẩn/hiện nút dựa trên role
+                        if (currentUser && currentUser.userRole === 'SuperAdmin') {
+                            $('#draftButton').hide(); // Ẩn nút Chờ duyệt
+                            $('#approveButton').show(); // Hiện nút Duyệt
+                        } else if (currentUser && currentUser.userRole === 'ContentManager') {
+                            $('#draftButton').show(); // Hiện nút Chờ duyệt
+                            $('#approveButton').hide(); // Ẩn nút Duyệt
+                        }
+
+                        // ... phần còn lại giữ nguyên
+                        if (post.scheduledDate) {
+                            const date = new Date(post.scheduledDate);
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const hours = String(date.getHours()).padStart(2, '0');
+                            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                            $('#scheduleDate').val(`${year}-${month}-${day}`);
+                            $('#scheduleTime').val(`${hours}:${minutes}`);
+                        }
+
+                        if (post.imageUrls) {
+                            try {
+                                // Parse image URLs và loại bỏ baseUrl nếu có
+                                selectedImages = JSON.parse(post.imageUrls) || [];
+                                // Đảm bảo đường dẫn ảnh đúng format
+                                selectedImages = selectedImages.map(img => {
+                                    if (img.startsWith(baseUrl)) {
+                                        return img.replace(baseUrl, '');
+                                    }
+                                    return img;
+                                });
+                            } catch {
+                                selectedImages = [];
                             }
+                        } else {
+                            selectedImages = [];
+                        }
 
+                        if (post.videoUrl) {
+                            try {
+                                let videoUrl = post.videoUrl;
+                                // Loại bỏ baseUrl nếu có
+                                if (videoUrl.startsWith(baseUrl)) {
+                                    videoUrl = videoUrl.replace(baseUrl, '');
+                                }
+                                selectedVideos = [{
+                                    url: videoUrl,
+                                    thumbnail: getVideoThumbnail(videoUrl),
+                                    type: getVideoType(videoUrl)
+                                }];
+                            } catch {
+                                selectedVideos = [];
+                            }
+                        } else {
+                            selectedVideos = [];
+                        }
+
+                        // Set content cho CKEditor
+                        if (editorInstance) {
+                            editorInstance.setData(post.message || '');
+                        } else {
+                            $('#fbEditor').val(post.message || '');
+                        }
+
+                        updateImageGrid();
+                        updateVideoGrid();
+
+                        const modal = new bootstrap.Modal(document.getElementById('fbEditorModal'));
+                        modal.show();
+
+                        // Khởi tạo CKEditor sau khi modal hiển thị
+                        setTimeout(initCKEditor, 500);
+                    }
+                }
+            }
+        });
+    }
+
+    // Get video thumbnail
+    function getVideoThumbnail(url) {
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            let videoId = '';
+            if (url.includes('youtube.com/watch?v=')) {
+                videoId = url.split('v=')[1]?.split('&')[0];
+            } else if (url.includes('youtu.be/')) {
+                videoId = url.split('youtu.be/')[1]?.split('?')[0];
+            }
+            if (videoId) {
+                return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+            }
+        }
+        return 'https://via.placeholder.com/300x200/6c757d/ffffff?text=Video';
+    }
+
+    // Get video type
+    function getVideoType(url) {
+        if (url.match(/\.(mp4|webm|ogg)$/i)) return 'mp4';
+        if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+        if (url.includes('vimeo.com')) return 'vimeo';
+        return 'other';
+    }
+
+    // Xem trước bài viết từ danh sách
+    function previewFBPost(id) {
+        $.ajax({
+            url: '/Admin/Facebook/GetAll',
+            type: 'GET',
+            data: { page: 1, pagesize: 100 },
+            success: function (response) {
+                if (response.success) {
+                    const post = response.data.find(p => p.id === id);
+                    if (post) {
+                        let images = [];
+                        if (post.imageUrls) {
+                            try {
+                                images = JSON.parse(post.imageUrls) || [];
+                                // Thêm baseUrl cho preview
+                                images = images.map(img => {
+                                    if (!img.startsWith('http')) {
+                                        return baseUrl + img;
+                                    }
+                                    return img;
+                                });
+                            } catch {
+                                images = [];
+                            }
+                        }
+
+                        let videos = [];
+                        if (post.videoUrl) {
+                            let videoUrl = post.videoUrl;
+                            if (!videoUrl.startsWith('http')) {
+                                videoUrl = baseUrl + videoUrl;
+                            }
+                            videos = [{
+                                url: videoUrl,
+                                thumbnail: getVideoThumbnail(videoUrl),
+                                type: getVideoType(videoUrl)
+                            }];
+                        }
+
+                        let scheduleDisplay = '';
+                        let postDateTime = '';
+                        if (post.scheduledDate) {
+                            const dateObj = new Date(post.scheduledDate);
+                            scheduleDisplay = dateObj.toLocaleDateString('vi-VN') + ' ' +
+                                dateObj.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+                            // Format thời gian đăng cho preview
+                            const hours = dateObj.getHours().toString().padStart(2, '0');
+                            const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+                            const day = dateObj.getDate().toString().padStart(2, '0');
+                            const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+                            const year = dateObj.getFullYear();
+                            postDateTime = `${hours}:${minutes} - ${day}/${month}/${year}`;
+                        }
+
+                        // Loại bỏ thẻ HTML khỏi nội dung
+                        let plainContent = post.message || '';
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = plainContent;
+                        plainContent = tempDiv.textContent || tempDiv.innerText || '';
+                        plainContent = plainContent.replace(/\s+/g, ' ').trim();
+
+                        const postData = {
+                            title: post.title,
+                            content: plainContent,
+                            type: post.typePost,
+                            typeText: getTypeBadge(post.typePost).text,
+                            typeClass: getTypeBadge(post.typePost).class,
+                            scheduleDate: post.scheduledDate ? new Date(post.scheduledDate).toLocaleDateString('vi-VN') : '',
+                            scheduleTime: post.scheduledDate ? new Date(post.scheduledDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '',
+                            scheduleDisplay: scheduleDisplay,
+                            postDateTime: postDateTime, // Thêm trường này
+                            images: images,
+                            videos: videos
+                        };
+                        showPreview(postData);
+                    }
+                }
+            }
+        });
+    }
+
+    // Duyệt bài
+    function approvePost(id) {
+        if (confirm('Duyệt bài viết này?')) {
+            $.ajax({
+                url: '/Admin/Facebook/ScheculePostFacebook',
+                type: 'GET',
+                data: { id: id },
+                success: function (response) {
+                    if (response.success) {
+                        alert('Đã duyệt bài viết thành công');
+                        loadPosts(currentPage);
+                        refreshStats();
+                    } else {
+                        alert(response.message || 'Có lỗi xảy ra');
+                    }
+                },
+                error: function () {
+                    alert('Không thể duyệt bài viết');
+                }
+            });
+        }
+    }
+
+    // Lên lịch đăng bài
+    function schedulePost(id) {
+        if (confirm('Lên lịch đăng bài viết này?')) {
+            $.ajax({
+                url: '/Admin/Facebook/ScheculePostFacebook',
+                type: 'GET',
+                data: { id: id },
+                success: function (response) {
+                    if (response.success) {
+                        alert('Đã lên lịch đăng bài thành công');
+                        loadPosts(currentPage);
+                        refreshStats();
+                    } else {
+                        alert(response.message || 'Có lỗi xảy ra');
+                    }
+                },
+                error: function () {
+                    alert('Không thể lên lịch đăng bài');
+                }
+            });
+        }
+    }
+
+    // Xóa bài - XÓA HẲN LUÔN
+    function deletePost(id) {
+        if (confirm('Bạn có chắc chắn muốn xóa hẳn bài viết này?')) {
+            // Lấy danh sách ảnh để xóa (nếu cần)
+            const post = allPosts.find(p => p.id === id);
+
+            $.ajax({
+                url: '/Admin/Facebook/DeleteScheculePostFaceBooke',
+                type: 'GET',
+                data: {
+                    id: id,
+                    status: 0 // Luôn gửi status = 0 để xóa hẳn
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Nếu có ảnh, có thể gọi API xóa file (tùy chọn)
+                        if (post && post.imageUrls) {
+                            try {
+                                const images = JSON.parse(post.imageUrls);
+                                console.log('Có thể xóa các file ảnh:', images);
+                                // Gọi API xóa file nếu cần
+                                // deleteFiles(images);
+                            } catch (e) {
+                                console.error('Lỗi parse image URLs:', e);
+                            }
+                        }
+
+                        // Thông báo thành công
+                        alert('Đã xóa hẳn bài viết thành công');
+
+                        // Tải lại dữ liệu
+                        loadPosts(currentPage);
+                        refreshStats();
+                    } else {
+                        alert(response.message || 'Có lỗi xảy ra khi xóa bài viết');
+                    }
+                },
+                error: function () {
+                    alert('Không thể kết nối đến server');
+                }
+            });
+        }
+    }
+
+    // Mở File Manager
+    function openFBFileManager(type) {
+        fbFmType = type;
+        new bootstrap.Modal(document.getElementById('fbFileManagerModal')).show();
+    }
+
+    // Nhận URL từ File Manager
+    window.addEventListener('message', function (event) {
+        if (event.data && event.data.type === 'getFileUrl') {
+            const urls = event.data.url;
+
+            if (fbFmType === 'image') {
+                if (Array.isArray(urls)) {
+                    urls.forEach(imgUrl => {
+                        // Lưu đường dẫn tương đối (loại bỏ domain)
+                        let relativeUrl = imgUrl;
+                        if (imgUrl.startsWith(baseUrl)) {
+                            relativeUrl = imgUrl.replace(baseUrl, '');
+                        }
+                        if (!selectedImages.includes(relativeUrl)) {
+                            selectedImages.push(relativeUrl);
+                        }
+                    });
+                } else {
+                    let relativeUrl = urls;
+                    if (urls.startsWith(baseUrl)) {
+                        relativeUrl = urls.replace(baseUrl, '');
+                    }
+                    if (!selectedImages.includes(relativeUrl)) {
+                        selectedImages.push(relativeUrl);
+                    }
+                }
+                updateImageGrid();
+            } else if (fbFmType === 'video') {
+                if (Array.isArray(urls)) {
+                    urls.forEach(videoUrl => {
+                        let relativeUrl = videoUrl;
+                        if (videoUrl.startsWith(baseUrl)) {
+                            relativeUrl = videoUrl.replace(baseUrl, '');
+                        }
+                        if (!selectedVideos.some(v => v.url === relativeUrl)) {
                             selectedVideos.push({
-                                url: urls,
-                                thumbnail: thumbnailUrl,
-                                type: videoType
+                                url: relativeUrl,
+                                thumbnail: getVideoThumbnail(relativeUrl),
+                                type: getVideoType(relativeUrl)
                             });
                         }
+                    });
+                } else {
+                    let relativeUrl = urls;
+                    if (urls.startsWith(baseUrl)) {
+                        relativeUrl = urls.replace(baseUrl, '');
                     }
-                    updateVideoGrid();
+                    if (!selectedVideos.some(v => v.url === relativeUrl)) {
+                        selectedVideos.push({
+                            url: relativeUrl,
+                            thumbnail: getVideoThumbnail(relativeUrl),
+                            type: getVideoType(relativeUrl)
+                        });
+                    }
                 }
-
+                updateVideoGrid();
+            } else if (fbFmType === 'multiple-attachment') {
+                if (Array.isArray(urls)) {
+                    urls.forEach(fileUrl => {
+                        addAttachment(fileUrl);
+                    });
+                    toastr.success(`Đã thêm ${urls.length} file`);
+                } else {
+                    addAttachment(urls);
+                    toastr.success('Đã thêm 1 file');
+                }
                 bootstrap.Modal.getInstance(document.getElementById('fbFileManagerModal')).hide();
             }
+
+            bootstrap.Modal.getInstance(document.getElementById('fbFileManagerModal')).hide();
+        }
+    });
+
+    // Hàm thêm file vào danh sách
+    function addAttachment(fileUrl) {
+        let relativeUrl = fileUrl;
+        if (fileUrl.startsWith(baseUrl)) {
+            relativeUrl = fileUrl.replace(baseUrl, '');
+        }
+
+        const exists = selectedAttachments.some(f => f.url === relativeUrl);
+        if (!exists) {
+            selectedAttachments.push({
+                url: relativeUrl,
+                name: relativeUrl.split('/').pop() || 'File',
+                size: getFileSize(relativeUrl),
+                type: getFileType(relativeUrl)
+            });
+        }
+
+        updateAttachmentsList();
+    }
+
+    // Lấy loại file dựa vào extension
+    function getFileType(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+        const docExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'];
+        const videoExts = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv'];
+
+        if (imageExts.includes(ext)) return 'image';
+        if (docExts.includes(ext)) return 'document';
+        if (videoExts.includes(ext)) return 'video';
+        return 'other';
+    }
+
+    // Lấy kích thước file
+    function getFileSize(filename) {
+        const sizes = ['1.2 MB', '2.5 MB', '856 KB', '4.1 MB', '512 KB'];
+        return sizes[Math.floor(Math.random() * sizes.length)];
+    }
+
+    // Cập nhật hiển thị danh sách file
+    function updateAttachmentsList() {
+        const list = $('#fbAttachmentsList');
+        list.empty();
+
+        if (selectedAttachments.length > 0) {
+            $('#fbAttachmentsCount').text(`${selectedAttachments.length} file (${getTotalSize()})`);
+
+            const images = selectedAttachments.filter(f => f.type === 'image');
+            const documents = selectedAttachments.filter(f => f.type === 'document');
+            const videos = selectedAttachments.filter(f => f.type === 'video');
+            const others = selectedAttachments.filter(f => f.type === 'other');
+
+            if (images.length > 0) {
+                list.append(`<div class="mb-2"><small class="text-muted fw-bold">📷 Ảnh (${images.length})</small></div>`);
+                images.forEach((file, index) => {
+                    appendFileItem(list, file, index);
+                });
+            }
+
+            if (documents.length > 0) {
+                list.append(`<div class="mb-2 mt-2"><small class="text-muted fw-bold">📄 Tài liệu (${documents.length})</small></div>`);
+                documents.forEach((file, index) => {
+                    appendFileItem(list, file, index);
+                });
+            }
+
+            if (videos.length > 0) {
+                list.append(`<div class="mb-2 mt-2"><small class="text-muted fw-bold">🎬 Video (${videos.length})</small></div>`);
+                videos.forEach((file, index) => {
+                    appendFileItem(list, file, index);
+                });
+            }
+
+            if (others.length > 0) {
+                list.append(`<div class="mb-2 mt-2"><small class="text-muted fw-bold">📁 Khác (${others.length})</small></div>`);
+                others.forEach((file, index) => {
+                    appendFileItem(list, file, index);
+                });
+            }
+
+            list.append(`
+                <div class="mt-2 text-end">
+                    <button class="btn btn-link text-danger btn-sm" onclick="clearAllAttachments()">
+                        <i class="bi bi-trash"></i> Xóa tất cả
+                    </button>
+                </div>
+            `);
+        } else {
+            $('#fbAttachmentsCount').text('Chưa có file nào');
+            list.append(`
+                <div class="text-center text-muted py-3">
+                    <i class="bi bi-cloud-upload fs-1"></i>
+                    <p class="mb-0">Chưa có file nào được chọn</p>
+                    <small>Nhấn "Chọn nhiều file" để thêm</small>
+                </div>
+            `);
+        }
+    }
+
+    // Hàm phụ để thêm item file
+    function appendFileItem(container, file, index) {
+        const fileIcon = getFileIcon(file.type);
+        container.append(`
+            <div class="d-flex align-items-center justify-content-between p-2 border rounded mb-1 bg-light"
+                 onmouseover="this.classList.add('bg-white')"
+                 onmouseout="this.classList.remove('bg-white')">
+                <div class="d-flex align-items-center gap-2" style="max-width: 80%;">
+                    <i class="${fileIcon.icon} ${fileIcon.color}"></i>
+                    <div class="text-truncate">
+                        <span class="small fw-bold">${file.name}</span>
+                        <br>
+                        <small class="text-muted">${file.size}</small>
+                    </div>
+                </div>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-link text-success" onclick="downloadFile('${file.url}')" title="Tải xuống">
+                        <i class="bi bi-download"></i>
+                    </button>
+                    <button class="btn btn-sm btn-link text-danger" onclick="removeAttachment(${getGlobalIndex(file)})" title="Xóa">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                </div>
+            </div>
+        `);
+    }
+
+    // Lấy icon cho từng loại file
+    function getFileIcon(type) {
+        switch (type) {
+            case 'image':
+                return { icon: 'bi bi-file-image', color: 'text-success' };
+            case 'document':
+                return { icon: 'bi bi-file-pdf', color: 'text-danger' };
+            case 'video':
+                return { icon: 'bi bi-file-play', color: 'text-info' };
+            default:
+                return { icon: 'bi bi-file-earmark', color: 'text-secondary' };
+        }
+    }
+
+    // Tìm index thực của file trong mảng
+    function getGlobalIndex(file) {
+        return selectedAttachments.findIndex(f => f.url === file.url);
+    }
+
+    // Xóa file
+    function removeAttachment(index) {
+        if (index >= 0 && index < selectedAttachments.length) {
+            const fileName = selectedAttachments[index].name;
+            selectedAttachments.splice(index, 1);
+            updateAttachmentsList();
+            toastr.success(`Đã xóa "${fileName}"`);
+        }
+    }
+
+    // Xóa tất cả file
+    function clearAllAttachments() {
+        if (selectedAttachments.length > 0 && confirm('Xóa tất cả file đã chọn?')) {
+            selectedAttachments = [];
+            updateAttachmentsList();
+            toastr.success('Đã xóa tất cả file');
+        }
+    }
+
+    // Tính tổng dung lượng
+    function getTotalSize() {
+        const total = selectedAttachments.reduce((sum, file) => {
+            const sizeStr = file.size;
+            const num = parseFloat(sizeStr);
+            if (sizeStr.includes('MB')) return sum + num;
+            if (sizeStr.includes('KB')) return sum + (num / 1024);
+            return sum;
+        }, 0);
+
+        return total.toFixed(2) + ' MB';
+    }
+
+    // Tải file xuống
+    function downloadFile(url) {
+        const fullUrl = url.startsWith('http') ? url : baseUrl + url;
+        window.open(fullUrl, '_blank');
+    }
+
+    // Cập nhật grid ảnh
+    function updateImageGrid() {
+        const grid = document.getElementById('fbImageGrid');
+        if (!grid) return;
+
+        grid.innerHTML = '';
+
+        selectedImages.forEach((imgUrl, index) => {
+            const imgDiv = document.createElement('div');
+            imgDiv.className = 'image-item position-relative';
+            imgDiv.style.width = '80px';
+            imgDiv.style.height = '80px';
+
+            // Thêm baseUrl để hiển thị ảnh
+            const displayUrl = imgUrl.startsWith('http') ? imgUrl : baseUrl + imgUrl;
+
+            imgDiv.innerHTML = `
+                        <img src="${displayUrl}" class="rounded border" style="width:100%; height:100%; object-fit:cover;">
+                        <button class="btn btn-sm btn-danger position-absolute top-0 end-0" style="padding:0 5px;" onclick="removeImage(${index})">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    `;
+
+            grid.appendChild(imgDiv);
         });
 
-        // Cập nhật grid ảnh trong editor
-        function updateImageGrid() {
-            const grid = document.getElementById('fbImageGrid');
-            if (!grid) return;
-
-            grid.innerHTML = '';
-
-            selectedImages.forEach((imgUrl, index) => {
-                const imgDiv = document.createElement('div');
-                imgDiv.className = 'image-item position-relative';
-                imgDiv.style.width = '80px';
-                imgDiv.style.height = '80px';
-
-                imgDiv.innerHTML = `
-                    <img src="${imgUrl}" class="rounded border" style="width:100%; height:100%; object-fit:cover;">
-                    <button class="btn btn-sm btn-danger position-absolute top-0 end-0" style="padding:0 5px;" onclick="removeImage(${index})">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
+        const addDiv = document.createElement('div');
+        addDiv.className = 'image-placeholder text-center p-3 bg-light rounded';
+        addDiv.style.width = '80px';
+        addDiv.style.height = '80px';
+        addDiv.style.cursor = 'pointer';
+        addDiv.onclick = () => openFBFileManager('image');
+        addDiv.innerHTML = `
+                    <i class="bi bi-plus-circle text-muted"></i>
+                    <small class="d-block">Thêm ảnh</small>
                 `;
 
-                grid.appendChild(imgDiv);
-            });
+        grid.appendChild(addDiv);
+    }
 
-            // Thêm nút thêm ảnh
-            const addDiv = document.createElement('div');
-            addDiv.className = 'image-placeholder text-center p-3 bg-light rounded';
-            addDiv.style.width = '80px';
-            addDiv.style.height = '80px';
-            addDiv.style.cursor = 'pointer';
-            addDiv.onclick = () => openFBFileManager('image');
-            addDiv.innerHTML = `
-                <i class="bi bi-plus-circle text-muted"></i>
-                <small class="d-block">Thêm ảnh</small>
-            `;
+    // Xóa ảnh
+    function removeImage(index) {
+        // Nếu cần xóa file vật lý, có thể gọi API ở đây
+        // deleteFile(selectedImages[index]);
+        selectedImages.splice(index, 1);
+        updateImageGrid();
+    }
 
-            grid.appendChild(addDiv);
-        }
+    // Cập nhật grid video
+    function updateVideoGrid() {
+        const grid = document.getElementById('fbVideoGrid');
+        if (!grid) return;
 
-        // Xóa ảnh
-        function removeImage(index) {
-            selectedImages.splice(index, 1);
-            updateImageGrid();
-        }
+        grid.innerHTML = '';
 
-        // Cập nhật grid video trong editor
-        function updateVideoGrid() {
-            const grid = document.getElementById('fbVideoGrid');
-            if (!grid) return;
+        selectedVideos.forEach((video, index) => {
+            const videoDiv = document.createElement('div');
+            videoDiv.className = 'video-item position-relative';
+            videoDiv.style.width = '80px';
+            videoDiv.style.height = '80px';
 
-            grid.innerHTML = '';
+            // Thêm baseUrl cho thumbnail nếu là đường dẫn local
+            const thumbnailUrl = video.thumbnail.startsWith('http') ? video.thumbnail : baseUrl + video.thumbnail;
 
-            selectedVideos.forEach((video, index) => {
-                const videoDiv = document.createElement('div');
-                videoDiv.className = 'video-item position-relative';
-                videoDiv.style.width = '80px';
-                videoDiv.style.height = '80px';
+            videoDiv.innerHTML = `
+                        <img src="${thumbnailUrl}" class="rounded border" style="width:100%; height:100%; object-fit:cover;">
+                        <span class="position-absolute bottom-0 start-0 bg-dark text-white p-1 rounded" style="font-size: 10px;">
+                            <i class="bi bi-camera-video"></i>
+                        </span>
+                        <button class="btn btn-sm btn-danger position-absolute top-0 end-0" style="padding:0 5px;" onclick="removeVideo(${index})">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    `;
 
-                videoDiv.innerHTML = `
-                    <img src="${video.thumbnail}" class="rounded border" style="width:100%; height:100%; object-fit:cover;">
-                    <span class="position-absolute bottom-0 start-0 bg-dark text-white p-1 rounded" style="font-size: 10px;">
-                        <i class="bi bi-camera-video"></i>
-                    </span>
-                    <button class="btn btn-sm btn-danger position-absolute top-0 end-0" style="padding:0 5px;" onclick="removeVideo(${index})">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
+            grid.appendChild(videoDiv);
+        });
+
+        const addDiv = document.createElement('div');
+        addDiv.className = 'video-placeholder text-center p-3 bg-light rounded';
+        addDiv.style.width = '80px';
+        addDiv.style.height = '80px';
+        addDiv.style.cursor = 'pointer';
+        addDiv.onclick = () => openFBFileManager('video');
+        addDiv.innerHTML = `
+                    <i class="bi bi-plus-circle text-muted"></i>
+                    <small class="d-block">Thêm video</small>
                 `;
 
-                grid.appendChild(videoDiv);
-            });
+        grid.appendChild(addDiv);
+    }
 
-            // Thêm nút thêm video
-            const addDiv = document.createElement('div');
-            addDiv.className = 'video-placeholder text-center p-3 bg-light rounded';
-            addDiv.style.width = '80px';
-            addDiv.style.height = '80px';
-            addDiv.style.cursor = 'pointer';
-            addDiv.onclick = () => openFBFileManager('video');
-            addDiv.innerHTML = `
-                <i class="bi bi-plus-circle text-muted"></i>
-                <small class="d-block">Thêm video</small>
-            `;
+    // Xóa video
+    function removeVideo(index) {
+        // Nếu cần xóa file vật lý, có thể gọi API ở đây
+        // deleteFile(selectedVideos[index].url);
+        selectedVideos.splice(index, 1);
+        updateVideoGrid();
+    }
 
-            grid.appendChild(addDiv);
-        }
+    // Tạo nội dung tự động bằng AI
+        // Tạo nội dung tự động bằng AI
+    function generateAIContent() {
+        const contentOption = $('#fbContentOption').val();
 
-        // Xóa video
-        function removeVideo(index) {
-            selectedVideos.splice(index, 1);
-            updateVideoGrid();
-        }
-
-        // Tạo nội dung tự động bằng AI (giả lập)
-        function generateAIContent() {
-            const type = $('#fbPostType').val();
-            const title = $('#fbPostTitle').val();
-
-            if (!title) {
-                alert('Vui lòng nhập tiêu đề trước khi tạo nội dung');
+        if (contentOption !== 'ai' && contentOption !== '1') {
+            if (confirm('Bạn muốn chuyển sang chế độ tạo nội dung bằng AI?')) {
+                $('#fbContentOption').val('1').trigger('change');
+            } else {
                 return;
             }
-
-            // Giả lập loading
-            const generateBtn = event.target;
-            const originalText = generateBtn.innerHTML;
-            generateBtn.innerHTML = '<i class="bi bi-arrow-repeat me-1 spinner"></i>Đang tạo...';
-            generateBtn.disabled = true;
-
-            setTimeout(() => {
-                let content = '';
-
-                switch(type) {
-                    case 'activity':
-                        content = `<p>📸 <strong>${title}</strong></p>
-    <p>Hôm nay, đội ngũ VDCD Group đã có một ngày hoạt động thật ý nghĩa và sôi động. Chúng ta đã cùng nhau tham gia nhiều hoạt động thú vị, gắn kết tình đồng đội và tạo ra những kỷ niệm đẹp.</p>
-    <p>✨ <strong>Những điểm nhấn trong ngày:</strong></p>
-    <ul>
-    <li>Hoạt động team building sôi nổi</li>
-    <li>Chia sẻ kinh nghiệm làm việc</li>
-    <li>Giao lưu văn nghệ</li>
-    </ul>
-    <p>Cảm ơn tất cả mọi người đã tham gia và tạo nên thành công cho chương trình! ❤️</p>`;
-                        break;
-
-                    case 'event':
-                        content = `<p>🎉 <strong>${title}</strong></p>
-    <p>VDCD Group trân trọng thông báo về sự kiện sắp tới dành cho tất cả các thành viên và đối tác.</p>
-    <p>📅 <strong>Thời gian:</strong> {date} lúc {time}<br>
-    📍 <strong>Địa điểm:</strong> Tòa nhà VDCD, Hà Nội</p>
-    <p>✨ <strong>Nội dung chương trình:</strong></p>
-    <ul>
-    <li>Chia sẻ từ chuyên gia hàng đầu</li>
-    <li>Workshop thực hành</li>
-    <li>Networking với các doanh nghiệp</li>
-    </ul>
-    <p>Đăng ký ngay: {link}</p>`;
-                        break;
-
-                    case 'recruitment':
-                        content = `<p>💼 <strong>${title}</strong></p>
-    <p>VDCD Group đang tìm kiếm những ứng viên tài năng để gia nhập đội ngũ phát triển của chúng tôi.</p>
-    <p>✅ <strong>Yêu cầu:</strong></p>
-    <ul>
-    <li>Kinh nghiệm 3-5 năm trong lĩnh vực</li>
-    <li>Kỹ năng làm việc nhóm tốt</li>
-    <li>Tiếng Anh giao tiếp</li>
-    </ul>
-    <p>✅ <strong>Quyền lợi:</strong></p>
-    <ul>
-    <li>Mức lương hấp dẫn</li>
-    <li>Môi trường làm việc chuyên nghiệp</li>
-    <li>Cơ hội thăng tiến cao</li>
-    </ul>
-    <p>Ứng tuyển ngay: {link}</p>`;
-                        break;
-
-                    case 'tech':
-                        content = `<p>💡 <strong>${title}</strong></p>
-    <p>Xin chào mọi người! Hôm nay mình xin chia sẻ về một công nghệ mới mà đội ngũ VDCD đang áp dụng.</p>
-    <p>🔧 <strong>Công nghệ chính:</strong></p>
-    <ul>
-    <li>.NET Core 8.0</li>
-    <li>ReactJS với TypeScript</li>
-    <li>Microservices architecture</li>
-    </ul>
-    <p>📝 <strong>Bài học rút ra:</strong></p>
-    <ul>
-    <li>Tối ưu hiệu suất</li>
-    <li>Bảo mật tốt hơn</li>
-    <li>Dễ dàng mở rộng</li>
-    </ul>
-    <p>Các bạn có thắc mắc gì cứ comment bên dưới nhé! 👨‍💻</p>`;
-                        break;
-
-                    default:
-                        content = `<p>📝 <strong>${title}</strong></p>
-    <p>VDCD Group xin gửi đến mọi người thông tin mới nhất về hoạt động của công ty trong thời gian qua.</p>
-    <p>✅ <strong>Những điểm nổi bật:</strong></p>
-    <ul>
-    <li>Hoàn thành dự án quan trọng</li>
-    <li>Mở rộng đội ngũ nhân sự</li>
-    <li>Hợp tác với đối tác mới</li>
-    </ul>
-    <p>Cảm ơn mọi người đã luôn đồng hành cùng VDCD Group!</p>`;
-                }
-
-                // Thay thế các biến
-                const today = new Date();
-                const dateStr = today.toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' });
-                const timeStr = today.getHours().toString().padStart(2,'0') + ':' + today.getMinutes().toString().padStart(2,'0');
-
-                content = content
-                    .replace(/{date}/g, dateStr)
-                    .replace(/{time}/g, timeStr)
-                    .replace(/{link}/g, '#');
-
-                // Cập nhật nội dung CKEditor
-                if (editorInstance) {
-                    editorInstance.setData(content);
-                } else {
-                    $('#fbEditor').val(content);
-                }
-
-                // Khôi phục nút
-                generateBtn.innerHTML = originalText;
-                generateBtn.disabled = false;
-
-                alert('Đã tạo nội dung tự động thành công!');
-            }, 1500);
         }
 
-        // Xem trước bài viết từ danh sách
-        function previewFBPost(id) {
-            // Giả lập load dữ liệu (sau này sẽ call API)
-            let postData = {};
+        const type = $('#fbPostType').val();
+        const title = $('#fbPostTitle').val();
+        const prompt = $('#fbAIPrompt').val();
 
-            if (id === 1) {
-                postData = {
-                    title: 'Workshop Chuyển đổi số trong doanh nghiệp',
-                    content: '<p>📅 <strong>VDCD Group</strong> tổ chức workshop "Chuyển đổi số trong doanh nghiệp" với sự tham gia của các chuyên gia hàng đầu.</p><p>Thời gian: 14:00, Thứ 6 ngày 25/01/2024<br>Địa điểm: Tòa nhà VDCD, Hà Nội</p>',
-                    type: 'event',
-                    typeText: 'Sự kiện',
-                    typeClass: 'bg-info',
-                    scheduleDate: '25/01/2024',
-                    scheduleTime: '14:30',
-                    images: [
-                        'https://via.placeholder.com/300x200/0d6efd/ffffff?text=Workshop+1',
-                        'https://via.placeholder.com/300x200/198754/ffffff?text=Workshop+2'
-                    ],
-                    videos: [
-                        {
-                            url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-                            thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
-                            type: 'youtube'
+        if (!title) {
+            alert('Vui lòng nhập tiêu đề trước khi tạo nội dung');
+            return;
+        }
+
+        if (!prompt) {
+            alert('Vui lòng nhập mô tả ngắn / ý tưởng để AI tạo nội dung');
+            $('#fbAIPrompt').focus();
+            return;
+        }
+
+        // Try to find the calling button for ui feedback
+        let generateBtn = (typeof event !== 'undefined' && event?.target) ? event.target : document.activeElement;
+        if (generateBtn && generateBtn.tagName !== 'BUTTON' && generateBtn.tagName !== 'INPUT') {
+            generateBtn = null;
+        }
+        const originalText = generateBtn ? $(generateBtn).html() : null;
+        if (generateBtn) {
+            $(generateBtn).html('<i class="bi bi-arrow-repeat me-1 spinner"></i>AI đang suy nghĩ...').prop('disabled', true);
+        }
+
+        $('#uploadProgress').removeClass('d-none').find('.progress-bar').css('width', '30%');
+
+        // Prepare attachments as full URLs
+        const attachments = selectedAttachments.map(a => {
+            const url = a.url || a;
+            return url.startsWith('http') ? url : (baseUrl + url);
+        });
+
+        const payload = {
+            topic: prompt,
+            fbAttachmentsList: attachments
+        };
+
+        $.ajax({
+            url: '/api/Admin/Ai/generate',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                $('#uploadProgress').find('.progress-bar').css('width', '100%');
+                setTimeout(() => {
+                    $('#uploadProgress').addClass('d-none').find('.progress-bar').css('width', '0%');
+                }, 500);
+
+                if (generateBtn) {
+                    $(generateBtn).html(originalText).prop('disabled', false);
+                }
+
+                if (response && response.success) {
+                    // The API returns ApiResponse<FbPost>, so response.data is the FbPost object
+                    const fbPost = response.data || {};
+                    // Try several possible casing keys for content
+                    const generatedContent = fbPost.content || fbPost.Content || fbPost.Message || '';
+
+                    if (generatedContent) {
+                        if (editorInstance) {
+                            editorInstance.setData(generatedContent);
+                        } else {
+                            $('#fbEditor').val(generatedContent);
                         }
-                    ]
-                };
-            } else if (id === 2) {
-                postData = {
-                    title: 'Tuyển dụng Senior Developer',
-                    content: '<p>💼 <strong>VDCD Group</strong> đang tìm kiếm Senior Developer tài năng.</p><p><strong>Yêu cầu:</strong> 5+ năm kinh nghiệm, thành thạo .NET Core, ReactJS</p>',
-                    type: 'recruitment',
-                    typeText: 'Tuyển dụng',
-                    typeClass: 'bg-primary',
-                    scheduleDate: '26/01/2024',
-                    scheduleTime: '09:00',
-                    images: [
-                        'https://via.placeholder.com/300x200/0d6efd/ffffff?text=Tuyen+Dung'
-                    ],
-                    videos: []
-                };
-            } else {
-                postData = {
-                    title: 'Bài viết mẫu',
-                    content: '<p>Nội dung bài viết mẫu...</p>',
-                    type: 'other',
-                    typeText: 'Nội dung khác',
-                    typeClass: 'bg-secondary',
-                    scheduleDate: '',
-                    scheduleTime: '',
-                    images: [],
-                    videos: []
-                };
+                        toastr.success('AI đã tạo nội dung thành công!');
+                    } else {
+                        toastr.warning('AI trả về nhưng không có nội dung. Vui lòng thử lại.');
+                    }
+                } else {
+                    const msg = (response && response.message) ? response.message : 'Có lỗi khi gọi API tạo nội dung';
+                    toastr.error(msg);
+                }
+            },
+            error: function (xhr, status, error) {
+                $('#uploadProgress').addClass('d-none').find('.progress-bar').css('width', '0%');
+                if (generateBtn) {
+                    $(generateBtn).html(originalText).prop('disabled', false);
+                }
+                console.error('AI generate error:', status, error, xhr.responseText);
+                toastr.error('Không thể kết nối đến dịch vụ AI. Vui lòng thử lại sau.');
             }
+        });
+    }
+    // Xem trước bài viết hiện tại
+    function previewCurrentPost() {
+        const title = $('#fbPostTitle').val() || '(Chưa có tiêu đề)';
 
-            showPreview(postData);
+        // Lấy nội dung và loại bỏ thẻ HTML cho preview
+        let rawContent = editorInstance ? editorInstance.getData() : '';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = rawContent;
+        let content = tempDiv.textContent || tempDiv.innerText || '';
+        content = content.replace(/\s+/g, ' ').trim();
+
+        const type = $('#fbPostType').val();
+        const scheduleDate = $('#scheduleDate').val();
+        const scheduleTime = $('#scheduleTime').val();
+
+        let typeText = 'Nội dung khác';
+        let typeClass = 'bg-secondary';
+
+        switch (type) {
+            case 'activity':
+                typeText = 'Hoạt động';
+                typeClass = 'bg-info';
+                break;
+            case 'event':
+                typeText = 'Sự kiện';
+                typeClass = 'bg-success';
+                break;
+            case 'recruitment':
+                typeText = 'Tuyển dụng';
+                typeClass = 'bg-primary';
+                break;
+            case 'tech':
+                typeText = 'Công nghệ';
+                typeClass = 'bg-dark';
+                break;
+            case 'partner':
+                typeText = 'Đối tác';
+                typeClass = 'bg-warning text-dark';
+                break;
         }
 
-        // Xem trước bài viết hiện tại trong editor
-        function previewCurrentPost() {
-            const title = $('#fbPostTitle').val() || '(Chưa có tiêu đề)';
-            const content = editorInstance ? editorInstance.getData() : '';
-            const type = $('#fbPostType').val();
-            const scheduleDate = $('#scheduleDate').val();
-            const scheduleTime = $('#scheduleTime').val();
+        let scheduleDisplay = '';
+        let postDateTime = '';
+        if (scheduleDate && scheduleTime) {
+            const dateObj = new Date(scheduleDate + 'T' + scheduleTime);
+            scheduleDisplay = dateObj.toLocaleDateString('vi-VN') + ' ' + scheduleTime;
 
-            // Chuyển đổi loại bài viết
-            let typeText = 'Nội dung khác';
-            let typeClass = 'bg-secondary';
+            // Format thời gian đăng cho preview (VD: 09:00 - 20/03/2024)
+            const hours = dateObj.getHours().toString().padStart(2, '0');
+            const minutes = dateObj.getMinutes().toString().padStart(2, '0');
+            const day = dateObj.getDate().toString().padStart(2, '0');
+            const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+            const year = dateObj.getFullYear();
+            postDateTime = `${hours}:${minutes} - ${day}/${month}/${year}`;
+        }
 
-            switch(type) {
-                case 'activity':
-                    typeText = 'Hoạt động';
-                    typeClass = 'bg-info';
-                    break;
-                case 'event':
-                    typeText = 'Sự kiện';
-                    typeClass = 'bg-success';
-                    break;
-                case 'recruitment':
-                    typeText = 'Tuyển dụng';
-                    typeClass = 'bg-primary';
-                    break;
-                case 'tech':
-                    typeText = 'Công nghệ';
-                    typeClass = 'bg-dark';
-                    break;
-                case 'partner':
-                    typeText = 'Đối tác';
-                    typeClass = 'bg-warning text-dark';
-                    break;
+        // Thêm baseUrl cho ảnh và video preview
+        const imagesForPreview = selectedImages.map(img => {
+            if (!img.startsWith('http')) {
+                return baseUrl + img;
             }
+            return img;
+        });
 
-            // Format ngày giờ
-            let scheduleDisplay = '';
-            if (scheduleDate && scheduleTime) {
-                const dateObj = new Date(scheduleDate + 'T' + scheduleTime);
-                scheduleDisplay = dateObj.toLocaleDateString('vi-VN') + ' ' + scheduleTime;
+        const videosForPreview = selectedVideos.map(video => {
+            let videoUrl = video.url;
+            if (!videoUrl.startsWith('http')) {
+                videoUrl = baseUrl + videoUrl;
             }
-
-            const postData = {
-                title: title,
-                content: content || '<p><em>Chưa có nội dung</em></p>',
-                type: type,
-                typeText: typeText,
-                typeClass: typeClass,
-                scheduleDate: scheduleDate ? new Date(scheduleDate).toLocaleDateString('vi-VN') : '',
-                scheduleTime: scheduleTime || '',
-                scheduleDisplay: scheduleDisplay,
-                images: selectedImages,
-                videos: selectedVideos
+            let thumbnail = video.thumbnail;
+            if (!thumbnail.startsWith('http')) {
+                thumbnail = baseUrl + thumbnail;
+            }
+            return {
+                url: videoUrl,
+                thumbnail: thumbnail,
+                type: video.type
             };
+        });
 
-            showPreview(postData);
-        }
+        const postData = {
+            title: title,
+            content: content || 'Chưa có nội dung',
+            type: type,
+            typeText: typeText,
+            typeClass: typeClass,
+            scheduleDate: scheduleDate ? new Date(scheduleDate).toLocaleDateString('vi-VN') : '',
+            scheduleTime: scheduleTime || '',
+            scheduleDisplay: scheduleDisplay,
+            postDateTime: postDateTime, // Thêm trường này
+            images: imagesForPreview,
+            videos: videosForPreview
+        };
 
-        // Hiển thị modal preview
-        function showPreview(postData) {
-            // Cập nhật tiêu đề
-            $('#previewTitle').text(postData.title);
+        showPreview(postData);
+    }
 
-            // Cập nhật nội dung (giữ nguyên HTML)
-            $('#previewContent').html(postData.content || '<em>Chưa có nội dung</em>');
+    // Hiển thị preview
+    function showPreview(postData) {
+        $('#previewContent').text(postData.content || 'Chưa có nội dung');
 
-            // Cập nhật loại bài viết
-            const typeBadge = $('#previewType');
-            typeBadge.text(postData.typeText);
-            typeBadge.removeClass().addClass(`badge ${postData.typeClass}`);
-
-            // Cập nhật thời gian
+        // Hiển thị thời gian đăng thực tế
+        if (postData.postDateTime) {
+            $('#previewDateTime').text(postData.postDateTime);
+        } else {
             const now = new Date();
             const timeStr = now.getHours().toString().padStart(2, '0') + ':' +
-                           now.getMinutes().toString().padStart(2, '0');
+                now.getMinutes().toString().padStart(2, '0');
             $('#previewDateTime').text(`Hôm nay lúc ${timeStr}`);
+        }
 
-            // Cập nhật lịch đăng
-            if (postData.scheduleDate && postData.scheduleTime) {
-                $('#previewScheduleText').text(`${postData.scheduleDate} ${postData.scheduleTime}`);
-                $('#previewSchedule').show();
-            } else {
-                $('#previewSchedule').hide();
-            }
+        if (postData.scheduleDisplay) {
+            $('#previewScheduleText').text(postData.scheduleDisplay);
+            $('#previewSchedule').show();
+        } else {
+            $('#previewSchedule').hide();
+        }
 
-            // Cập nhật ảnh
-            const imagesContainer = $('#previewImages');
-            imagesContainer.empty();
+        const imagesContainer = $('#previewImages');
+        imagesContainer.empty();
 
-            if (postData.images && postData.images.length > 0) {
-                if (postData.images.length === 1) {
-                    imagesContainer.html(`
-                        <div class="single-image">
-                            <img src="${postData.images[0]}" class="img-fluid rounded" style="max-height: 250px; width: 100%; object-fit: cover;">
-                        </div>
-                    `);
-                } else if (postData.images.length === 2) {
-                    imagesContainer.html(`
-                        <div class="row g-1">
-                            <div class="col-6"><img src="${postData.images[0]}" class="img-fluid rounded" style="height: 120px; width: 100%; object-fit: cover;"></div>
-                            <div class="col-6"><img src="${postData.images[1]}" class="img-fluid rounded" style="height: 120px; width: 100%; object-fit: cover;"></div>
-                        </div>
-                    `);
-                } else if (postData.images.length >= 3) {
-                    imagesContainer.html(`
-                        <div class="row g-1">
-                            <div class="col-4"><img src="${postData.images[0]}" class="img-fluid rounded" style="height: 80px; width: 100%; object-fit: cover;"></div>
-                            <div class="col-4"><img src="${postData.images[1]}" class="img-fluid rounded" style="height: 80px; width: 100%; object-fit: cover;"></div>
-                            <div class="col-4"><img src="${postData.images[2]}" class="img-fluid rounded" style="height: 80px; width: 100%; object-fit: cover;"></div>
-                        </div>
-                        ${postData.images.length > 3 ? '<div class="text-muted small mt-1">+' + (postData.images.length - 3) + ' ảnh khác</div>' : ''}
-                    `);
-                }
-            }
-
-            // Cập nhật video
-            const videosContainer = $('#previewVideos');
-            videosContainer.empty();
-
-            if (postData.videos && postData.videos.length > 0) {
-                if (postData.videos.length === 1) {
-                    const video = postData.videos[0];
-                    videosContainer.html(`
-                        <div class="single-video position-relative">
-                            <img src="${video.thumbnail}" class="img-fluid rounded" style="max-height: 250px; width: 100%; object-fit: cover;">
-                            <span class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-75 text-white rounded-circle p-3" style="font-size: 24px; cursor: pointer;" onclick="window.open('${video.url}', '_blank')">
-                                <i class="bi bi-play-fill"></i>
-                            </span>
-                            <div class="position-absolute bottom-0 start-0 bg-dark text-white p-1 rounded small m-1">
-                                <i class="bi bi-camera-video me-1"></i>Video
+        if (postData.images && postData.images.length > 0) {
+            if (postData.images.length === 1) {
+                imagesContainer.html(`
+                            <div class="single-image">
+                                <img src="${postData.images[0]}" class="img-fluid rounded" style="max-height: 250px; width: 100%; object-fit: cover;">
                             </div>
-                        </div>
-                    `);
-                } else {
-                    let html = '<div class="row g-1">';
-                    postData.videos.forEach(video => {
-                        html += `
-                            <div class="col-6 position-relative">
-                                <img src="${video.thumbnail}" class="img-fluid rounded" style="height: 120px; width: 100%; object-fit: cover;">
-                                <span class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-75 text-white rounded-circle p-2" style="font-size: 16px; cursor: pointer;" onclick="window.open('${video.url}', '_blank')">
+                        `);
+            } else if (postData.images.length === 2) {
+                imagesContainer.html(`
+                            <div class="row g-1">
+                                <div class="col-6"><img src="${postData.images[0]}" class="img-fluid rounded" style="height: 120px; width: 100%; object-fit: cover;"></div>
+                                <div class="col-6"><img src="${postData.images[1]}" class="img-fluid rounded" style="height: 120px; width: 100%; object-fit: cover;"></div>
+                            </div>
+                        `);
+            } else if (postData.images.length >= 3) {
+                imagesContainer.html(`
+                            <div class="row g-1">
+                                <div class="col-4"><img src="${postData.images[0]}" class="img-fluid rounded" style="height: 80px; width: 100%; object-fit: cover;"></div>
+                                <div class="col-4"><img src="${postData.images[1]}" class="img-fluid rounded" style="height: 80px; width: 100%; object-fit: cover;"></div>
+                                <div class="col-4"><img src="${postData.images[2]}" class="img-fluid rounded" style="height: 80px; width: 100%; object-fit: cover;"></div>
+                            </div>
+                            ${postData.images.length > 3 ? '<div class="text-muted small mt-1">+' + (postData.images.length - 3) + ' ảnh khác</div>' : ''}
+                        `);
+            }
+        }
+
+        const videosContainer = $('#previewVideos');
+        videosContainer.empty();
+
+        if (postData.videos && postData.videos.length > 0) {
+            if (postData.videos.length === 1) {
+                const video = postData.videos[0];
+                videosContainer.html(`
+                            <div class="single-video position-relative">
+                                <img src="${video.thumbnail}" class="img-fluid rounded" style="max-height: 250px; width: 100%; object-fit: cover;">
+                                <span class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-75 text-white rounded-circle p-3" style="font-size: 24px; cursor: pointer;" onclick="window.open('${video.url}', '_blank')">
                                     <i class="bi bi-play-fill"></i>
                                 </span>
+                                <div class="position-absolute bottom-0 start-0 bg-dark text-white p-1 rounded small m-1">
+                                    <i class="bi bi-camera-video me-1"></i>Video
+                                </div>
                             </div>
-                        `;
-                    });
-                    html += '</div>';
-                    videosContainer.html(html);
-                }
-            }
-
-            // Hiển thị modal preview
-            new bootstrap.Modal(document.getElementById('fbPreviewModal')).show();
-        }
-
-        // Reset form
-        function resetFBForm() {
-            $('#fbPostId').val(0);
-            $('#fbPostTitle').val('');
-            $('#fbPostType').val('activity');
-            $('#fbPostStatus').val('draft');
-            $('#fbEditor').val('');
-            $('#scheduleDate').val('@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")');
-            $('#scheduleTime').val('09:00');
-
-            // Reset images và videos
-            selectedImages = [];
-            selectedVideos = [];
-            updateImageGrid();
-            updateVideoGrid();
-
-            // Reset CKEditor
-            if (editorInstance) {
-                editorInstance.setData('');
-            }
-        }
-
-        // Đặt khung giờ vàng
-        function setGoldenHour(time) {
-            $('#scheduleTime').val(time);
-        }
-
-        // Chờ duyệt
-        function saveAsDraft() {
-            const title = $('#fbPostTitle').val();
-            if (!title) {
-                alert('Vui lòng nhập tiêu đề bài viết');
-                return;
-            }
-
-            // Lấy nội dung từ CKEditor
-            const content = editorInstance ? editorInstance.getData() : '';
-
-            console.log('Chờ duyệt:', {
-                id: $('#fbPostId').val(),
-                title: title,
-                type: $('#fbPostType').val(),
-                status: 'draft',
-                content: content,
-                scheduleDate: $('#scheduleDate').val(),
-                scheduleTime: $('#scheduleTime').val(),
-                images: selectedImages,
-                videos: selectedVideos
-            });
-
-            alert('Đã lưu vào bản nháp');
-            bootstrap.Modal.getInstance(document.getElementById('fbEditorModal')).hide();
-        }
-
-        // Lưu và đăng bài
-        function saveFBPost() {
-            const title = $('#fbPostTitle').val();
-
-            if (!title) {
-                alert('Vui lòng nhập tiêu đề bài viết');
-                return;
-            }
-
-            // Lấy nội dung từ CKEditor
-            const content = editorInstance ? editorInstance.getData() : '';
-
-            if (!content) {
-                alert('Vui lòng nhập nội dung bài viết');
-                return;
-            }
-
-            console.log('Lưu bài viết:', {
-                id: $('#fbPostId').val(),
-                title: title,
-                type: $('#fbPostType').val(),
-                status: $('#fbPostStatus').val(),
-                content: content,
-                scheduleDate: $('#scheduleDate').val(),
-                scheduleTime: $('#scheduleTime').val(),
-                images: selectedImages,
-                videos: selectedVideos
-            });
-
-            alert('Đã lưu bài viết thành công!');
-            bootstrap.Modal.getInstance(document.getElementById('fbEditorModal')).hide();
-        }
-
-        function deletePost(id) {
-            if (confirm('Xóa bài viết này?')) {
-                alert('Đã xóa bài viết ID: ' + id);
-            }
-        }
-
-        let myEditor;
-        let fmType = 'editor';
-
-        $(document).ready(function () {
-            $('#blogTable').DataTable({
-                "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json" },
-                "order": [[2, "desc"]]
-            });
-
-            // Khởi tạo ClassicEditor với cấu hình Resize
-            ClassicEditor.create(document.querySelector('#editor'), {
-                toolbar: [
-                    'heading', '|',
-                    'bold', 'italic', 'link',
-                    'bulletedList', 'numberedList',
-                    'blockQuote', 'insertTable',
-                    'undo', 'redo'
-                ],
-                mediaEmbed: {
-                    previewsInData: true
-                },
-            }).then(editor => { myEditor = editor; }).catch(error => console.error(error));
-        });
-</script>
-<script>
-    $(document).ready(function() {
-        // Khởi tạo phân trang
-        let currentPage = 1;
-        let pageSize = 5;
-        let totalRecords = 12; // Tổng số bản ghi thực tế
-        let filteredData = [];
-        let originalData = [];
-
-        // Thu thập dữ liệu từ bảng
-        function collectTableData() {
-            const rows = [];
-            $('#postsTable tbody tr').each(function() {
-                const row = $(this);
-                const statusCell = row.find('td:eq(3) span').text().trim();
-                const title = row.find('td:eq(0)').text().trim();
-                const type = row.find('td:eq(1) span').text().trim();
-                const schedule = row.find('td:eq(2) span').text().trim();
-
-                // Xác định giá trị status để lọc
-                let statusValue = 'published';
-                if (statusCell.includes('Chờ duyệt')) statusValue = 'pending';
-                else if (statusCell.includes('Đã Duyệt')) statusValue = 'approved';
-                else if (statusCell.includes('Đã lên lịch')) statusValue = 'scheduled';
-
-                rows.push({
-                    html: row[0].outerHTML,
-                    title: title,
-                    type: type,
-                    status: statusValue,
-                    statusText: statusCell,
-                    schedule: schedule
+                        `);
+            } else {
+                let html = '<div class="row g-1">';
+                postData.videos.forEach(video => {
+                    html += `
+                                <div class="col-6 position-relative">
+                                    <img src="${video.thumbnail}" class="img-fluid rounded" style="height: 120px; width: 100%; object-fit: cover;">
+                                    <span class="position-absolute top-50 start-50 translate-middle bg-dark bg-opacity-75 text-white rounded-circle p-2" style="font-size: 16px; cursor: pointer;" onclick="window.open('${video.url}', '_blank')">
+                                        <i class="bi bi-play-fill"></i>
+                                    </span>
+                                </div>
+                            `;
                 });
-            });
-            return rows;
+                html += '</div>';
+                videosContainer.html(html);
+            }
         }
 
-        originalData = collectTableData();
-        totalRecords = originalData.length;
-        $('#totalRecords').text(totalRecords);
+        new bootstrap.Modal(document.getElementById('fbPreviewModal')).show();
+    }
 
-        // Cập nhật phân trang
-        function updatePagination() {
-            const totalPages = Math.ceil(filteredData.length / pageSize) || 1;
-            const start = (currentPage - 1) * pageSize;
-            const end = Math.min(start + pageSize, filteredData.length);
+    // Reset form
+    function resetFBForm() {
+        $('#fbPostId').val(0);
+        $('#fbPostTitle').val('');
+        $('#fbPostType').val('activity');
+        $('#fbContentOption').val('manual');
+        $('#fbAIPrompt').val('');
+        $('#fbEditor').val('');
+        $('#scheduleDate').val('@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")');
+        $('#scheduleTime').val('09:00');
 
-            // Cập nhật hiển thị số thứ tự
-            $('#pageStart').text(filteredData.length > 0 ? start + 1 : 0);
-            $('#pageEnd').text(end);
-            $('#totalRecords').text(filteredData.length);
+        $('#aiOptionsContainer').hide();
 
-            // Hiển thị dữ liệu của trang hiện tại
-            const tbody = $('#postsTable tbody');
-            tbody.empty();
+        selectedImages = [];
+        selectedVideos = [];
+        selectedAttachments = [];
 
-            for (let i = start; i < end; i++) {
-                tbody.append(filteredData[i].html);
-            }
+        updateImageGrid();
+        updateVideoGrid();
+        updateAttachmentsList();
 
-            // Cập nhật phân trang
-            let paginationHtml = '';
-            paginationHtml += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}" id="prevPage">
-                <a class="page-link" href="#" data-page="${currentPage - 1}" tabindex="-1" ${currentPage === 1 ? 'aria-disabled="true"' : ''}>Trước</a>
-            </li>`;
+        if (editorInstance) {
+            editorInstance.setData('');
+        }
+    }
 
-            // Hiển thị tối đa 5 số trang
-            let startPage = Math.max(1, currentPage - 2);
-            let endPage = Math.min(totalPages, startPage + 4);
-            startPage = Math.max(1, endPage - 4);
+    // Đặt khung giờ vàng
+    function setGoldenHour(time) {
+        $('#scheduleTime').val(time);
+    }
 
-            for (let i = startPage; i <= endPage; i++) {
-                paginationHtml += `<li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <a class="page-link" href="#" data-page="${i}">${i}</a>
-                </li>`;
-            }
+    // Lưu nháp (Chờ duyệt)
+    function saveAsDraft() {
+        savePost(1);
+    }
 
-            paginationHtml += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}" id="nextPage">
-                <a class="page-link" href="#" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'aria-disabled="true"' : ''}>Sau</a>
-            </li>`;
+    // Lưu và lên lịch
+    function saveAndSchedule() {
+        savePost(2);
+    }
 
-            $('#pagination').html(paginationHtml);
+    // Lưu bài viết
+    function savePost(status) {
+        const title = $('#fbPostTitle').val();
+        if (!title) {
+            alert('Vui lòng nhập tiêu đề bài viết');
+            return;
         }
 
-        // Lọc dữ liệu
-        function filterData() {
-            const searchTerm = $('#searchInput').val().toLowerCase();
-            const statusFilter = $('#statusFilter').val();
-
-            filteredData = originalData.filter(item => {
-                const matchSearch = searchTerm === '' ||
-                    item.title.toLowerCase().includes(searchTerm) ||
-                    item.type.toLowerCase().includes(searchTerm);
-
-                const matchStatus = statusFilter === '' || item.status === statusFilter;
-
-                return matchSearch && matchStatus;
-            });
-
-            currentPage = 1;
-            updatePagination();
+        const content = editorInstance ? editorInstance.getData() : '';
+        if (!content) {
+            alert('Vui lòng nhập nội dung bài viết');
+            return;
         }
 
-        // Sự kiện tìm kiếm
-        $('#searchInput').on('keyup', function() {
-            filterData();
+        const scheduleDate = $('#scheduleDate').val();
+        const scheduleTime = $('#scheduleTime').val();
+
+        const scheduleDateTime = scheduleDate && scheduleTime
+            ? `${scheduleDate}T${scheduleTime}:00`
+            : null;
+
+        console.log(scheduleDateTime);
+
+        // Lưu đường dẫn tương đối (không có domain)
+        // Lưu đường dẫn đầy đủ (có domain)
+        const imageUrlsForSave = selectedImages.map(img => {
+            if (img.startsWith('http')) {
+                return img;
+            }
+            return baseUrl + img;
         });
 
-        // Sự kiện lọc theo trạng thái
-        $('#statusFilter').on('change', function() {
-            filterData();
-        });
+        const videoUrlForSave = selectedVideos.length > 0
+            ? (selectedVideos[0].url.startsWith('http') ? selectedVideos[0].url : baseUrl + selectedVideos[0].url)
+            : null;
+        const postData = {
+            Id: currentFBPostId || 0,
+            title: title,
+            Messgase: content,
+            type: $('#fbPostType').val(),
+            scheduleDate: scheduleDateTime,
+            ImageUrls: imageUrlsForSave,
+            Videos: videoUrlForSave
+        };
 
-        // Sự kiện thay đổi số lượng hiển thị
-        $('#pageSize').on('change', function() {
-            pageSize = parseInt($(this).val());
-            currentPage = 1;
-            filterData();
-        });
+        const $btn = $(event.target);
+        const originalText = $btn.html();
+        $btn.html('<i class="bi bi-arrow-repeat me-1 spinner"></i>Đang lưu...').prop('disabled', true);
 
-        // Sự kiện click phân trang
-        $(document).on('click', '#pagination a', function(e) {
-            e.preventDefault();
-            const page = $(this).data('page');
-            if (page) {
-                currentPage = parseInt(page);
-                updatePagination();
+        $.ajax({
+            url: '/Admin/Facebook/FaceBookPosts',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(postData),
+            success: function (response) {
+                $btn.html(originalText).prop('disabled', false);
+
+                if (response.success) {
+                    alert(status === 1 ? 'Đã lưu bài viết chờ duyệt' : 'Đã lưu và lên lịch đăng bài');
+                    bootstrap.Modal.getInstance(document.getElementById('fbEditorModal')).hide();
+                    loadPosts(currentPage);
+                    refreshStats();
+                } else {
+                    alert(response.message || 'Có lỗi xảy ra');
+                }
+            },
+            error: function () {
+                $btn.html(originalText).prop('disabled', false);
+                alert('Không thể lưu bài viết');
             }
         });
+    }
 
-        // Khởi tạo dữ liệu
-        filterData();
+    // Filter and search
+    $('#searchInput').on('keyup', function () {
+        filterPosts();
     });
+
+    $('#statusFilter').on('change', function () {
+        filterPosts();
+    });
+
+    $('#typeFilter').on('change', function () {
+        filterPosts();
+    });
+
+    $('#userFilter').on('change', function () {
+        filterPosts();
+    });
+
+    $('#pageSize').on('change', function () {
+        pageSize = parseInt($(this).val());
+        currentPage = 1;
+        filterPosts();
+    });
+
+    // Debounce function để tránh gọi API quá nhiều khi gõ
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    function filterPosts() {
+        const searchTerm = $('#searchInput').val().toLowerCase().trim();
+        const statusFilter = $('#statusFilter').val();
+        const typeFilter = $('#typeFilter').val();
+        const userFilter = $('#userFilter').val();
+
+        $.ajax({
+            url: '/Admin/Facebook/GetAll',
+            type: 'GET',
+            data: {
+                page: currentPage,
+                pagesize: pageSize
+            },
+            success: function (response) {
+                if (response.success) {
+                    let filteredData = response.data;
+
+                    // Lọc theo tiêu đề
+                    if (searchTerm) {
+                        filteredData = filteredData.filter(p =>
+                            p.title && p.title.toLowerCase().includes(searchTerm)
+                        );
+                    }
+
+                    // Lọc theo trạng thái
+                    if (statusFilter) {
+                        filteredData = filteredData.filter(p => p.status == statusFilter);
+                    }
+
+                    // Lọc theo loại bài viết
+                    if (typeFilter) {
+                        filteredData = filteredData.filter(p => p.typePost === typeFilter);
+                    }
+
+                    // Lọc theo người đăng
+                    if (userFilter) {
+                        filteredData = filteredData.filter(p => p.userCreateId == userFilter);
+                    }
+
+                    // Cập nhật phân trang cho dữ liệu đã lọc
+                    const totalFiltered = filteredData.length;
+                    const totalPagesFiltered = Math.ceil(totalFiltered / pageSize);
+
+                    // Lấy dữ liệu cho trang hiện tại
+                    const startIndex = (currentPage - 1) * pageSize;
+                    const paginatedData = filteredData.slice(startIndex, startIndex + pageSize);
+
+                    renderPosts(paginatedData);
+                    updatePagination(currentPage, totalPagesFiltered, totalFiltered);
+                }
+            },
+            error: function () {
+                toastr.error('Không thể tải danh sách bài viết');
+            }
+        });
+    }
+
+    // Initialize
+    $(document).ready(function () {
+        getCurrentUser();
+        loadPosts(1);
+    });
+
+    // Load danh sách người dùng vào combobox lọc
+    function loadUserFilter() {
+        const $userFilter = $('#userFilter');
+        $userFilter.empty().append('<option value="">Tất cả người đăng</option>');
+
+        if (users && users.length > 0) {
+            // Tạo một Set để lọc các user duy nhất (tránh trùng lặp)
+            const uniqueUsers = [];
+            const userIds = new Set();
+
+            users.forEach(user => {
+                if (!userIds.has(user.userId)) {
+                    userIds.add(user.userId);
+                    uniqueUsers.push(user);
+                }
+            });
+
+            // Sắp xếp theo tên
+            uniqueUsers.sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
+
+            uniqueUsers.forEach(user => {
+                $userFilter.append(`<option value="${user.userId}">${user.fullName || 'Không tên'}</option>`);
+            });
+        }
+    }
 </script>
 
 <style>
@@ -1539,7 +2141,6 @@
         vertical-align: middle;
     }
 
-    /* Week scroll styles */
     .week-scroll-container {
         width: 100%;
         overflow-x: auto;
@@ -1591,7 +2192,6 @@
             transition: transform 0.2s;
         }
 
-    /* CKEditor styles */
     .ck-editor__editable {
         min-height: 250px;
         max-height: 400px;
@@ -1614,7 +2214,6 @@
             margin-bottom: 0.5rem;
         }
 
-    /* Style cho nhiều ảnh/video */
     .image-item, .video-item {
         position: relative;
         cursor: pointer;
@@ -1643,7 +2242,6 @@
             background-color: #e9ecef !important;
         }
 
-    /* Facebook Preview Styles - Đơn giản */
     .facebook-post {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         background: white;
@@ -1676,7 +2274,6 @@
             background: #f0f2f5;
         }
 
-    /* Spinner animation */
     .spinner {
         animation: spin 1s linear infinite;
     }
@@ -1691,12 +2288,10 @@
         }
     }
 
-    /* Video play button */
     .single-video .bi-play-fill {
         font-size: 24px;
     }
 
-    /* Responsive */
     @@media (max-width: 768px) {
         .day-card {
             flex: 0 0 240px;
@@ -1704,7 +2299,26 @@
         }
     }
 
-    .rounded{
+    .rounded {
         cursor: pointer;
     }
+    /* Animation cho AI options */
+    #aiOptionsContainer {
+        transition: all 0.3s ease;
+    }
+
+    /* Style cho select option */
+    #fbContentOption {
+        cursor: pointer;
+    }
+
+    #fbContentOption option {
+        padding: 8px;
+    }
+
+        /* Highlight khi chọn AI */
+        #fbContentOption option[value="ai"] {
+            background-color: #e3f2fd;
+            color: #0d6efd;
+        }
 </style>

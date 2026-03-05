@@ -25,19 +25,20 @@ namespace VDCD.Areas.Admin.Controllers
         private readonly FacebookService _facebookService;
         private readonly SettingService _settingService;
         private readonly IActivityLogService _activityLogService;
-
-        public FacebookController(DepartmentService departmentService, UserService userService,
-            JobtitleService jobtitleService, PositionService positionService, FacebookService facebookService,SettingService settingService, IActivityLogService activityLogService)
-        {
-            _departmentService = departmentService;
-            _userService = userService;
-            _jobtitleService = jobtitleService;
+		private readonly IRealtimeNotifier _notifier;
+		public FacebookController(DepartmentService departmentService, UserService userService,
+            JobtitleService jobtitleService, PositionService positionService, FacebookService facebookService, SettingService settingService, IActivityLogService activityLogService, IRealtimeNotifier notifier)
+		{
+			_departmentService = departmentService;
+			_userService = userService;
+			_jobtitleService = jobtitleService;
 			_positionService = positionService;
-            _facebookService = facebookService;
-            _settingService = settingService;
-            _activityLogService = activityLogService;
-        }
-        public IActionResult Index()
+			_facebookService = facebookService;
+			_settingService = settingService;
+			_activityLogService = activityLogService;
+			_notifier = notifier;
+		}
+		public IActionResult Index()
         {
             return View();
         }
@@ -140,8 +141,17 @@ namespace VDCD.Areas.Admin.Controllers
 
                 // Log creation
                 await _activityLogService.LogAsync(ActivityLogType.Post, $"Created Facebook post (Id={fbp.Id}) by {user.UserName}", HttpContext);
-
-                return Ok(new {success = true});
+				await _notifier.Notify("postfb", new
+				{
+					/*                contact.Name,
+									contact.Phone,
+									contact.Email,
+									contact.Title,
+									Time = DateTime.Now.ToString("HH:mm:ss")*/
+					name = fbp.Title,
+					time = DateTime.Now.ToString("HH:mm dd/MM")
+				});
+				return Ok(new {success = true});
             }
             catch (Exception ex)
             {

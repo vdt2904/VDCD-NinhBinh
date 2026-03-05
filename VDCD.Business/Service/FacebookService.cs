@@ -229,7 +229,7 @@ namespace VDCD.Business.Service
 
             var commentContent = new FormUrlEncodedContent(commentParams);
 
-            var commentRes = await _http.PostAsync(commentUrl, commentContent);
+            var commentRes = await _http.PostAsync(commentUrl, commentContent); 
             var commentJson = await commentRes.Content.ReadAsStringAsync();
 
             if (!commentRes.IsSuccessStatusCode)

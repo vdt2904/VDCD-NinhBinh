@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using VDCD.Entities.Security
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -75,6 +76,10 @@
         transform: translateX(0);
     }
 }
+
+@{
+    var isSuperAdminstrator = User?.IsInRole(AdminRoles.SuperAdmin) == true;
+}
 </style>
 
     <script src="~/Admin/js/scripts.js"></script>
@@ -105,6 +110,10 @@
                 url = "/admin/JobApplication/index";
             }
 
+            if(type === "postfb"){
+                title = `📄 Bài viết mới ${data.name} cần duyệt`;
+                url = "/admin/AutoPost/index";
+            }
             div.innerHTML = `
                     <div class="notify-title">${title}</div>
                     <div class="notify-time">${data.time || "Vừa xong"}</div>
@@ -133,7 +142,12 @@
         connection.on("NewCV", function (data) {
             showNotification(data, "cv");
         });
-
+        if (@isSuperAdminstrator.ToString().ToLower() == true) {
+        // 📄 Bài viết mới
+        connection.on("postfb", function (data) {
+            showNotification(data, "postfb");
+        });
+        }
         connection.start()
             .catch(err => console.error(err));
     </script>

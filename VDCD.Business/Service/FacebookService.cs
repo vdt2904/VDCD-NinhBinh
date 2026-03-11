@@ -78,7 +78,7 @@ namespace VDCD.Business.Service
             }
             Posted(id);
 
-            await _activityLogService.LogAsync(ActivityLogType.Post, $"Posted Facebook post id {id} (text)", _httpContextAccessor.HttpContext);
+/*            await _activityLogService.LogAsync(ActivityLogType.Post, $"Posted Facebook post id {id} (text)", _httpContextAccessor.HttpContext);*/
 
 			return json;
         }
@@ -138,7 +138,7 @@ namespace VDCD.Business.Service
                 throw new Exception($"Create post error: {postJson}");
 			Posted(id);
 
-            await _activityLogService.LogAsync(ActivityLogType.Post, $"Posted Facebook post id {id} (images)", _httpContextAccessor.HttpContext);
+/*            await _activityLogService.LogAsync(ActivityLogType.Post, $"Posted Facebook post id {id} (images)", _httpContextAccessor.HttpContext);*/
 
 			return postJson;
         }
@@ -157,7 +157,7 @@ namespace VDCD.Business.Service
             var res = await _http.PostAsync(url, content);
 			Posted(id);
 
-            await _activityLogService.LogAsync(ActivityLogType.Post, $"Posted Facebook post id {id} (video)", _httpContextAccessor.HttpContext);
+/*            await _activityLogService.LogAsync(ActivityLogType.Post, $"Posted Facebook post id {id} (video)", _httpContextAccessor.HttpContext);*/
 
 			return await res.Content.ReadAsStringAsync();
         }
@@ -236,7 +236,7 @@ namespace VDCD.Business.Service
                 throw new Exception($"Comment images error: {commentJson}");
 			Posted(id);
 
-            await _activityLogService.LogAsync(ActivityLogType.Post, $"Posted Facebook post id {id} (video+images)", _httpContextAccessor.HttpContext);
+/*            await _activityLogService.LogAsync(ActivityLogType.Post, $"Posted Facebook post id {id} (video+images)", _httpContextAccessor.HttpContext);*/
 
 			return videoJson;
         }

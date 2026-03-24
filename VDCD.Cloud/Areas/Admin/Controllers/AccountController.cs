@@ -92,7 +92,7 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
             var principal = new ClaimsPrincipal(identity);
             var authProperties = new AuthenticationProperties
             {
-                IsPersistent = false,
+                IsPersistent = true,
                 ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2)
             };
 

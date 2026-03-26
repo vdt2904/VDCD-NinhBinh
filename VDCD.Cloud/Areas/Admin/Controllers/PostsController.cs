@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using VDCD.Business.Service;
 using VDCD.Entities.Custom;
 using VDCD.Entities.Security;
@@ -13,13 +14,15 @@ namespace VDCD.Areas.Admin.Controllers
     {
         private readonly PostsService _postsService;
         private readonly CategoryService _categoryService;
+		private readonly ILogger<Posts> _logger;
 
-        public PostsController(PostsService postsService,
-                                 CategoryService categoryService)
+		public PostsController(PostsService postsService,
+                                 CategoryService categoryService,ILogger<Posts> logger)
         {
             _postsService = postsService;
             _categoryService = categoryService;
-        }
+            _logger = logger;
+		}
         public IActionResult Index()
         {
             var lst = _postsService.GetAll();
@@ -38,7 +41,8 @@ namespace VDCD.Areas.Admin.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+				Log.Error(ex, "Admin/Posts/Save");
+				return Json(new { success = false, message = ex.Message });
             }
         }
         public IActionResult GetById(int id)

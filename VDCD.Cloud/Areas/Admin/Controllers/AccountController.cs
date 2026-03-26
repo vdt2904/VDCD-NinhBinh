@@ -181,5 +181,46 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
         {
                        return Ok(DateTime.Now);
 		}
-    }
+		[HttpGet]
+		public async Task<IActionResult> CheckSession()
+		{
+			var result = await HttpContext.AuthenticateAsync("AdminAuth");
+
+			// Chưa login hoặc cookie không hợp lệ
+			if (!result.Succeeded || result.Principal == null)
+			{
+				return Ok(new
+				{
+					isAuthenticated = false,
+					isExpired = true,
+					remainingSeconds = 0
+				});
+			}
+
+			var expiresUtc = result.Properties?.ExpiresUtc;
+			var now = DateTimeOffset.UtcNow;
+
+			// Không có expire (hiếm)
+			if (!expiresUtc.HasValue)
+			{
+				return Ok(new
+				{
+					isAuthenticated = true,
+					isExpired = false,
+					remainingSeconds = (long?)null
+				});
+			}
+
+			var isExpired = expiresUtc.Value <= now;
+			var remaining = isExpired ? 0 : (long)(expiresUtc.Value - now).TotalSeconds;
+
+			return Ok(new
+			{
+				isAuthenticated = true,
+				isExpired = isExpired,
+				expiresUtc = expiresUtc.Value,
+				remainingSeconds = remaining
+			});
+		}
+	}
 }

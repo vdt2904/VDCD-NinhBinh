@@ -3,6 +3,7 @@ using Hangfire.Dashboard;
 using Hangfire.MySql;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System;
 using System.Transactions;
 using VDCD.Business;
@@ -22,6 +23,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
     )
 );
+Log.Logger = new LoggerConfiguration()
+	.MinimumLevel.Debug()
+	.WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+	.CreateLogger();
+builder.Host.UseSerilog();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ICacheService, CacheSevice>();
 

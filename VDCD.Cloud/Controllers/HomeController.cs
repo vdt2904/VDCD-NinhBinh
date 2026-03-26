@@ -214,8 +214,10 @@ namespace VDCD.Cloud.Controllers
                     Title = a.Title,
                     Summary = a.Summary, // Sửa từ Description để khớp với view cũ của bạn
                     Thumbnail = a.Thumbnail,
-                    CategoryName = categories.ContainsKey((int)a.CategoryId) ? categories[(int)a.CategoryId] : "TỔNG HỢP",
-                    PublishedDate = a.PublishedDate,
+					CategoryName = a.CategoryId.HasValue && categories.ContainsKey(a.CategoryId.Value)
+	? categories[a.CategoryId.Value]
+	: "TỔNG HỢP",
+					PublishedDate = a.PublishedDate,
                     // Giả sử bạn cần Slug để làm link chi tiết
                     Slug = a.Slug
                 }).ToList();

@@ -122,10 +122,10 @@ namespace VDCD.Business.Service
 
             // Log activity (synchronous wait to avoid changing method signature)
             var action = model.Id == 0 ? "Created" : "Updated";
-            _activityLogService
+            /*_activityLogService
                 .LogAsync(ActivityLogType.Post, $"{action} post '{model.Title}'", _httpContextAccessor.HttpContext)
                 .GetAwaiter()
-                .GetResult();
+                .GetResult();*/
         }
         public Posts? GetById(int id)
         {

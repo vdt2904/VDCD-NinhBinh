@@ -79,10 +79,25 @@
 </script>
 <style>
 	.carousel-caption.custom-caption {
-		top: 10% !important; /* Đưa lên cách mép trên 10% chiều cao ảnh */
-		bottom: auto !important; /* Hủy bỏ việc dính vào đáy */
+		top: auto !important; /* Đưa lên cách mép trên 10% chiều cao ảnh */
+		bottom: 18%  !important; /* Hủy bỏ việc dính vào đáy */
 		transform: none !important;
 	}
+	@@media (max-width: 1440px) {
+        .carousel-caption.custom-caption {
+			bottom: 15%  !important; /* Hủy bỏ việc dính vào đáy */
+		}
+    }
+	@@media (max-width: 1280px) {
+        .carousel-caption.custom-caption .hero-subtitle {
+			font-size: 45px !important;
+		}
+    }
+	@@media (max-width: 500px) {
+        .carousel-caption.custom-caption .hero-subtitle {
+			font-size: 22px !important;
+		}
+    }
 </style>
 <script>
 	$(document).ready(function () {

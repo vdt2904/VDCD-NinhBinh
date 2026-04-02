@@ -167,9 +167,25 @@
         transform: scale(1);
     }
 
+   
+
     /* Khi slide active, thực hiện zoom lên 1.1 */
     .carousel-item.active .zoom-bg {
-        transform: scale(1.15);
+        @* transform: scale(1.15); *@
+        animation: kenBurnsLeft 8s ease-in-out infinite alternate;
+    }
+
+     @@keyframes kenBurnsLeft {
+        0% {
+            /* Bắt đầu ở vị trí trung tâm, tỉ lệ 1:1 */
+            transform: scale(1) translate(0, 0);
+        }
+        100% {
+            /* scale(1.1): Phóng to 10% 
+            translate(-10%, 0): Dịch sang TRÁI 10% chiều rộng của chính nó
+            */
+            transform: scale(1.2) translate(-10%, 0);
+        }
     }
 
     /* Overlay tối để nổi bật chữ */

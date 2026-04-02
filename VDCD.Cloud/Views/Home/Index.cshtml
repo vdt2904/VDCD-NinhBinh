@@ -98,6 +98,18 @@
 			font-size: 22px !important;
 		}
     }
+	@@keyframes kenBurnsLeft {
+        0% {
+            /* Bắt đầu ở vị trí trung tâm, tỉ lệ 1:1 */
+            transform: scale(1) translate(0, 0);
+        }
+        100% {
+            /* scale(1.1): Phóng to 10% 
+            translate(-10%, 0): Dịch sang TRÁI 10% chiều rộng của chính nó
+            */
+            transform: scale(1.2) translate(-10%, 0);
+        }
+    }
 </style>
 <script>
 	$(document).ready(function () {
@@ -110,12 +122,12 @@
 
 		// Reset lại trạng thái zoom khi chuyển slide để tạo hiệu ứng liên tục
 		myCarousel.addEventListener('slide.bs.carousel', function () {
-			$('.zoom-bg').css('transition', 'none');
-			$('.zoom-bg').css('transform', 'scale(1)');
+			@* $('.zoom-bg').css('transition', 'none'); *@
+			@* $('.zoom-bg').css('transform', 'scale(1)'); *@
 
 			// Cần một khoảng nghỉ cực ngắn để trình duyệt nhận diện reset scale
 			setTimeout(function () {
-				$('.zoom-bg').css('transition', 'transform 6s ease-out');
+				$('.zoom-bg').css('animation', 'kenBurnsLeft 8s ease-in-out infinite alternate');
 			}, 50);
 		});
 	});

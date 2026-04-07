@@ -31,9 +31,9 @@
     <div class="container-fluid px-0">
         <div class="hero-content text-white p-5">
             
-            <h1 class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <h1 data-aos="fade-right" data-aos-duration="1500" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
             <hr class="border-light opacity-50 mb-4" style="width:90%">
-            <nav aria-label="breadcrumb">
+            <nav data-aos="fade-right" data-aos-duration="1500" aria-label="breadcrumb">
                 <ol class="breadcrumb mb-2">
                     <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
                     <li class="breadcrumb-item active text-white fw-light" aria-current="page">Hệ thống trung tâm</li>
@@ -87,12 +87,12 @@
 <section class="centers-section py-5">
     <div class="container">
         <div class="col-12 text-center mb-5">
-            <div class="d-flex justify-content-center align-items-center mb-4">
+            <div data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center mb-4">
                 <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
                 <span class="text-danger fw-bold text-uppercase small">hệ sinh thái tập đoàn</span>
                 <span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
             </div>
-            <h2 class="display-6 fw-bold text-uppercase">
+            <h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase">
                 Hệ thống 12 trung tâm <br> Viện nghiên cứu trực thuộc
             </h2>
         </div>
@@ -100,7 +100,7 @@
         <div class="row g-4">
             @foreach (var center in Model.Centers)
             {
-                <div class="col-md-6 col-lg-4">
+                <div class="col-md-6 col-lg-4" data-aos="flip-down" data-aos-duration="1500">
                     <div class="center-card h-100">
                         <div class="img-wrapper mb-3">
                             <img src="@center.Image" class="img-fluid rounded-0" alt="@center.Name">
@@ -186,18 +186,18 @@
 <section class="collaboration-section py-5">
     <div class="container">
         <div class="col-12 text-center mb-5">
-            <div class="d-flex justify-content-center align-items-center mb-4">
+            <div data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center mb-4">
                 <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
                 <span class="text-danger fw-bold text-uppercase small">cách thức vận hành</span>
                 <span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
             </div>
-            <h2 class="display-6 fw-bold text-uppercase">
+            <h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase">
                 @GetSt("setting.general.operation.main_title")
             </h2>
         </div>
 
         <div class="row mt-4">
-            <div class="col-md-5 mb-4">
+            <div data-aos="fade-right" data-aos-duration="1500" class="col-md-5 mb-4">
                 <div class="sticky-top" style="top: 120px; z-index: 5;">
                     <div class="fixed-image-container shadow-sm">
                         <img id="operation-image" src="@GetSt("setting.general.operation.image.0")"
@@ -206,7 +206,7 @@
                 </div>
             </div>
 
-            <div class="col-md-7 ps-md-5">
+            <div data-aos="fade-left" data-aos-duration="1500" class="col-md-7 ps-md-5">
                 <div class="operation-timeline">
                     @{
                         int i = 0;
@@ -325,15 +325,15 @@
 <section class="contact-section py-5 bg-light">
     <div class="container">
         <div class="mb-4">
-            <div class="d-flex align-items-center mb-4">
+            <div data-aos="fade-right" data-aos-duration="1500" class="d-flex align-items-center mb-4">
                 <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
                 <span class="text-danger fw-bold text-uppercase small">liên hệ</span>
                 <span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
             </div>
-            <h2 class="fw-bold display-6 text-uppercase">Liên hệ với chúng tôi</h2>
+            <h2 data-aos="fade-right" data-aos-duration="1500" class="fw-bold display-6 text-uppercase">Liên hệ với chúng tôi</h2>
         </div>
 
-        <form class="contact-form mt-5">
+        <form class="contact-form mt-5" data-aos="fade-up" data-aos-duration="1500">
             <div class="row g-4">
                 <div class="col-md-6">
                     <input type="text" class="form-control-custom" placeholder="Tên *">

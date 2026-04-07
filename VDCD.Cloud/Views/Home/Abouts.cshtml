@@ -10,9 +10,9 @@
     <div class="container-fluid px-0">
         <div class="hero-content text-white p-5">
 
-            <h1 class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <h1 data-aos="fade-right" data-aos-duration="1500" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
             <hr class="border-light opacity-50 mb-4" style="width:90%">
-            <nav aria-label="breadcrumb">
+            <nav data-aos="fade-right" data-aos-duration="1500" aria-label="breadcrumb">
                 <ol class="breadcrumb mb-2">
                     <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
                     <li class="breadcrumb-item active text-white fw-light" aria-current="page">Về chúng tôi</li>
@@ -88,23 +88,23 @@
     <div class="container">
         <div class="row mb-5">
             <div class="col-12 text-center">
-                <div class="text-danger text-uppercase fw-bold mb-4" style="letter-spacing: 2px;">
+                <div data-aos="fade-down" data-aos-duration="1500" class="text-danger text-uppercase fw-bold mb-4" style="letter-spacing: 2px;">
                     <span class="border-top border-danger border-3 me-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
                     <span class="small">Câu chuyện thương hiệu</span>
                     <span class="border-top border-danger border-3 ms-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
                 </div>
-                <h2 class="display-6 fw-bold text-uppercase">VDCD NINH BÌNH</h2>
+                <h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase">VDCD NINH BÌNH</h2>
             </div>
         </div>
 
         <div class="row g-5">
-            <div class="col-lg-6">
+            <div class="col-lg-6" data-aos="fade-right" data-aos-duration="1500">
                 <div class="position-relative">
                     <img src="@GetSt("setting.general.trademark.image")" alt="VDCD Projects Map" class="img-fluid w-100 shadow-sm rounded">
                 </div>
             </div>
 
-            <div class="col-lg-6">
+            <div class="col-lg-6" data-aos="fade-left" data-aos-duration="1500">
                 <div class="brand-info">
                     <h4 class="text-danger fw-bold mb-3" style="line-height: 1.2;">
                         CÔNG TY CP TỔNG CÔNG TY CÔNG NGHỆ THIẾT KẾ XÂY DỰNG VIỆT NAM
@@ -249,14 +249,14 @@
 <section class="strengths-section">
     <div class="container">
         <div class="row mb-5 align-items-center">
-            <div class="col-lg-3">
+            <div data-aos="fade-down" data-aos-duration="1500" class="col-lg-3">
                 <div class="text-danger text-uppercase fw-bold" style="letter-spacing: 2px;">
                 <span class="border-top border-danger border-3 me-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
                 <span class="small">Thế mạnh</span>
                 <span class="border-top border-danger border-3 ms-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
                 </div>
             </div>
-            <div class="col-lg-9">
+            <div data-aos="fade-down" data-aos-duration="1500" class="col-lg-9">
                 <p class="mb-0 fw-bold text-muted" style="max-width: 800px;">
                     VDCD sở hữu công nghệ lõi và đội ngũ nhân sự là chuyên gia hàng đầu trong lĩnh vực chuyển đổi số,
                     xử lý dữ liệu theo chuẩn mô hình BIM & GIS và phát triển hệ thống phần mềm chuyên biệt.
@@ -275,7 +275,7 @@
 
                     if (!string.IsNullOrEmpty(tabName))
                     {
-                        <div class="slide-item">
+                        <div class="slide-item" data-aos="fade-right" data-aos-duration="1500">
                             <div class="card-strength">
                                 <div class="strength-number">
                                     @(i + 1 < 10 ? "0" + (i + 1) : (i + 1).ToString()).
@@ -385,14 +385,14 @@
 <section class="solutions-section">
     <div class="container">
         <div class="d-flex justify-content-center justify-content-start mb-4">
-            <h5 class="text-danger text-uppercase fw-bold" style="letter-spacing: 2px;">
+            <h5 data-aos="fade-down" data-aos-duration="1500" class="text-danger text-uppercase fw-bold" style="letter-spacing: 2px;">
                 <span class="border-top border-danger border-3 me-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
                 <span class="small">Giải pháp</span>
                 <span class="border-top border-danger border-3 ms-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
             </h5>
         </div>
 
-        <h2 class="main-title">Lĩnh vực hoạt động</h2>
+        <h2 data-aos="fade-down" data-aos-duration="1500" class="main-title">Lĩnh vực hoạt động</h2>
 
         <div class="row g-5 mt-4">
             @{
@@ -403,7 +403,7 @@
                     var title = GetSt($"setting.general.solution.title.{i1}");
                     var content = GetSt($"setting.general.solution.content.{i1}");
 
-                    <div class="col-lg-4 col-md-6">
+                    <div class="col-lg-4 col-md-6" data-aos="flip-down" data-aos-duration="1500">
                         <h3 class="column-title">@title</h3>
                         <div class="solution-list-container">
                             @if (!string.IsNullOrEmpty(content))
@@ -427,7 +427,7 @@
     <div class="container">
         <div class="row mb-4 justify-content-center align-items-center">
             <div class="col-md-auto">
-                <h5 class="d-flex justify-content-center align-items-center">
+                <h5 data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center">
 					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
 					<span class="text-danger fw-bold text-uppercase" style="white-space: nowrap;">khách hàng & đối tác</span>
 					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
@@ -442,7 +442,7 @@
                 <div class="customer-slider">
                     @foreach (var item in Model.Customers)
                     {
-                        <div class="px-4">
+                        <div class="px-4" data-aos="fade-right" data-aos-duration="1500">
                             <div class="partner-logo-wrapper d-flex align-items-center justify-content-center">
                                 <img src="@item.Image"
                                      alt="@item.CustomerName"

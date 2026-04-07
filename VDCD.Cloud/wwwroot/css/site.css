@@ -19,5 +19,8 @@ html {
 
 body {
   margin-bottom: 60px;
-  font-family: "Unbounded", sans-serif;
+  font-family: "Lora", serif !important;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
 }

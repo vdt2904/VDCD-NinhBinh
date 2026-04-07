@@ -10,9 +10,9 @@
     <div class="container-fluid px-0">
         <div class="hero-content text-white p-5">
 
-            <h1 class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <h1 data-aos="fade-right" data-aos-duration="1500" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
             <hr class="border-light opacity-50 mb-4" style="width:90%">
-            <nav aria-label="breadcrumb">
+            <nav data-aos="fade-right" data-aos-duration="1500" aria-label="breadcrumb">
                 <ol class="breadcrumb mb-2">
                     <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
                     <li class="breadcrumb-item active text-white fw-light" aria-current="page">Cơ cấu tổ chức</li>
@@ -170,12 +170,12 @@
 <section class="py-5">
     <div class="container" style="max-width:unset">
         <div class="text-center mb-5">
-            <div class="d-flex align-items-center justify-content-center mb-4">
+            <div data-aos="fade-down" data-aos-duration="1500" class="d-flex align-items-center justify-content-center mb-4">
                 <span class="bg-danger me-2" style="width: 25px; height: 2px;"></span>
                 <span class="text-danger fw-bold text-uppercase small">ban giám đốc</span>
                 <span class="bg-danger ms-2" style="width: 25px; height: 2px;"></span>
             </div>
-            <h2 class="display-6 fw-bolder text-uppercase">Đội ngũ lãnh đạo</h2>
+            <h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bolder text-uppercase">Đội ngũ lãnh đạo</h2>
         </div>
 
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mt-4">
@@ -183,7 +183,7 @@
             {
                 foreach (var item in Model.Users.Where(u => u.IsShow == true))
                 {
-                    <div class="col">
+                    <div class="col" data-aos="flip-down" data-aos-duration="1500">
                         <div 
                             class="card h-100 border-0 bg-transparent team-card mb-4"
                             data-bs-toggle="modal"
@@ -220,15 +220,15 @@
 <section class="py-5 bg-light">
     <div class="container">
         <div class="text-center mb-5">
-            <div class="d-flex align-items-center justify-content-center mb-4">
+            <div data-aos="fade-down" data-aos-duration="1500" class="d-flex align-items-center justify-content-center mb-4">
                <span class="bg-danger me-2" style="width: 25px; height: 2px;"></span>
                 <span class="text-danger fw-bold text-uppercase small">cơ cấu tổ chức</span>
                <span class="bg-danger ms-2" style="width: 25px; height: 2px;"></span>
             </div>
-            <h2 class="display-6 fw-bold text-uppercase">@GetSt("setting.general.OrgStructure.title")</h2>
+            <h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase">@GetSt("setting.general.OrgStructure.title")</h2>
         </div>
         <div class="text-center">
-            <img src="@GetSt("setting.general.OrgStructure.image")" class="img-fluid shadow-sm bg-white p-2" alt="Sơ đồ tổ chức">
+            <img data-aos="zoom-in" data-aos-duration="1500" src="@GetSt("setting.general.OrgStructure.image")" class="img-fluid shadow-sm bg-white p-2" alt="Sơ đồ tổ chức">
         </div>
     </div>
 </section>

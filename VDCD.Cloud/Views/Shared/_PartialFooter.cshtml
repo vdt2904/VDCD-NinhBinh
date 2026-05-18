@@ -96,7 +96,9 @@
     }
 
     .footer-logo {
-        height: 70px; /* Tăng từ 50px lên 70px */
+        max-width: 100%;
+        height: auto;
+        max-height: 70px; /* Giới hạn chiều cao tối đa */
         width: auto;
     }
 
@@ -162,6 +164,9 @@
 
     /* Fix đường kẻ cho mobile */
     @@media (max-width: 767.98px) {
+        .footer-logo {
+            max-height: 50px; /* Logo nhỏ lại trên mobile */
+        }
         .contact-info-row div {
             border-right: none !important;
             border-bottom: 1px solid #333;

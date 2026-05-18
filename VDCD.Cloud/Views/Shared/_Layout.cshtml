@@ -23,7 +23,9 @@
     <link rel="icon" href="/uploads/cbf7823d-e5f1-49fd-801a-8bf2253d4547_iconlogo.png" sizes="32x32" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@200..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 </head>
 <body style="margin-bottom:unset;">
     @await Html.PartialAsync("/Views/Shared/_PartialHeader.cshtml")
@@ -35,4 +37,8 @@
     @await Html.PartialAsync("/Views/Shared/_PartialFooter.cshtml")
 
 </body>
+
+<script>
+  AOS.init();
+</script>
 </html>

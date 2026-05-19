@@ -107,14 +107,14 @@
             <div class="col-lg-6" data-aos="fade-left" data-aos-duration="1500">
                 <div class="brand-info">
                     <h4 class="text-danger fw-bold mb-3" style="line-height: 1.2;">
-                        CÔNG TY CP TỔNG CÔNG TY CÔNG NGHỆ THIẾT KẾ XÂY DỰNG VIỆT NAM
+                        @GetSt("setting.general.footer.namecompany")
                     </h4>
 
                     <div class="mb-4">
                         <p class="mb-1"><strong>Tên viết tắt:</strong> @GetSt("setting.general.trademark.initials")</p>
                         <p><strong>Giấy chứng nhận đăng ký kinh doanh số:</strong> @GetSt("setting.general.trademark.tax")</p>
                     </div>
-
+                        
                     <div class="description-text text-muted" style="text-align: justify; line-height: 1.8;">
                         <p>@Html.Raw(GetSt("setting.general.trademark.description").Replace("\n", "<br />"))</p>
 

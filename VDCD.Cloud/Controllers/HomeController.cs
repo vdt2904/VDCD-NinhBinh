@@ -29,15 +29,18 @@ namespace VDCD.Cloud.Controllers
         private readonly DepartmentService _departmentService;
         private readonly SeoMetaService _seoMetaService;
 
-        public HomeController(ILogger<HomeController> logger,UserBll userBll, SettingService settingService,CenterService centerService
+		private readonly string _domain;
+
+		public HomeController(ILogger<HomeController> logger,UserBll userBll, SettingService settingService,CenterService centerService
             , SeoMetaService seoMetaService, ProjectService projectService, CategoryService categoryService,PostsService postsService,
             CustomerService customerService, UserService service,UserDepartmentJobtitlePositionService userDepartmentJobtitlePositionService,
-            DepartmentService departmentService,SeoMetaService metaService) : base(seoMetaService)
+            DepartmentService departmentService,SeoMetaService metaService,IConfiguration configuration) : base(seoMetaService)
         {
             _logger = logger;
             userService = userBll;
             _settingService = settingService;   
             _centerService = centerService;
+            _domain = configuration["Kestrel:Endpoints"];
             _projectService = projectService;
             _categoryService = categoryService;
             _postsService = postsService;
@@ -280,7 +283,7 @@ namespace VDCD.Cloud.Controllers
                         }
                     }
 
-                    return $"https://vdcd.site/{key}";
+                    return $"{_domain}/{key}";
                 })
                 .ToList();
 

@@ -31,13 +31,13 @@
                     <img src="@GetSt("setting.general.footer.logo")" alt="VDCD Logo" class="footer-logo">
                 </a>
                 <div class="social-links d-flex gap-3">
-                    <a href="@GetSt("setting.general.social.facebook")" class="social-item" target="_blank">
+                    <a href="@GetSt("setting.general.social.facebook")" rel="noopener noreferrer" aria-label="Facebook VDCD Ninh Bình" class="social-item" target="_blank">
                         <i class="fa-brands fa-facebook-f"></i>
                     </a>
-                    <a href="@GetSt("setting.general.social.telegram")" class="social-item" target="_blank">
+                    <a href="@GetSt("setting.general.social.telegram")" rel="noopener noreferrer" aria-label="Telegram VDCD Ninh Bình" class="social-item" target="_blank">
                         <i class="fa-brands fa-telegram"></i>
                     </a>
-                    <a href="@GetSt("setting.general.social.youtube")" class="social-item" target="_blank">
+                    <a href="@GetSt("setting.general.social.youtube")" rel="noopener noreferrer" aria-label="YouTube VDCD Ninh Bình" class="social-item" target="_blank">
                         <i class="fa-brands fa-youtube"></i>
                     </a>
                 </div>
@@ -64,7 +64,7 @@
 
         <div class="row pt-5 border-top border-dark align-items-center">
             <div class="col-md-6 text-center text-md-start">
-                <p class="text-muted mb-0">© @DateTime.Now.Year <span class="text-danger fw-bold">VDCD Ninh Bình</span>. All Rights Reserved.</p>
+                <p class="text-secondary mb-0">© @DateTime.Now.Year <span class="text-danger fw-bold">VDCD Ninh Bình</span>. All Rights Reserved.</p>
             </div>
           
         </div>
@@ -216,6 +216,9 @@
     });
 </script>
 
-<a href="javascript:void(0)" class="scroll-top d-flex align-items-center justify-content-center">
-    <i class="bi bi-arrow-up-short"></i>
+<a
+  href="#top"
+  class="scroll-top d-flex align-items-center justify-content-center"
+>
+  <i class="bi bi-arrow-up-short"></i>
 </a>

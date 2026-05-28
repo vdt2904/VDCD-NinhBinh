@@ -3,7 +3,7 @@
     ViewData["Title"] = "Contact";
     Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
 }
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 <div class="container mt-4">
     <div class="row mb-4 align-items-center">
         <div class="col-md-4">
@@ -272,7 +272,17 @@
             });
         }
     });
-
+    const connection1 = new signalR.HubConnectionBuilder()
+            .withUrl("/hub/notification")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+    connection1.on("NewStatus", function (data) {
+            //showNotification(data, "contact");
+        resetAndLoad();
+    });
+    connection1.start()
+    .then(() => console.log("Notification hub connected"))
+    .catch(err => console.error("Connection failed:", err));
     // 2. Hàm mở Modal và nạp dữ liệu khách hàng
     function openReplyModal(id, name, email, subject) {
         document.getElementById('replyTargetId').value = id;

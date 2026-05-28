@@ -162,10 +162,10 @@ namespace VDCD.Business.Service
             ClearCache();
 
             // Log delete
-            _activityLogService
+            /*_activityLogService
                 .LogAsync(ActivityLogType.Post, $"Deleted post '{entity.Title}'", _httpContextAccessor.HttpContext)
                 .GetAwaiter()
-                .GetResult();
+                .GetResult();*/
         }
 
         // =======================

@@ -30,6 +30,11 @@
                 <a href="/" class="d-block mb-4">
                     <img src="@GetSt("setting.general.footer.logo")" alt="VDCD Logo" class="footer-logo">
                 </a>
+                <div class="company-info text-secondary small" style="margin-bottom: 5%;">
+                    <p class="mb-2 text-light fw-bold">@GetSt("setting.general.trademark.initials")</p>
+                    <p class="mb-2">Mã số thuế: <span class="text-light">@GetSt("setting.general.trademark.tax")</span></p>
+                    <p class="mb-0">Chịu trách nhiệm bởi: <span class="text-light">@GetSt("setting.general.footer.personresponsible")</span></p>
+                </div>
                 <div class="social-links d-flex gap-3">
                     <a href="@GetSt("setting.general.social.facebook")" rel="noopener noreferrer" aria-label="Facebook VDCD Ninh Bình" class="social-item" target="_blank">
                         <i class="fa-brands fa-facebook-f"></i>
@@ -41,6 +46,8 @@
                         <i class="fa-brands fa-youtube"></i>
                     </a>
                 </div>
+                <!-- Phần thông tin công ty mới thêm vào dưới Logo và MXH -->
+                
             </div>
 
             <div class="col-6 col-lg-3 offset-lg-1">
@@ -89,9 +96,10 @@
     }
 
     .footer-logo {
-        height: 70px; /* Tăng từ 50px lên 70px */
+        max-width: 100%;
+        height: auto;
+        max-height: 70px; /* Giới hạn chiều cao tối đa */
         width: auto;
-
     }
 
     /* Social Items to hơn */
@@ -115,6 +123,12 @@
             color: white;
             transform: translateY(-5px);
         }
+
+    /* CSS bổ sung cho phần thông tin doanh nghiệp */
+    .company-info p {
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
 
     /* Menu Link to và thoáng */
     .footer-menu a {
@@ -150,6 +164,9 @@
 
     /* Fix đường kẻ cho mobile */
     @@media (max-width: 767.98px) {
+        .footer-logo {
+            max-height: 50px; /* Logo nhỏ lại trên mobile */
+        }
         .contact-info-row div {
             border-right: none !important;
             border-bottom: 1px solid #333;

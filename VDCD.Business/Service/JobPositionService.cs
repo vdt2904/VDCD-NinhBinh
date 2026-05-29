@@ -77,7 +77,8 @@ namespace VDCD.Business.Service
                 entity.ExpiredDate = model.ExpiredDate;
                 entity.Slug = model.Slug;
                 entity.Salary = model.Salary;
-
+                entity.Industry = model.Industry;
+                entity.Level = model.Level;
                 _jobPositionRepo.Update(entity);
             }
 

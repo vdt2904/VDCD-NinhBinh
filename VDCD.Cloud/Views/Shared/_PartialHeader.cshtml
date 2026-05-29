@@ -49,16 +49,16 @@
 
     /* --- TỐI ƯU HERO SLIDER --- */
     .hero-title {
-        /* Chữ tự động co giãn: Cực tiểu 35px, Linh hoạt 6vw, Cực đại 80px */
-        font-size: clamp(35px, 6vw, 60px) !important;
+        /* Chữ tự động co giãn: Cực tiểu 28px, Linh hoạt 6vw, Cực đại 60px */
+        font-size: clamp(28px, 6vw, 60px) !important;
         font-weight: 900;
         color: #fff;
-        margin: 10%;
+        margin: 0 5% 0 5%;
         line-height: 1.1;
     }
 
     .hero-subtitle {
-        font-size: clamp(25px, 4.5vw, 50px) !important;
+        font-size: clamp(18px, 4.5vw, 50px) !important;
         font-weight: 800;
         color: #fff;
         letter-spacing: 2px;
@@ -83,7 +83,7 @@
     .explore-button-wrapper {
         position: absolute;
         bottom: 50px;
-        right: 5%; /* Thu hẹp lại để không bị sát mép màn hình lớn */
+        right: 5%;
         z-index: 20;
     }
 
@@ -96,17 +96,10 @@
         transition: all 0.3s ease;
     }
 
-    @@media (max-width: 768px) {
-        .explore-button-wrapper {
-            right: auto;
-            left: 15px;
-            bottom: 30px;
+    @@media (max-width: 991.98px) {
+        .hero-title {
+            margin: 0 3% 0 3%;
         }
-        .custom-caption { bottom: 15%; }
-
-        .header-logo {
-            max-height: 45px; /* Nhỏ lại trên tablet/mobile */
-        }   
     }
 
 
@@ -126,8 +119,32 @@
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link" href="~/ve-chung-toi">Về chúng tôi</a></li>
                     <li class="nav-item"><a class="nav-link" href="~/co-cau-to-chuc">Cơ cấu tổ chức</a></li>
-                    <li class="nav-item"><a class="nav-link" href="~/he-thong-trung-tam">Hệ thống trung tâm</a></li>
-                    <li class="nav-item"><a class="nav-link" href="~/du-an">Dự án</a></li>
+                    <li class="nav-item"><a class="nav-link" href="~/kien-tao-tuong-lai-so">Kiến tạo tương lai số</a></li>
+                    <!-- <li class="nav-item"><a class="nav-link" href="~/he-thong-trung-tam">Hệ thống trung tâm</a></li>
+                    <li class="nav-item"><a class="nav-link" href="~/du-an">Dự án</a></li> -->
+                    <!-- MENU CHA -->
+                    <!-- <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle"
+                        href="#"
+                        id="futureDropdown"
+                        role="button">
+                            Kiến tạo tương lai số
+                        </a>
+
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="~/he-thong-trung-tam">
+                                    Hệ thống trung tâm
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" href="~/du-an">
+                                    Dự án
+                                </a>
+                            </li>
+                        </ul>
+                    </li> -->
                     <li class="nav-item"><a class="nav-link" href="~/tin-tuc">Tin tức</a></li>
                     <li class="nav-item"><a class="nav-link" href="~/lien-he">Liên hệ</a></li>
                     <li class="nav-item"><a class="nav-link" href="~/tuyen-dung">Tuyển dụng</a></li>
@@ -139,9 +156,9 @@
                         </a>
                     </li>
  *@
-                    <li class="nav-item ms-lg-2">
+                    <!-- <li class="nav-item ms-lg-2">
                         <a class="btn-login-custom" href="/admin/account/login">Đăng Nhập</a>
-                    </li>
+                    </li> -->
                 </ul>
             </div>
         </div>
@@ -158,15 +175,38 @@
     .hero-slider {
         position: relative;
         width: 100%;
-        height: 100vh; /* Full màn hình */
+        height: 100vh;
+        min-height: 400px;
         overflow: hidden;
-        margin-top: 110px;
+        margin-top: 45px;
     }
 
     /* Hiệu ứng Zoom nhẹ cho ảnh nền */
     .carousel-item {
         height: 100vh;
+        min-height: 400px;
         background-color: #000;
+    }
+
+    @@media (max-width: 768px) {
+        .hero-slider,
+        .carousel-item {
+            height: 70vh;
+            min-height: 320px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .hero-slider,
+        .carousel-item {
+            height: 60vh;
+            min-height: 280px;
+            margin-top: 0;
+        }
+
+        .navbar-dark .navbar-brand {
+            width: 70% !important;
+        }
     }
 
     .zoom-bg {
@@ -175,19 +215,28 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-size: cover;
-        background-position: center;
+        object-fit: cover;
+    display: block;
         transition: transform 6s ease-out; /* Thời gian zoom */
         transform: scale(1);
     }
 
-   
+   .section-line {
+    width: 30px;
+    height: 2px;
+    background-color: #e30613;
+    display: inline-block;
+}
 
     /* Khi slide active, thực hiện zoom lên 1.1 */
     .carousel-item.active .zoom-bg {
         @* transform: scale(1.15); *@
         animation: kenBurnsLeft 10s ease-in-out infinite alternate;
     }
+
+    .carousel-item.active .zoom-bg.restart-animation {
+    animation: none;
+}
 
      @@keyframes kenBurnsLeft {
         0% {
@@ -219,20 +268,21 @@
     pointer-events: none;
 }
 
-    /* Căn chỉnh chữ */
+    /* Căn chỉnh chữ - đã được định nghĩa ở block style trên */
     .custom-caption {
         text-align: left;
-        left: 10%;
+        left: 0 !important;
+        right: 0 !important;
         bottom: 20%;
         z-index: 10;
     }
 
     .hero-title {
-        font-size: 80px;
+        font-size: clamp(28px, 6vw, 60px) !important;
         font-weight: 900;
         color: #fff;
-        margin: 0 0 0 5%;
-        line-height: 1;
+        margin: 0 5% 0 5%;
+        line-height: 1.1;
     }
 
     @* .hero-subtitle {
@@ -249,11 +299,34 @@
     /* Nút Khám phá dự án */
     .explore-button-wrapper {
         position: absolute;
-        width: 100%;
         bottom: 100px;
-        left: 0;
+        left: calc(50% - 120px);
+        right: auto;
+        width: auto;
         z-index: 20;
-        text-align: center;
+        text-align: left;
+    }
+
+    @@media (max-width: 768px) {
+        .explore-button-wrapper {
+            right: auto;
+            left: calc(50% - 120px);
+            bottom: 90px;
+            width: auto;
+        }
+        .custom-caption {
+            bottom: 15%;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .hero-title {
+            margin: 0 2% 0 2%;
+        }
+        .explore-button-wrapper {
+            bottom: 100px;
+            left: 85px;
+        }
     }
 
     .btn-explore {
@@ -302,4 +375,130 @@
             border: none;
             margin-right: 10px;
         }
+
+        /* =========================
+   DROPDOWN MENU DESKTOP + MOBILE
+========================= */
+
+.navbar .dropdown {
+    position: relative;
+}
+
+/* Dropdown mặc định */
+.dropdown-menu {
+    background: #000;
+    border: none;
+    border-radius: 14px;
+    padding: 10px 0;
+    min-width: 260px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+
+/* Item */
+.dropdown-item {
+    color: #fff !important;
+    font-family: "Lora", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 14px 22px;
+    transition: all 0.25s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 0, 0, 0.12);
+    color: #ff0000 !important;
+    padding-left: 28px;
+}
+
+/* Icon dropdown */
+.navbar .dropdown-toggle::after {
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+/* =========================
+   DESKTOP
+========================= */
+@@media (min-width: 992px) {
+
+    .navbar .dropdown-menu {
+        display: block;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(12px);
+        transition:
+            opacity 0.25s ease,
+            transform 0.25s ease,
+            visibility 0.25s;
+        pointer-events: none;
+    }
+
+    .navbar .dropdown:hover .dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
+}
+
+/* =========================
+   MOBILE
+========================= */
+@@media (max-width: 991.98px) {
+
+    .navbar-collapse {
+        background: #000;
+        padding: 15px 0;
+    }
+
+    .dropdown-menu {
+        position: static !important;
+        transform: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: none;
+        width: 100%;
+        margin-top: 8px;
+        background: rgba(255,255,255,0.03);
+        border-radius: 10px;
+        box-shadow: none;
+        padding: 0;
+    }
+
+    /* Hover mobile/tablet */
+    .navbar .dropdown:hover .dropdown-menu,
+    .navbar .dropdown:focus-within .dropdown-menu {
+        display: block;
+    }
+
+    .dropdown-item {
+        padding: 14px 18px 14px 30px;
+        font-size: 14px;
+    }
+
+    .dropdown-item:hover {
+        padding-left: 36px;
+    }
+}
 </style>
+
+<script>
+    // Load logo một lần duy nhất tại đây — không cần lặp lại ở từng view
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/home/GetHeader')
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (!res.success) return;
+                var logoItem = res.footer.find(function (x) { return x.settingKey === 'setting.general.footer.logo'; });
+                if (logoItem) {
+                    var el = document.getElementById('main-logo');
+                    if (el) el.src = logoItem.value;
+                }
+                // Expose toàn bộ response để các view khác dùng nếu cần (slider, v.v.)
+                window.__headerData = res;
+                document.dispatchEvent(new CustomEvent('headerLoaded', { detail: res }));
+            })
+            .catch(function (e) { console.warn('GetHeader failed', e); });
+    });
+</script>

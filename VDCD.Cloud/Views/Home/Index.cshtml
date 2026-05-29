@@ -1,16 +1,17 @@
-﻿@model VDCD.Models.HomeModelView
+@model VDCD.Models.HomeModelView
 @{
 
 }
 <section class="hero-slider">
 	<div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
 		<div class="carousel-indicators custom-indicators" id="slider-indicators"></div>
-
 		<div class="carousel-inner" id="slider-content">
+			@* Placeholder skeleton để tránh layout shift khi JS chưa load *@
+			<div class="carousel-item active">
+				<div class="zoom-bg" style="background-color:#111;"></div>
+			</div>
 		</div>
-
 		<div id="sec1-title"></div>
-
 		<div class="explore-button-wrapper heartbeat">
 			<a href="#" class="btn-explore jello-horizontal">
 				Khám Phá Dự Án<span class="icon-arrow">→</span>
@@ -19,87 +20,74 @@
 	</div>
 </section>
 <script>
-	$(document).ready(function () {
-		$.ajax({
-			url: '/home/GetHeader',
-			type: 'GET',
-			success: function (response) {
-				if (response.success) {
-					// 1. Cập nhật Logo từ mảng footer
-					const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
-					if (logoData) {
-						$('#main-logo').attr('src', logoData.value);
-					}
-
-					// 2. Cập nhật Slider từ mảng slice
-					let indicatorsHtml = '';
-					let slidesHtml = '';
-					let secTitleHtml = '';
-
-					// Gom nhóm title và image vì API trả về các object rời rạc
-					const slices = [];
-					for (let i = 0; i < response.slice.length; i += 2) {
-						slices.push({
-							title: response.slice[i].value,
-							image: response.slice[i + 1].value
-						});
-					}
-
-					slices.forEach((item, index) => {
-						const activeClass = index === 0 ? 'active' : '';
-
-						// Tạo Indicators
-						indicatorsHtml += `<button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="${index}" class="${activeClass}"></button>`;
-						secTitleHtml += `<div class="carousel-caption custom-caption d-flex flex-column justify-content-start align-items-center"
-											style="top: 10%; bottom: auto; padding-top: 0;">
-											<h1 class="hero-title" data-aos="fade-down" data-aos-duration="1500">
-												${item.title.split(' ')[0]} <span class="text-red">${item.title.split(' ').slice(1).join(' ')}</span>
-											</h1>
-											<h2 class="hero-subtitle text-white mt-3 text-center" data-aos="fade-down" data-aos-once="true" data-aos-duration="1500">Trung Tâm Đổi Mới Sáng Tạo Ninh Bình</h2>
-										</div>`;
-
-						// Tạo Slide Content với cấu trúc Zoom-bg
-						slidesHtml += `<div class="carousel-item ${activeClass}">
-										<div class="zoom-bg" style="background-image: url('${item.image}');"></div>
-									</div>`;
-					});
-
-					$('#slider-indicators').html(indicatorsHtml);
-					$('#sec1-title').html(secTitleHtml);
-					$('#slider-content').html(slidesHtml);
-
-					@* // Khởi động lại carousel sau khi thêm dữ liệu động
-					new bootstrap.Carousel('#heroCarousel', {
-						interval: 5000,
-						pause: false
-					}); *@
-
-					// Sau khi đã append HTML vào #slider-indicators và #slider-content:
-                    const carouselEl = document.querySelector('#heroCarousel');
-                    
-                    // KHỞI TẠO DUY NHẤT TẠI ĐÂY
-                    const carousel = new bootstrap.Carousel(carouselEl, {
-                        interval: 8000,
-                        pause: false
-                    });
-
-					AOS.init();
-
-                    // Xử lý hiệu ứng Zoom khi chuyển slide
-                    carouselEl.addEventListener('slide.bs.carousel', function () {
-                        // Reset và chạy lại animation cho mượt mà
-                        $('.zoom-bg').css('animation', 'none');
-                        
-                        setTimeout(function () {
-                            $('.zoom-bg').css('animation', 'kenBurnsLeft 10s ease-in-out infinite alternate');
-                        }, 50);
-                    });
-				}
-			},
-			error: function (err) {
-				console.error("Không thể lấy dữ liệu từ API", err);
+	// Dùng DOMContentLoaded thay vì $(document).ready để không phụ thuộc jQuery load trước
+	document.addEventListener('DOMContentLoaded', function () {
+		function initSlider(response) {
+			var slices = [];
+			for (var i = 0; i < response.slice.length; i += 2) {
+				slices.push({ title: response.slice[i].value, image: response.slice[i+1].value });
 			}
-		});
+
+			var indicatorsHtml = '', slidesHtml = '', secTitleHtml = '';
+			slices.forEach(function(item, index) {
+				var activeClass = index === 0 ? 'active' : '';
+				indicatorsHtml += '<button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="' + index + '" class="' + activeClass + '"></button>';
+				var words = item.title.split(' ');
+				secTitleHtml += '<div class="carousel-caption custom-caption d-flex flex-column justify-content-start align-items-center" style="top:10%;bottom:auto;padding-top:0;">'
+					+ '<h1 class="hero-title">' + words[0] + ' <span class="text-red">' + words.slice(1).join(' ') + '</span></h1>'
+					+ '<h2 class="hero-subtitle text-white mt-3 text-center">KIẾN TẠO TƯƠNG LAI SỐ</h2>'
+					+ '</div>';
+				slidesHtml += `
+<div class="carousel-item ${activeClass}">
+    <img
+        class="zoom-bg hero-image"
+        src="${item.image}"
+        alt="${item.title}"
+        ${index === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"'}
+        decoding="async"
+        width="1920"
+        height="1080"
+    />
+</div>`;
+				if (index === 0) {
+					var link = document.createElement('link');
+					link.rel = 'preload'; link.as = 'image'; link.href = item.image;
+					document.head.appendChild(link);
+				}
+			});
+
+			document.getElementById('slider-indicators').innerHTML = indicatorsHtml;
+			document.getElementById('sec1-title').innerHTML = secTitleHtml;
+			document.getElementById('slider-content').innerHTML = slidesHtml;
+
+			var carouselEl = document.querySelector('#heroCarousel');
+			const zoomEls = document.querySelectorAll('.zoom-bg');
+			new bootstrap.Carousel(carouselEl, { interval: 8000, pause: false });
+			carouselEl.addEventListener('slide.bs.carousel', function () {
+
+				zoomEls.forEach(el => {
+					el.classList.add('restart-animation');
+				});
+
+				requestAnimationFrame(() => {
+					requestAnimationFrame(() => {
+						zoomEls.forEach(el => {
+							el.classList.remove('restart-animation');
+						});
+					});
+				});
+			});
+		}
+
+		// Nếu header đã load xong trước (cached), dùng luôn
+		if (window.__headerData) {
+			initSlider(window.__headerData);
+		} else {
+			// Chờ event từ _PartialHeader
+			document.addEventListener('headerLoaded', function(e) {
+				initSlider(e.detail);
+			});
+		}
 	});
 </script>
 <style>
@@ -150,7 +138,7 @@
 			font-size: 22px !important;
 		}
 		.carousel-caption.custom-caption {
-			bottom: 35%  !important; /* Hủy bỏ việc dính vào đáy */
+			bottom: 26%  !important; /* Hủy bỏ việc dính vào đáy */
 		}
     }
 	@@keyframes kenBurnsLeft {
@@ -270,7 +258,7 @@
 
 			<div class="col-lg-8 position-relative">
 				<div class="main-image-wrapper mt-5">
-					<img data-aos="zoom-in" data-aos-duration="1500" src="@GetSt("setting.general.aboutus.image")" alt="VDCD Tech" class="img-fluid w-100 shadow-sm">
+					<img data-aos="zoom-in" data-aos-duration="1500" src="@GetSt("setting.general.aboutus.image")" alt="VDCD Tech" class="img-fluid w-100 shadow-sm" loading="lazy" decoding="async" width="800" height="450">
 				</div>
 
 				<div class="stats-container d-flex">
@@ -300,7 +288,9 @@
 					<div class="service-card position-relative overflow-hidden">
 
 						@* Ảnh nền của toàn bộ ô *@
-						<div class="service-bg-holder" style="background-image: url('@item.Image');"></div>
+						<div class="service-bg-holder lazy-bg"
+							data-bg="@item.Image">
+						</div>
 
 						@* Lớp phủ tối *@
 						<div class="service-overlay"></div>
@@ -315,7 +305,7 @@
 											? "/images/icon-default.webp" 
 											: item.Icon;
 									}
-									<img src="@icon" alt="icon" class="service-icon-img">
+									<img src="@icon" alt="icon" class="service-icon-img" loading="lazy" decoding="async" width="35" height="35">
 								</div>
 							</div>
 
@@ -424,9 +414,35 @@
 		.Take(visionQuantity)
 		.ToList();
 }
+<script>
+document.addEventListener('DOMContentLoaded', function () {
 
+    const lazyBackgrounds = document.querySelectorAll('.lazy-bg');
 
-<section class="vision-section py-5 position-relative" style="padding-top: 90px !important;">
+    const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+
+            if (!entry.isIntersecting) return;
+
+            const el = entry.target;
+            const bg = el.dataset.bg;
+
+            if (bg) {
+                el.style.backgroundImage = `url('${bg}')`;
+                el.classList.add('loaded');
+            }
+
+            obs.unobserve(el);
+        });
+    }, {
+        rootMargin: '200px'
+    });
+
+    lazyBackgrounds.forEach(el => observer.observe(el));
+});
+</script>
+
+<section class="vision-section py-5 position-relative overflow-hidden" style="padding-top: 90px !important;">
 	<div class="vision-bg-overlay d-none d-lg-block"></div>
 
 	<div class="container position-relative" style="z-index: 2;">
@@ -434,9 +450,9 @@
 		<div class="row mb-4">
 			<div class="col-12 text-center text-lg-start">
 				<div data-aos="fade-down" data-aos-duration="1500" class="d-flex align-items-center mb-3 justify-content-center">
-					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="line me-2 section-line"></span>
 					<span class="text-danger fw-bold text-uppercase small">Tầm nhìn & giá trị</span>
-					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="line ms-2 section-line"></span>
 				</div>
 				<h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase text-center">@GetSt("setting.general.vision.main_title")</h2>
 			</div>
@@ -472,7 +488,7 @@
 					<div class="row align-items-center">
 						<div class="col-lg-6 p-0 position-relative">
 							<div class="vision-image shadow-lg" data-aos="fade-right" data-aos-duration="1500">
-								<img src="@GetSt($"setting.general.vision.image.{idx}")" class="img-fluid w-100" alt="Vision" style="height: 500px; object-fit: cover;">
+								<img src="@GetSt($"setting.general.vision.image.{idx}")" class="img-fluid w-100 vision-img" alt="Vision" loading="@(idx == visionIndexes.First() ? "eager" : "lazy")" decoding="async" width="600" height="500">
 							</div>
 						</div>
 
@@ -542,6 +558,24 @@
 			color: #fff !important;
 		}
 
+	/* Ảnh vision responsive */
+	.vision-img {
+		height: 500px;
+		object-fit: cover;
+	}
+
+	@@media (max-width: 991.98px) {
+		.vision-img {
+			height: 300px;
+		}
+	}
+
+	@@media (max-width: 575.98px) {
+		.vision-img {
+			height: 220px;
+		}
+	}
+
 	/* Lớp nền xám bên phải */
 	.vision-bg-overlay {
 		position: absolute;
@@ -559,9 +593,9 @@
 		<div class="row mb-5">
 			<div class="col-12">
 				<div data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center mb-4">
-					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="line me-2 section-line"></span>
 					<span class="text-danger fw-bold text-uppercase small">dự án</span>
-					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="line ms-2 section-line"></span>
 				</div>
 				<h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase text-center">Dự án nổi bật</h2>
 			</div>
@@ -579,7 +613,7 @@
 					@* Mỗi slide item *@
 					<div data-aos="flip-left" data-aos-duration="1500" class="px-2">
 						<div class="project-card position-relative overflow-hidden shadow">
-							<img src="@item.Image" class="project-img w-100" alt="@item.ProjectName">
+							<img data-lazy="@item.Image" class="project-img w-100" alt="@item.ProjectName" loading="lazy" decoding="async" width="400" height="400">
 							<div class="project-overlay"></div>
 							<div class="project-info p-4">
 								<h4 class="fw-bold mb-2 text-white text-truncate">
@@ -610,15 +644,26 @@
 	</div>
 </section>
 <script>
-	$(document).ready(function () {
-		$('.project-slider').slick({
-			infinite: true,
-			slidesToShow: 4, // Mặc định hiện 4 ảnh như col-lg-3
-			slidesToScroll: 1,
-			arrows: false, // Tắt mũi tên mặc định của Slick
-			autoplay: true,
-			autoplaySpeed: 3000,
-			responsive: [
+	document.addEventListener('DOMContentLoaded', function () {
+
+    const slider = document.querySelector('.project-slider');
+
+    if (!slider) return;
+
+    const observer = new IntersectionObserver((entries) => {
+
+        entries.forEach(entry => {
+
+            if (!entry.isIntersecting) return;
+
+            $(slider).slick({
+                infinite: true,
+                slidesToShow: 4,
+                lazyLoad: 'ondemand',
+                arrows: false,
+                autoplay: true,
+                autoplaySpeed: 3000,
+				responsive: [
 				{
 					breakpoint: 1200,
 					settings: { slidesToShow: 3 }
@@ -632,16 +677,17 @@
 					settings: { slidesToShow: 1 }
 				}
 			]
-		});
+            });
 
-		// Sự kiện cho nút bấm Custom
-		$('#prevProject').click(function () {
-			$('.project-slider').slick('slickPrev');
-		});
-		$('#nextProject').click(function () {
-			$('.project-slider').slick('slickNext');
-		});
-	});
+            observer.disconnect();
+        });
+
+    }, {
+        rootMargin: '300px'
+    });
+
+    observer.observe(slider);
+});
 </script>
 <style>
 	.project-slider .slick-list {
@@ -751,9 +797,9 @@
 		<div class="row mb-5">
 			<div class="col-12 text-center">
 				<div data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center mb-4">
-					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="line me-2 section-line"></span>
 					<span class="text-danger fw-bold text-uppercase small">dịch vụ</span>
-					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="line ms-2 section-line"></span>
 				</div>
 				<h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase">
 					@GetSt("setting.general.services.titlemain")
@@ -870,14 +916,14 @@
 		}
 </style>
 
-<section class="partners-section py-5 bg-light">
+<section class="partners-section py-5 bg-light overflow-hidden">
 	<div class="container">
 		<div class="row mb-4 justify-content-center align-items-center">
 			<div class="col-md-auto">
 				<div data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center">
-					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="line me-2 section-line"></span>
 					<span class="text-danger fw-bold text-uppercase small" style="white-space: nowrap;">khách hàng & đối tác</span>
-					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="line ms-2 section-line"></span>
 				</div>
 			</div>
 			@* <div class="col border-top border-secondary-subtle ms-3 d-none d-md-block">
@@ -891,10 +937,13 @@
 					{
 						<div class="px-4" data-aos="zoom-in-up" data-aos-duration="1500">
 							<div class="partner-logo-wrapper d-flex align-items-center justify-content-center">
-								<img src="@item.Image"
+								<img data-lazy="@item.Image"
 									 alt="@item.CustomerName"
 									 title="@item.CustomerName"
-									 class="img-fluid partner-logo">
+									 class="img-fluid partner-logo"
+									 loading="lazy"
+									 decoding="async"
+									 width="160" height="90">
 							</div>
 						</div>
 					}
@@ -904,16 +953,26 @@
 	</div>
 </section>
 <script>
-	$(document).ready(function () {
-		$('.customer-slider').slick({
-			slidesToShow: 6,      // Hiển thị 6 logo một lúc trên PC
-			slidesToScroll: 1,
-			autoplay: true,
-			autoplaySpeed: 2000,
-			arrows: false,        // Ẩn nút điều hướng để slider chạy tự nhiên
-			dots: false,
-			infinite: true,
-			responsive: [
+	document.addEventListener('DOMContentLoaded', function () {
+
+    const slider = document.querySelector('.customer-slider');
+
+    if (!slider) return;
+
+    const observer = new IntersectionObserver((entries) => {
+
+        entries.forEach(entry => {
+
+            if (!entry.isIntersecting) return;
+
+            $(slider).slick({
+                infinite: true,
+                slidesToShow: 4,
+                lazyLoad: 'ondemand',
+                arrows: false,
+                autoplay: true,
+                autoplaySpeed: 3000,
+				responsive: [
 				{
 					breakpoint: 1200,
 					settings: { slidesToShow: 5 }
@@ -931,8 +990,17 @@
 					settings: { slidesToShow: 2 }
 				}
 			]
-		});
-	});
+            });
+
+            observer.disconnect();
+        });
+
+    }, {
+        rootMargin: '300px'
+    });
+
+    observer.observe(slider);
+});
 </script>
 <style>
 	.partners-section {
@@ -974,9 +1042,9 @@
 		<div class="row mb-5">
 			<div class="col-12" style="text-align: center;">
 				<div data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center mb-4">
-					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="line me-2 section-line"></span>
 					<span class="text-danger fw-bold text-uppercase small">tin tức</span>
-					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="line ms-2 section-line"></span>
 				</div>
 				<h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase">Bài viết mới</h2>
 			</div>
@@ -998,7 +1066,10 @@
 							<a href="/tin-tuc/@item.Slug">
 								<img src="@thumbnail"
 									class="img-fluid w-100"
-									alt="@item.Title">
+									alt="@item.Title"
+									loading="lazy"
+									decoding="async"
+									width="400" height="250">
 							</a>
 							@* Box ngày tháng đè lên ảnh *@
 							<div class="date-box position-absolute top-0 start-0 bg-white p-2 text-center shadow-sm">
@@ -1136,9 +1207,9 @@
 		<div class="row align-items-start">
 			<div class="col-lg-4 mb-5 mb-lg-0">
 				<div data-aos="fade-right" data-aos-duration="1500" class="d-flex align-items-center mb-2">
-					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="line me-2 section-line"></span>
 					<span class="text-danger fw-bold text-uppercase small">con số ấn tượng</span>
-					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="line ms-2 section-line"></span>
 				</div>
 				<h2 data-aos="fade-right" data-aos-duration="1500" class="display-3 fw-bold text-uppercase brand-text">VDCD</h2>
 			</div>
@@ -1244,32 +1315,51 @@
 
 @* Counter *@
 <script>
-	$(document).ready(function () {
-		let counted = false;
-		$(window).on("scroll", function () {
-			let sectionTop = $(".statistics-section").offset().top - window.innerHeight + 100;
-			if (!counted && $(window).scrollTop() > sectionTop) {
-				$(".stat-number").each(function () {
-					let $this = $(this);
-					let target = parseInt($this.attr("data-target"));
-					$({ countNum: 0 }).animate(
-						{ countNum: target },
-						{
-							duration: 2000,
-							easing: "swing",
-							step: function () {
-								$this.text(Math.floor(this.countNum));
-							},
-							complete: function () {
-								$this.text(target);
-							}
-						}
-					);
-				});
-				counted = true;
-			}
-		});
-	});
+	document.addEventListener('DOMContentLoaded', function () {
+
+    const section = document.querySelector('.statistics-section');
+
+    if (!section) return;
+
+    const observer = new IntersectionObserver((entries) => {
+
+        entries.forEach(entry => {
+
+            if (!entry.isIntersecting) return;
+
+            document.querySelectorAll('.stat-number').forEach(function(el) {
+
+                const target = parseInt(el.dataset.target);
+
+                let startTime = null;
+
+                function step(timestamp) {
+
+                    if (!startTime) startTime = timestamp;
+
+                    const progress = Math.min((timestamp - startTime) / 2000, 1);
+
+                    el.textContent = Math.floor(progress * target);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    } else {
+                        el.textContent = target;
+                    }
+                }
+
+                requestAnimationFrame(step);
+            });
+
+            observer.disconnect();
+        });
+
+    }, {
+        threshold: 0.3
+    });
+
+    observer.observe(section);
+});
 </script>
 
 <section class="ideals-section position-relative bg-black overflow-hidden">
@@ -1279,9 +1369,9 @@
 			<div class="col-lg-7 d-flex align-items-center justify-content-center py-5">
 				<div class="content-wrapper px-4 px-md-5">
 					<div data-aos="fade-down" data-aos-duration="1500" class="d-flex align-items-center mb-4">
-						<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+						<span class="line me-2 section-line"></span>
 						<span class="text-danger fw-bold text-uppercase small">đồng hành & phát triển</span>
-						<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+						<span class="line ms-2 section-line"></span>
 					</div>
 
 					<h2 data-aos="fade-down" data-aos-duration="1500" class="text-white fw-bold display-4 text-uppercase mb-0" style="letter-spacing: -1px; line-height: 1.5;">
@@ -1293,7 +1383,7 @@
 
 			<div class="col-lg-5 position-relative">
 				<div data-aos="zoom-in-left" data-aos-duration="1500" class="image-container">
-					<img src="/uploads/8fa2dee3-43e4-4d6c-a573-c8e42a28d04d_h1_img-5.png" alt="VDCD Building" class="img-fluid building-image">
+					<img src="/uploads/8fa2dee3-43e4-4d6c-a573-c8e42a28d04d_h1_img-5.png" alt="VDCD Building" class="img-fluid building-image" loading="lazy" decoding="async" width="600" height="550">
 				</div>
 			</div>
 		</div>

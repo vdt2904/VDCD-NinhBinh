@@ -164,7 +164,16 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+var cacheMaxAge = "31536000"; // 1 năm
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Chỉ áp dụng cho các file tĩnh (hình ảnh, css, js)
+        ctx.Context.Response.Headers.Append(
+            "Cache-Control", $"public, max-age={cacheMaxAge}");
+    }
+});
 
 app.UseRouting();
 app.UseAuthentication();
@@ -174,6 +183,11 @@ app.UseHangfireDashboard("/admin/hangfire", new DashboardOptions
 	Authorization = new[] { new HangfireCustomAuthFilter() }
 });
 app.UseAuthorization();
+app.MapControllerRoute(
+    name: "kien-tao",
+    pattern: "kien-tao-tuong-lai-so",
+    defaults: new { controller = "Home", action = "KienTao" }
+);
 app.MapControllerRoute(
     name: "center",
     pattern: "he-thong-trung-tam",

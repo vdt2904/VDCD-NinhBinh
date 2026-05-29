@@ -1,0 +1,288 @@
+@model VDCD.Models.KienTaoViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Kiến tạo tương lai số";
+}
+
+@functions {
+    string GetSt(string key) => Model.Settings.ContainsKey(key) ? Model.Settings[key] : "";
+}
+
+@* ===== HERO ===== *@
+<section class="hero-section d-flex align-items-end">
+    <div class="container-fluid px-0">
+        <div class="hero-content text-white p-5">
+            <h1 data-aos="fade-right" data-aos-duration="600" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <hr class="border-light opacity-50 mb-4" style="width:90%">
+            <nav data-aos="fade-right" data-aos-duration="600" aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active text-white fw-light" aria-current="page">Kiến tạo tương lai số</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</section>
+
+<style>
+    .hero-section {
+        background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/uploads/e9a9ef35-6e08-41e8-b8ea-7112e2a130f4_bg1.jpg');
+        background-size: cover;
+        background-position: center;
+        height: 700px;
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        margin-top: 45px;
+    }
+    .hero-content {
+        width: 100%;
+        background: linear-gradient(transparent, rgba(0,0,0,0.4));
+        padding-bottom: 60px !important;
+        padding-left: 10% !important;
+    }
+    .breadcrumb-item + .breadcrumb-item::before { content: ">"; color: white; }
+    .hero-content h1 { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; letter-spacing: -1px; }
+    @@media (max-width: 768px) {
+        .hero-section { height: 350px; }
+        .hero-content h1 { font-size: 2.5rem; }
+    }
+</style>
+
+@* ===== PHẦN 1: HỆ THỐNG TRUNG TÂM ===== *@
+<section class="centers-section py-5">
+    <div class="container">
+        <div class="col-12 text-center mb-5">
+            <div data-aos="fade-down" data-aos-duration="600" class="d-flex justify-content-center align-items-center mb-4">
+                <span style="width:30px;height:2px;background:#e30613;display:inline-block;" class="me-2"></span>
+                <span class="text-danger fw-bold text-uppercase small">hệ sinh thái tập đoàn</span>
+                <span style="width:30px;height:2px;background:#e30613;display:inline-block;" class="ms-2"></span>
+            </div>
+            <h2 data-aos="fade-down" data-aos-duration="600" class="display-6 fw-bold text-uppercase">
+                Hệ thống 12 trung tâm <br> Viện nghiên cứu trực thuộc
+            </h2>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var center in Model.Centers)
+            {
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-duration="600">
+                    <div class="center-card h-100">
+                        <div class="img-wrapper mb-3">
+                            <img src="@center.Image" class="img-fluid" alt="@center.Name" loading="lazy" width="400" height="225">
+                        </div>
+                        <div class="card-body-center">
+                            <h4 class="fw-bold mb-3 center-title">@center.Name</h4>
+                            <hr class="w-25 mb-3">
+                            <a href="@center.Url" class="text-danger text-decoration-none fw-bold d-flex align-items-center learn-more">
+                                <i class="bi bi-arrow-up-right me-2"></i> Tìm Hiểu Thêm
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<style>
+    .center-title {
+        font-size: 1.5rem; line-height: 1.2;
+        display: -webkit-box; -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .center-card {
+        border: 1px solid #eee;
+        border-radius: 0 0 10px 10px;
+        box-shadow: 3px 7px 8px #eee;
+        height: 100%;
+    }
+    .card-body-center { padding: 0 10px 30px; }
+    .img-wrapper { overflow: hidden; aspect-ratio: 16 / 9; }
+    .img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+    .center-card:hover img { transform: scale(1.05); }
+    .learn-more { font-size: 0.9rem; }
+    .center-card:hover .bi-arrow-up-right { transform: rotate(40deg); transition: 0.3s all; }
+</style>
+
+@* ===== PHẦN 2: DỰ ÁN ===== *@
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="col-12 text-center mb-5">
+            <div data-aos="fade-down" data-aos-duration="600" class="d-flex justify-content-center align-items-center mb-4">
+                <span style="width:30px;height:2px;background:#e30613;display:inline-block;" class="me-2"></span>
+                <span class="text-danger fw-bold text-uppercase small">thành tựu</span>
+                <span style="width:30px;height:2px;background:#e30613;display:inline-block;" class="ms-2"></span>
+            </div>
+            <h2 data-aos="fade-down" data-aos-duration="600" class="display-6 fw-bold text-uppercase">Dự án của chúng tôi</h2>
+        </div>
+
+        @* Filter danh mục *@
+        <div data-aos="fade-down" data-aos-duration="600" class="d-flex justify-content-center flex-wrap gap-2 mb-5">
+            <a href="/kien-tao-tuong-lai-so"
+               class="btn btn-filter rounded-pill px-4 @(Model.CurrentCategoryId == null ? "active" : "")">
+                Tất cả
+            </a>
+            @foreach (var cat in Model.Categories)
+            {
+                <a href="/kien-tao-tuong-lai-so?categoryId=@cat.Id"
+                   class="btn btn-filter rounded-pill px-4 @(Model.CurrentCategoryId == cat.Id ? "active" : "")">
+                    @cat.CategoryName
+                </a>
+            }
+        </div>
+
+        <div data-aos="fade-down" data-aos-duration="600" class="row g-4">
+            @foreach (var project in Model.Projects)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="project-card position-relative overflow-hidden rounded shadow-sm">
+                        <a href="/du-an/@project.Plug" class="text-white stretched-link">
+                            <img src="@project.Image" class="img-fluid w-100" alt="@project.ProjectName" style="height:350px;object-fit:cover;" loading="lazy" width="400" height="350">
+                        </a>
+                        <div class="project-overlay d-flex flex-column justify-content-end p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="text-white fw-bold mb-0 pe-3">@project.ProjectName</h5>
+                                <a href="/du-an/@project.Plug" class="text-white stretched-link">
+                                    <i class="bi bi-arrow-up-right"></i>
+                                </a>
+                            </div>
+                            <div class="position-relative" style="z-index:3;">
+                                <span class="badge border border-white rounded-pill px-3 py-2 fw-light">
+                                    @Model.Categories.FirstOrDefault(c => c.Id == project.CategoryId)?.CategoryName
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Page navigation" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        var pageUrl = Model.CurrentCategoryId.HasValue
+                            ? $"/kien-tao-tuong-lai-so?categoryId={Model.CurrentCategoryId}&page={i}"
+                            : $"/kien-tao-tuong-lai-so?page={i}";
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link shadow-sm border-0 mx-1 rounded" href="@pageUrl">@i</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        }
+    </div>
+</section>
+
+<style>
+    .project-card { position: relative; transition: all 0.3s ease; cursor: pointer; }
+    .project-overlay::before {
+        content: ""; position: absolute; bottom: 0; left: 0;
+        height: 4px; width: 100%; background-color: #E80002;
+        transition: all ease 0.35s; z-index: -1;
+    }
+    .project-card:hover .project-overlay::before { height: 100%; z-index: 1; }
+    .project-overlay {
+        position: absolute; top: auto; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(to top, rgb(0 0 0 / 90%) 0%, rgb(0 0 0 / 30%) 60%, #00000000 100%);
+        z-index: 100;
+    }
+    .project-overlay > div { z-index: 2; }
+    .project-card h5 { color: #fff !important; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); font-size: 1.2rem; line-height: 1.4; }
+    .project-card a i { color: #fff !important; font-size: 1.2rem; }
+    .project-card .badge { background: transparent !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.8) !important; font-weight: 300; }
+    .project-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important; }
+    .project-card:hover .stretched-link { transform: rotate(45deg); transition: 0.6s all; }
+    .btn-filter { background-color: #fff; border: 1px solid #ff0000; color: #ff0000; }
+    .btn-filter.active, .btn-filter:hover { background-color: #ff0000; color: #fff; transition: 0.3s all; }
+    .pagination .page-link { color: #333; padding: 10px 18px; }
+    .pagination .page-item.active .page-link { background-color: #ff0000; border-color: #ff0000; color: #fff; }
+    .pagination .page-link:hover { background-color: #f1f3f5; color: #ff0000; }
+</style>
+
+@* ===== PHẦN 3: CÁCH THỨC VẬN HÀNH ===== *@
+<section class="collaboration-section py-5">
+    <div class="container">
+        <div class="col-12 text-center mb-5">
+            <div data-aos="fade-down" data-aos-duration="600" class="d-flex justify-content-center align-items-center mb-4">
+                <span style="width:30px;height:2px;background:#e30613;display:inline-block;" class="me-2"></span>
+                <span class="text-danger fw-bold text-uppercase small">cách thức vận hành</span>
+                <span style="width:30px;height:2px;background:#e30613;display:inline-block;" class="ms-2"></span>
+            </div>
+            <h2 data-aos="fade-down" data-aos-duration="600" class="display-6 fw-bold text-uppercase">
+                @GetSt("setting.general.operation.main_title")
+            </h2>
+        </div>
+
+        <div class="row mt-4">
+            <div data-aos="fade-right" data-aos-duration="600" class="col-md-5 mb-4">
+                <div class="sticky-top" style="top:120px;z-index:5;">
+                    <div class="fixed-image-container shadow-sm">
+                        <img id="operation-image" src="@GetSt("setting.general.operation.image.0")" alt="Operation" loading="eager" width="500" height="500">
+                    </div>
+                </div>
+            </div>
+            <div data-aos="fade-left" data-aos-duration="600" class="col-md-7 ps-md-5">
+                <div class="operation-timeline">
+                    @{
+                        int opIdx = 0;
+                        while (Model.Settings.ContainsKey($"setting.general.operation.title.{opIdx}"))
+                        {
+                            var title = GetSt($"setting.general.operation.title.{opIdx}");
+                            var content = GetSt($"setting.general.operation.content.{opIdx}");
+                            var imageUrl = GetSt($"setting.general.operation.image.{opIdx}");
+                            var displayNum = (opIdx + 1).ToString("D2");
+                            <div class="timeline-item d-flex mb-5" onmouseover="changeOpImage('@imageUrl', this)">
+                                <div class="timeline-number-wrapper me-4">
+                                    <div class="timeline-number">@displayNum</div>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4 class="fw-bold h5">@title</h4>
+                                    <p class="text-muted small">@content</p>
+                                </div>
+                            </div>
+                            opIdx++;
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .fixed-image-container { width: 100%; aspect-ratio: 1/1; overflow: hidden; background-color: #f8f9fa; border-radius: 4px; }
+    .fixed-image-container img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: opacity 0.4s ease-in-out; }
+    .timeline-item { transition: all 0.3s; opacity: 0.5; }
+    .timeline-item.active { opacity: 1; }
+    .timeline-number {
+        width: 50px; height: 50px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: white; font-weight: bold;
+    }
+    .timeline-item.active .timeline-number { background-color: #dc3545; border-color: #dc3545; color: white; }
+</style>
+
+<script>
+    function changeOpImage(imgUrl, element) {
+        const mainImg = document.getElementById('operation-image');
+        if (mainImg.src !== imgUrl && imgUrl !== "") {
+            mainImg.style.opacity = '0.3';
+            setTimeout(function () {
+                mainImg.src = imgUrl;
+                mainImg.style.opacity = '1';
+            }, 200);
+        }
+        document.querySelectorAll('.timeline-item').forEach(function (item) {
+            item.classList.remove('active');
+        });
+        element.classList.add('active');
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        const firstItem = document.querySelector('.timeline-item');
+        if (firstItem) firstItem.classList.add('active');
+    });
+</script>

@@ -1,4 +1,4 @@
-﻿
+
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -9,9 +9,9 @@
     <div class="container-fluid px-0">
         <div class="hero-content text-white p-5">
 
-            <h1 data-aos="fade-right" data-aos-duration="1500" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <h1 data-aos="fade-right" data-aos-duration="600" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
             <hr class="border-light opacity-50 mb-4" style="width:90%">
-            <nav data-aos="fade-right" data-aos-duration="1500" aria-label="breadcrumb">
+            <nav data-aos="fade-right" data-aos-duration="600" aria-label="breadcrumb">
                 <ol class="breadcrumb mb-2">
                     <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
                     <li class="breadcrumb-item active text-white fw-light" aria-current="page">Về chúng tôi</li>
@@ -23,20 +23,20 @@
 </section>
 <style>
     .hero-section {
-        /* Thay đường dẫn ảnh của bạn vào đây */
+        /* Thay du?ng d?n ?nh c?a b?n v�o d�y */
         background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/uploads/1046cdc6-6989-44eb-89ee-49fd85f442fe_bc_page.jpg');
         background-size: cover;
         background-position: center;
-        height: 700px; /* Điều chỉnh chiều cao tùy ý */
+        height: 700px; /* �i?u ch?nh chi?u cao t�y � */
         position: relative;
         display: flex;
-        align-items: flex-end; /* Đẩy nội dung xuống đáy */
-        margin-top: 110px;
+        align-items: flex-end; /* �?y n?i dung xu?ng d�y */
+        margin-top: 45px;
     }
 
     .hero-content {
         width: 100%;
-        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* Làm tối nhẹ phần chân chữ */
+        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* L�m t?i nh? ph?n ch�n ch? */
         padding-bottom: 60px !important;
         padding-left: 10% !important;
     }
@@ -62,26 +62,6 @@
         }
     }
 </style>
-<script>
-    $(document).ready(function () {
-        $.ajax({
-            url: '/home/GetHeader',
-            type: 'GET',
-            success: function (response) {
-                if (response.success) {
-                    // 1. Cập nhật Logo từ mảng footer
-                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
-                    if (logoData) {
-                        $('#main-logo').attr('src', logoData.value);
-                    }
-                }
-            },
-            error: function (err) {
-                console.error("Không thể lấy dữ liệu từ API", err);
-            }
-        });
-    });
-</script>
 
 <section class="contact-section py-5 bg-light">
     <div class="container">
@@ -133,15 +113,15 @@
 <style>
     /* Reset & General */
     .contact-section {
-        background-color: #f8f9fc !important; /* Màu nền xám nhạt như ảnh */
+        background-color: #f8f9fc !important; /* M�u n?n x�m nh?t nhu ?nh */
     }
 
-    /* Tinh chỉnh Input: Chỉ có đường kẻ dưới */
+    /* Tinh ch?nh Input: Ch? c� du?ng k? du?i */
     .form-control-custom {
         width: 100%;
         background: transparent;
         border: none;
-        border-bottom: 1px solid #ced4da; /* Màu xám nhẹ cho đường kẻ */
+        border-bottom: 1px solid #ced4da; /* M�u x�m nh? cho du?ng k? */
         padding: 12px 0;
         outline: none;
         font-size: 0.95rem;
@@ -149,13 +129,13 @@
     }
 
         .form-control-custom:focus {
-            border-bottom-color: #000; /* Đổi màu khi focus */
+            border-bottom-color: #000; /* �?i m�u khi focus */
         }
 
-    /* Cố định size ảnh tòa nhà (Tỷ lệ chữ nhật ngang) */
+    /* C? d?nh size ?nh t�a nh� (T? l? ch? nh?t ngang) */
     .fixed-image-container {
         width: 100%;
-        height: 250px; /* Độ cao phù hợp */
+        height: 250px; /* �? cao ph� h?p */
         overflow: hidden;
         border-radius: 4px;
     }
@@ -166,7 +146,7 @@
             object-fit: cover;
         }
 
-    /* Custom Button Gửi */
+    /* Custom Button G?i */
     .btn-submit-circle {
         display: flex;
         align-items: center;

@@ -1,4 +1,4 @@
-﻿
+
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -7,9 +7,9 @@
     <div class="container-fluid px-0">
         <div class="hero-content text-white p-5">
 
-            <h1 data-aos="fade-right" data-aos-duration="1500" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <h1 data-aos="fade-right" data-aos-duration="600" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
             <hr class="border-light opacity-50 mb-4" style="width:90%">
-            <nav data-aos="fade-right" data-aos-duration="1500" aria-label="breadcrumb">
+            <nav data-aos="fade-right" data-aos-duration="600" aria-label="breadcrumb">
                 <ol class="breadcrumb mb-2">
                     <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
                     <li class="breadcrumb-item active text-white fw-light" aria-current="page">Tin tức</li>
@@ -21,20 +21,20 @@
 </section>
 <style>
     .hero-section {
-        /* Thay đường dẫn ảnh của bạn vào đây */
+        /* Thay du?ng d?n ?nh c?a b?n v�o d�y */
         background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/uploads/fff5733a-2cd6-4e40-b55d-ce3d2fe744f3_540895050_1349604910506179_7192088055664062117_n-1.jpg');
         background-size: cover;
         background-position: center;
-        height: 700px; /* Điều chỉnh chiều cao tùy ý */
+        height: 700px; /* �i?u ch?nh chi?u cao t�y � */
         position: relative;
         display: flex;
-        align-items: flex-end; /* Đẩy nội dung xuống đáy */
-        margin-top: 110px;
+        align-items: flex-end; /* �?y n?i dung xu?ng d�y */
+        margin-top: 45px;
     }
 
     .hero-content {
         width: 100%;
-        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* Làm tối nhẹ phần chân chữ */
+        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* L�m t?i nh? ph?n ch�n ch? */
         padding-bottom: 60px !important;
         padding-left: 10% !important;
     }
@@ -60,32 +60,12 @@
         }
     }
 </style>
-<script>
-    $(document).ready(function () {
-        $.ajax({
-            url: '/home/GetHeader',
-            type: 'GET',
-            success: function (response) {
-                if (response.success) {
-                    // 1. Cập nhật Logo từ mảng footer
-                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
-                    if (logoData) {
-                        $('#main-logo').attr('src', logoData.value);
-                    }
-                }
-            },
-            error: function (err) {
-                console.error("Không thể lấy dữ liệu từ API", err);
-            }
-        });
-    });
-</script>
 
 
 <section class="news-list-section py-5">
     <div class="container">
         <div class="row mb-5 justify-content-end">
-            <div data-aos="fade-left" data-aos-duration="1500" class="col-md-4">
+            <div data-aos="fade-left" data-aos-duration="600" class="col-md-4">
                 <div class="search-box position-relative">
                     <input type="text" id="news-search" class="form-control rounded-pill ps-4 pr-5" placeholder="Tìm kiếm ...">
                     <i class="fa fa-search position-absolute top-50 end-0 translate-middle-y me-3 text-danger"></i>
@@ -93,7 +73,7 @@
             </div>
         </div>
 
-        <div class="row g-4" id="news-container" data-aos="fade-down" data-aos-duration="1500">
+        <div class="row g-4" id="news-container" data-aos="fade-down" data-aos-duration="600">
         </div>
 
         <nav aria-label="Page navigation" class="mt-5">
@@ -103,7 +83,7 @@
     </div>
 </section>
 <style>
-    /* Card Tin tức */
+    /* Card Tin t?c */
     a {
         text-decoration: none;
         color: #000;
@@ -181,7 +161,7 @@
         font-size: 0.85rem;
     }
 
-    /* Tìm kiếm và Phân trang */
+    /* T�m ki?m v� Ph�n trang */
     .search-box input {
         border: 1px solid #eee;
         padding: 12px;
@@ -195,7 +175,7 @@
 
     .pagination .page-item.active .page-link {
         background-color: transparent;
-        color: #f00; /* Màu đỏ làm điểm nhấn */
+        color: #f00; /* M�u d? l�m di?m nh?n */
         font-weight: bold;
         border-bottom: 2px solid #f00;
     }
@@ -206,28 +186,23 @@
     let searchQuery = "";
     let timeout = null;
 
-    $(document).ready(function () {
-        // Khởi tạo lần đầu
+    document.addEventListener('DOMContentLoaded', function () {
         loadNews(currentPage, searchQuery);
 
-        // Xử lý tìm kiếm với cơ chế Debounce tối ưu
-        $('#news-search').on('keyup', function () {
-            const val = $(this).val().trim();
-
-            // Chỉ tìm kiếm nếu giá trị thực sự thay đổi
+        document.getElementById('news-search').addEventListener('keyup', function () {
+            var val = this.value.trim();
             if (val === searchQuery && val !== "") return;
-
             clearTimeout(timeout);
-            timeout = setTimeout(() => {
+            timeout = setTimeout(function () {
                 searchQuery = val;
-                currentPage = 1; // Reset về trang 1 khi tìm kiếm mới
+                currentPage = 1;
                 loadNews(currentPage, searchQuery);
             }, 500);
         });
     });
 
     function loadNews(page, search) {
-        // Thêm hiệu ứng loading mờ nhẹ nội dung cũ (tùy chọn)
+        // Th�m hi?u ?ng loading m? nh? n?i dung cu (t�y ch?n)
         $('#news-container').css('opacity', '0.5');
 
         $.ajax({
@@ -261,7 +236,7 @@
     function renderNews(items) {
         let html = '';
         items.forEach(item => {
-            // Xử lý ngày tháng
+            // X? l� ng�y th�ng
             const date = new Date(item.publishedDate);
             const day = date.getDate().toString().padStart(2, '0');
             const month = "TH" + (date.getMonth() + 1);
@@ -274,10 +249,10 @@
                                     <span class="date-day">${day}</span>
                                     <span class="date-month">${month}</span>
                                 </div>
-                                <img src="${item.thumbnail || '/images/default.png'}" class="card-img-top" alt="${item.title}" style="height: 220px; object-fit: cover;">
+                                <img src="${item.thumbnail || '/images/default.png'}" class="card-img-top" alt="${item.title}" style="height: 220px; object-fit: cover;" loading="lazy" width="400" height="220">
                             </a>
                             <a href="/tin-tuc/${item.slug}" class="card-body">
-                                <span class="news-category mb-1 text-uppercase small text-muted font-weight-bold">${item.categoryName || 'Tin tức'}</span>
+                                <span class="news-category mb-1 text-uppercase small text-muted font-weight-bold">${item.categoryName || 'Tin t?c'}</span>
                                 <h3 class="news-title h5 font-weight-bold text-dark mb-2" title="${item.title}">${item.title}</h3>
                                 <p class="news-excerpt text-muted small mb-3">${item.summary || ''}</p>
                                 <span class="read-more text-dark font-weight-bold text-decoration-underline">Đọc Thêm</span>
@@ -296,7 +271,7 @@
         }
 
         let html = '';
-        // Nút Back
+        // N�t Back
         if (current > 1) {
             html += `<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="changePage(${current - 1})">&laquo;</a></li>`;
         }
@@ -309,7 +284,7 @@
                 `;
         }
 
-        // Nút Next
+        // N�t Next
         if (current < totalPages) {
             html += `<li class="page-item"><a class="page-link" href="javascript:void(0)" onclick="changePage(${current + 1})">&raquo;</a></li>`;
         }
@@ -320,9 +295,7 @@
     function changePage(page) {
         currentPage = page;
         loadNews(currentPage, searchQuery);
-        // Cuộn mượt lên đầu danh sách tin tức
-        $('html, body').animate({
-            scrollTop: $(".news-list-section").offset().top - 80
-        }, 100);
+        var section = document.querySelector('.news-list-section');
+        if (section) window.scrollTo({ top: section.offsetTop - 80, behavior: 'smooth' });
     }
 </script>

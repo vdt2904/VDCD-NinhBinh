@@ -1,4 +1,4 @@
-﻿@model VDCD.Models.OrganizationalModelView
+@model VDCD.Models.OrganizationalModelView
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -10,9 +10,9 @@
     <div class="container-fluid px-0">
         <div class="hero-content text-white p-5">
 
-            <h1 data-aos="fade-right" data-aos-duration="1500" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <h1 data-aos="fade-right" data-aos-duration="600" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
             <hr class="border-light opacity-50 mb-4" style="width:90%">
-            <nav data-aos="fade-right" data-aos-duration="1500" aria-label="breadcrumb">
+            <nav data-aos="fade-right" data-aos-duration="600" aria-label="breadcrumb">
                 <ol class="breadcrumb mb-2">
                     <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
                     <li class="breadcrumb-item active text-white fw-light" aria-current="page">Cơ cấu tổ chức</li>
@@ -24,20 +24,20 @@
 </section>
 <style>
     .hero-section {
-        /* Thay đường dẫn ảnh của bạn vào đây */
+        /* Thay du?ng d?n ?nh c?a b?n v�o d�y */
         background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/uploads/1046cdc6-6989-44eb-89ee-49fd85f442fe_bc_page.jpg');
         background-size: cover;
         background-position: center;
-        height: 700px; /* Điều chỉnh chiều cao tùy ý */
+        height: 700px; /* �i?u ch?nh chi?u cao t�y � */
         position: relative;
         display: flex;
-        align-items: flex-end; /* Đẩy nội dung xuống đáy */
-        margin-top: 110px;
+        align-items: flex-end; /* �?y n?i dung xu?ng d�y */
+        margin-top: 45px;
     }
 
     .hero-content {
         width: 100%;
-        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* Làm tối nhẹ phần chân chữ */
+        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* L�m t?i nh? ph?n ch�n ch? */
         padding-bottom: 60px !important;
         padding-left: 10% !important;
     }
@@ -63,30 +63,10 @@
         }
     }
 </style>
-<script>
-    $(document).ready(function () {
-        $.ajax({
-            url: '/home/GetHeader',
-            type: 'GET',
-            success: function (response) {
-                if (response.success) {
-                    // 1. Cập nhật Logo từ mảng footer
-                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
-                    if (logoData) {
-                        $('#main-logo').attr('src', logoData.value);
-                    }
-                }
-            },
-            error: function (err) {
-                console.error("Không thể lấy dữ liệu từ API", err);
-            }
-        });
-    });
-</script>
 <style>
-    /* 1. Card nhân sự ngoài danh sách */
+    /* 1. Card nh�n s? ngo�i danh s�ch */
     .custom-rect-img {
-        /* Chỉnh tỷ lệ 3/3.5 để hình chữ nhật không quá cao */
+        /* Ch?nh t? l? 3/3.5 d? h�nh ch? nh?t kh�ng qu� cao */
         aspect-ratio: 3 / 3.6;
         background-color: #f4f4f4;
         position: relative;
@@ -96,7 +76,7 @@
         .custom-rect-img img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Đảm bảo ảnh lấp đầy khung hình chữ nhật */
+            object-fit: cover; /* �?m b?o ?nh l?p d?y khung h�nh ch? nh?t */
             transition: transform 0.6s ease;
         }
 
@@ -105,7 +85,7 @@
         cursor: pointer;
     }
 
-    /* 2. Nút dấu cộng (+) */
+    /* 2. N�t d?u c?ng (+) */
     .btn-plus-overlay {
         position: absolute;
         bottom: 12px;
@@ -133,9 +113,9 @@
             color: #dc3545 !important;
         }
 
-    /* 3. Modal chi tiết - Giảm chiều cao ảnh để bớt cao */
+    /* 3. Modal chi ti?t - Gi?m chi?u cao ?nh d? b?t cao */
     #modal-avatar {
-        min-height: 400px; /* Chỉnh lại chiều cao ảnh trong modal */
+        min-height: 400px; /* Ch?nh l?i chi?u cao ?nh trong modal */
         object-fit: cover;
     }
 
@@ -144,13 +124,13 @@
         bottom: 0;
         right: 0;
         width: 45%;
-        height: 30%; /* Khối cam thấp xuống theo ảnh */
+        height: 30%; /* Kh?i cam th?p xu?ng theo ?nh */
         background-color: #FD7E14;
         clip-path: polygon(100% 0, 0% 100%, 100% 100%);
         z-index: 2;
     }
 
-    /* Tiêu đề và nội dung */
+    /* Ti�u d? v� n?i dung */
     .text-muted-custom {
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -170,7 +150,7 @@
 <section class="py-5">
     <div class="container" style="max-width:unset">
         <div class="text-center mb-5">
-            <div data-aos="fade-down" data-aos-duration="1500" class="d-flex align-items-center justify-content-center mb-4">
+            <div data-aos="fade-down" data-aos-duration="600" class="d-flex align-items-center justify-content-center mb-4">
                 <span class="bg-danger me-2" style="width: 25px; height: 2px;"></span>
                 <span class="text-danger fw-bold text-uppercase small">ban giám đốc</span>
                 <span class="bg-danger ms-2" style="width: 25px; height: 2px;"></span>
@@ -183,7 +163,7 @@
             {
                 foreach (var item in Model.Users.Where(u => u.IsShow == true))
                 {
-                    <div class="col" data-aos="flip-down" data-aos-duration="1500">
+                    <div class="col" data-aos="fade-up" data-aos-duration="600">
                         <div 
                             class="card h-100 border-0 bg-transparent team-card mb-4"
                             data-bs-toggle="modal"
@@ -220,12 +200,12 @@
 <section class="py-5 bg-light">
     <div class="container">
         <div class="text-center mb-5">
-            <div data-aos="fade-down" data-aos-duration="1500" class="d-flex align-items-center justify-content-center mb-4">
+            <div data-aos="fade-down" data-aos-duration="600" class="d-flex align-items-center justify-content-center mb-4">
                <span class="bg-danger me-2" style="width: 25px; height: 2px;"></span>
                 <span class="text-danger fw-bold text-uppercase small">cơ cấu tổ chức</span>
                <span class="bg-danger ms-2" style="width: 25px; height: 2px;"></span>
             </div>
-            <h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase">@GetSt("setting.general.OrgStructure.title")</h2>
+            <h2 data-aos="fade-down" data-aos-duration="600" class="display-6 fw-bold text-uppercase">@GetSt("setting.general.OrgStructure.title")</h2>
         </div>
         <div class="text-center">
             <img data-aos="zoom-in" data-aos-duration="1500" src="@GetSt("setting.general.OrgStructure.image")" class="img-fluid shadow-sm bg-white p-2" alt="Sơ đồ tổ chức">

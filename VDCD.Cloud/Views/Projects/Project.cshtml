@@ -39,7 +39,7 @@
         position: relative;
         display: flex;
         align-items: flex-end; /* Đẩy nội dung xuống đáy */
-        margin-top: 110px;
+        margin-top: 45px;
     }
 
     .hero-content {
@@ -70,26 +70,6 @@
         }
     }
 </style>
-<script>
-    $(document).ready(function () {
-        $.ajax({
-            url: '/home/GetHeader',
-            type: 'GET',
-            success: function (response) {
-                if (response.success) {
-                    // 1. Cập nhật Logo từ mảng footer
-                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
-                    if (logoData) {
-                        $('#main-logo').attr('src', logoData.value);
-                    }
-                }
-            },
-            error: function (err) {
-                console.error("Không thể lấy dữ liệu từ API", err);
-            }
-        });
-    });
-</script>
 
 <section class="project-details py-5">
     <div class="container">

@@ -1,42 +1,22 @@
-﻿@model VDCD.Models.CenterModelView
+@model VDCD.Models.CenterModelView
 @{
 
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 @functions {
-    // Hàm hỗ trợ lấy giá trị nhanh và an toàn
+    // H�m h? tr? l?y gi� tr? nhanh v� an to�n
     string GetSt(string key) => Model.Settings.ContainsKey(key) ? Model.Settings[key] : "";
 }
-<script>
-    $(document).ready(function () {
-        $.ajax({
-            url: '/home/GetHeader',
-            type: 'GET',
-            success: function (response) {
-                if (response.success) {
-                    // 1. Cập nhật Logo từ mảng footer
-                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
-                    if (logoData) {
-                        $('#main-logo').attr('src', logoData.value);
-                    }                  
-                }
-            },
-            error: function (err) {
-                console.error("Không thể lấy dữ liệu từ API", err);
-            }
-        });
-    });
-</script>
 <section class="hero-section d-flex align-items-end">
     <div class="container-fluid px-0">
         <div class="hero-content text-white p-5">
             
-            <h1 data-aos="fade-right" data-aos-duration="1500" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <h1 data-aos="fade-right" data-aos-duration="600" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
             <hr class="border-light opacity-50 mb-4" style="width:90%">
-            <nav data-aos="fade-right" data-aos-duration="1500" aria-label="breadcrumb">
+            <nav data-aos="fade-right" data-aos-duration="600" aria-label="breadcrumb">
                 <ol class="breadcrumb mb-2">
                     <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
-                    <li class="breadcrumb-item active text-white fw-light" aria-current="page">Hệ thống trung tâm</li>
+                    <li class="breadcrumb-item active text-white fw-light" aria-current="page">H? th?ng trung t�m</li>
                 </ol>
             </nav>
             
@@ -45,20 +25,20 @@
 </section>
 <style>
     .hero-section {
-    /* Thay đường dẫn ảnh của bạn vào đây */
+    /* Thay du?ng d?n ?nh c?a b?n v�o d�y */
     background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/uploads/e9a9ef35-6e08-41e8-b8ea-7112e2a130f4_bg1.jpg');
     background-size: cover;
     background-position: center;
-    height: 700px; /* Điều chỉnh chiều cao tùy ý */
+    height: 700px; /* �i?u ch?nh chi?u cao t�y � */
     position: relative;
     display: flex;
-    align-items: flex-end; /* Đẩy nội dung xuống đáy */
-    margin-top: 110px;
+    align-items: flex-end; /* �?y n?i dung xu?ng d�y */
+    margin-top: 45px;
 }
 
 .hero-content {
     width: 100%;
-    background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* Làm tối nhẹ phần chân chữ */
+    background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* L�m t?i nh? ph?n ch�n ch? */
     padding-bottom: 60px !important;
     padding-left: 10% !important;
 }
@@ -87,30 +67,30 @@
 <section class="centers-section py-5">
     <div class="container">
         <div class="col-12 text-center mb-5">
-            <div data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center mb-4">
+            <div data-aos="fade-down" data-aos-duration="600" class="d-flex justify-content-center align-items-center mb-4">
                 <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
-                <span class="text-danger fw-bold text-uppercase small">hệ sinh thái tập đoàn</span>
+                <span class="text-danger fw-bold text-uppercase small">h? sinh th�i t?p do�n</span>
                 <span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
             </div>
-            <h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase">
-                Hệ thống 12 trung tâm <br> Viện nghiên cứu trực thuộc
+            <h2 data-aos="fade-down" data-aos-duration="600" class="display-6 fw-bold text-uppercase">
+                H? th?ng 12 trung t�m <br> Vi?n nghi�n c?u tr?c thu?c
             </h2>
         </div>
 
         <div class="row g-4">
             @foreach (var center in Model.Centers)
             {
-                <div class="col-md-6 col-lg-4" data-aos="flip-down" data-aos-duration="1500">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-duration="600">
                     <div class="center-card h-100">
                         <div class="img-wrapper mb-3">
-                            <img src="@center.Image" class="img-fluid rounded-0" alt="@center.Name">
+                            <img src="@center.Image" class="img-fluid rounded-0" alt="@center.Name" loading="lazy" width="400" height="225">
                         </div>
 
                         <div class="card-body">
                             <h4 class="fw-bold mb-3 center-title">@center.Name</h4>
                             <hr class="w-25 mb-3">
                             <a href="@center.Url" class="text-danger text-decoration-none fw-bold d-flex align-items-center learn-more">
-                                <i class="bi bi-arrow-up-right me-2"></i> Tim Hiểu Thêm
+                                <i class="bi bi-arrow-up-right me-2"></i> Tim Hi?u Th�m
                             </a>
                         </div>
                     </div>
@@ -120,7 +100,7 @@
     </div>
 </section>
 <style>
-    /* Đường kẻ ngang màu đỏ cạnh text header */
+    /* �u?ng k? ngang m�u d? c?nh text header */
     .red-line {
         display: inline-block;
         width: 40px;
@@ -128,12 +108,12 @@
         background-color: #dc3545;
     }
 
-    /* Định dạng tiêu đề trung tâm */
+    /* �?nh d?ng ti�u d? trung t�m */
     .center-title {
         font-size: 1.5rem;
         line-height: 1.2;
         display: -webkit-box;
-        -webkit-line-clamp: 2;      /* số dòng muốn hiển thị */
+        -webkit-line-clamp: 2;      /* s? d�ng mu?n hi?n th? */
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
@@ -149,10 +129,10 @@
 		padding: 0 10px 30px;
 	}
 
-    /* Hiệu ứng cho ảnh */
+    /* Hi?u ?ng cho ?nh */
     .img-wrapper {
         overflow: hidden;
-        aspect-ratio: 16 / 9; /* Giữ tỉ lệ ảnh chuẩn */
+        aspect-ratio: 16 / 9; /* Gi? t? l? ?nh chu?n */
     }
 
         .img-wrapper img {
@@ -163,10 +143,10 @@
         }
 
     .center-card:hover img {
-        transform: scale(1.05); /* Phóng to nhẹ khi hover */
+        transform: scale(1.05); /* Ph�ng to nh? khi hover */
     }
 
-    /* Nút tìm hiểu thêm */
+    /* N�t t�m hi?u th�m */
     .learn-more {
         font-size: 0.9rem;
         transition: gap 0.3s ease;
@@ -177,7 +157,7 @@
             transition: 0.3s all;
         }
 
-    /* Tùy chỉnh font chữ tiêu đề lớn */
+    /* T�y ch?nh font ch? ti�u d? l?n */
     h2 {
         letter-spacing: -1px;
     }
@@ -186,27 +166,27 @@
 <section class="collaboration-section py-5">
     <div class="container">
         <div class="col-12 text-center mb-5">
-            <div data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center mb-4">
+            <div data-aos="fade-down" data-aos-duration="600" class="d-flex justify-content-center align-items-center mb-4">
                 <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
-                <span class="text-danger fw-bold text-uppercase small">cách thức vận hành</span>
+                <span class="text-danger fw-bold text-uppercase small">c�ch th?c v?n h�nh</span>
                 <span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
             </div>
-            <h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase">
+            <h2 data-aos="fade-down" data-aos-duration="600" class="display-6 fw-bold text-uppercase">
                 @GetSt("setting.general.operation.main_title")
             </h2>
         </div>
 
         <div class="row mt-4">
-            <div data-aos="fade-right" data-aos-duration="1500" class="col-md-5 mb-4">
+            <div data-aos="fade-right" data-aos-duration="600" class="col-md-5 mb-4">
                 <div class="sticky-top" style="top: 120px; z-index: 5;">
                     <div class="fixed-image-container shadow-sm">
                         <img id="operation-image" src="@GetSt("setting.general.operation.image.0")"
-                             alt="Operation">
+                             alt="Operation" loading="eager" width="500" height="500">
                     </div>
                 </div>
             </div>
 
-            <div data-aos="fade-left" data-aos-duration="1500" class="col-md-7 ps-md-5">
+            <div data-aos="fade-left" data-aos-duration="600" class="col-md-7 ps-md-5">
                 <div class="operation-timeline">
                     @{
                         int i = 0;
@@ -236,34 +216,34 @@
     </div>
 </section>
 <style>
-    /* Khung chứa ảnh cố định */
+    /* Khung ch?a ?nh c? d?nh */
     .fixed-image-container {
         width: 100%;
-        /* Bạn có thể chọn tỷ lệ: 1/1 (vuông), 4/3, hoặc 16/9 */
+        /* B?n c� th? ch?n t? l?: 1/1 (vu�ng), 4/3, ho?c 16/9 */
         aspect-ratio: 1 / 1;
         overflow: hidden;
-        background-color: #f8f9fa; /* Màu nền chờ nếu ảnh lỗi */
+        background-color: #f8f9fa; /* M�u n?n ch? n?u ?nh l?i */
         border-radius: 4px;
     }
 
         .fixed-image-container img {
             width: 100%;
             height: 100%;
-            /* Quan trọng nhất: Giúp ảnh không bị méo, tự cắt tỉa để lấp đầy khung */
+            /* Quan tr?ng nh?t: Gi�p ?nh kh�ng b? m�o, t? c?t t?a d? l?p d?y khung */
             object-fit: cover;
             object-position: center;
             transition: opacity 0.4s ease-in-out;
         }
 
-    /* Tùy chỉnh cho Timeline để mượt hơn */
+    /* T�y ch?nh cho Timeline d? mu?t hon */
     .operation-timeline::before {
         content: '';
         position: absolute;
-        left: 35px; /* Điều chỉnh để nằm đúng tâm vòng tròn số */
+        left: 35px; /* �i?u ch?nh d? n?m d�ng t�m v�ng tr�n s? */
         top: 10px;
         bottom: 50px;
         width: 1px;
-        background-color: #dee2e6; /* Màu xám nhạt */
+        background-color: #dee2e6; /* M�u x�m nh?t */
         z-index: -11;
     }
 
@@ -299,24 +279,24 @@
     function changeOpImage(imgUrl, element) {
         const mainImg = document.getElementById('operation-image');
 
-        // Chỉ đổi nếu URL khác ảnh hiện tại
+        // Ch? d?i n?u URL kh�c ?nh hi?n t?i
         if (mainImg.src !== imgUrl && imgUrl !== "") {
-            mainImg.style.opacity = '0.3'; // Mờ dần
+            mainImg.style.opacity = '0.3'; // M? d?n
 
             setTimeout(() => {
                 mainImg.src = imgUrl;
-                mainImg.style.opacity = '1'; // Hiện rõ lại
+                mainImg.style.opacity = '1'; // Hi?n r� l?i
             }, 200);
         }
 
-        // Active mục đang chọn
+        // Active m?c dang ch?n
         document.querySelectorAll('.timeline-item').forEach(item => {
             item.classList.remove('active');
         });
         element.classList.add('active');
     }
 
-    // Thiết lập mục đầu tiên active khi load trang
+    // Thi?t l?p m?c d?u ti�n active khi load trang
     document.addEventListener("DOMContentLoaded", function () {
         const firstItem = document.querySelector('.timeline-item');
         if (firstItem) firstItem.classList.add('active');
@@ -325,46 +305,46 @@
 <section class="contact-section py-5 bg-light">
     <div class="container">
         <div class="mb-4">
-            <div data-aos="fade-right" data-aos-duration="1500" class="d-flex align-items-center mb-4">
+            <div data-aos="fade-right" data-aos-duration="600" class="d-flex align-items-center mb-4">
                 <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
-                <span class="text-danger fw-bold text-uppercase small">liên hệ</span>
+                <span class="text-danger fw-bold text-uppercase small">li�n h?</span>
                 <span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
             </div>
-            <h2 data-aos="fade-right" data-aos-duration="1500" class="fw-bold display-6 text-uppercase">Liên hệ với chúng tôi</h2>
+            <h2 data-aos="fade-right" data-aos-duration="600" class="fw-bold display-6 text-uppercase">Li�n h? v?i ch�ng t�i</h2>
         </div>
 
-        <form class="contact-form mt-5" data-aos="fade-up" data-aos-duration="1500">
+        <form class="contact-form mt-5" data-aos="fade-up" data-aos-duration="600">
             <div class="row g-4">
                 <div class="col-md-6">
-                    <input type="text" class="form-control-custom" placeholder="Tên *">
+                    <input type="text" class="form-control-custom" placeholder="T�n *">
                 </div>
                 <div class="col-md-6">
-                    <input type="text" class="form-control-custom" placeholder="Số Điện Thoại *">
+                    <input type="text" class="form-control-custom" placeholder="S? �i?n Tho?i *">
                 </div>
                 <div class="col-md-6">
                     <input type="email" class="form-control-custom" placeholder="Email *">
                 </div>
                 <div class="col-md-6">
-                    <input type="text" class="form-control-custom" placeholder="Tiêu Đề *">
+                    <input type="text" class="form-control-custom" placeholder="Ti�u �? *">
                 </div>
                 <div class="col-12">
-                    <textarea class="form-control-custom" rows="1" placeholder="Nội Dung *"></textarea>
+                    <textarea class="form-control-custom" rows="1" placeholder="N?i Dung *"></textarea>
                 </div>
             </div>
             <button type="submit" class="btn-submit-circle mt-5">
-                <span>Gửi</span>
+                <span>G?i</span>
                 <div class="icon-circle"><i class="bi bi-arrow-up-right"></i></div>
             </button>
         </form>
     </div>
 </section>
 <style>
-    /* --- FIX ĐƯỜNG KẺ DỌC --- */
+    /* --- FIX �U?NG K? D?C --- */
    
-    /* --- CỐ ĐỊNH SIZE ẢNH --- */
+    /* --- C? �?NH SIZE ?NH --- */
     .fixed-image-container {
         width: 100%;
-        aspect-ratio: 1 / 1; /* Cố định hình vuông */
+        aspect-ratio: 1 / 1; /* C? d?nh h�nh vu�ng */
         overflow: hidden;
         border-radius: 4px;
     }

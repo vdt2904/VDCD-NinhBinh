@@ -56,30 +56,39 @@ namespace VDCD.Business.Service
         public IReadOnlyList<Posts> GetAll(string search = "")
         {
             // Đảm bảo search không bị null để tránh lỗi khi dùng .Contains
-            search = search ?? "";
+            search = search?.Trim() ?? "";
 
             // 1. Kiểm tra Cache
             if (_cache.TryGet(CacheParam.PostsAll, out List<Posts> cached))
             {
-                // Phải .ToList() rồi mới cast sang IReadOnlyList
-                return cached.Where(x => x.Title.Contains(search)).ToList();
+                if (string.IsNullOrEmpty(search))
+                    return cached;
+
+                return cached
+                    .Where(x => x.Title != null && x.Title.Contains(search, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
             }
 
-            // 2. Nếu không có cache, lấy từ Repo
+            // 2. Nếu không có cache, lấy toàn bộ từ Repo (không filter search ở đây)
             var data = _postsRepo
                 .GetsReadOnly()
-                .Where(x => x.Title.Contains(search))
                 .OrderByDescending(x => x.Id)
                 .ToList();
 
-            // 3. Lưu vào Cache
+            // 3. Lưu toàn bộ dữ liệu vào Cache (không filter)
             _cache.Set(
                 CacheParam.PostsAll,
                 data,
                 TimeSpan.FromMinutes(CacheParam.PostsAllTimeout)
             );
 
-            return data;
+            // 4. Trả về kết quả đã filter theo search
+            if (string.IsNullOrEmpty(search))
+                return data;
+
+            return data
+                .Where(x => x.Title != null && x.Title.Contains(search, StringComparison.OrdinalIgnoreCase))
+                .ToList();
         }
         public void Save(Posts model, string keywords)
         {

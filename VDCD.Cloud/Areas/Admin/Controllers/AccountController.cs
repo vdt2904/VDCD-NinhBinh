@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using VDCD.Business.Service;
+using VDCD.Business.Infrastructure;
 using VDCD.Entities.Security;
 using VDCD.Extensions;
+using VDCD.Entities.Enums;
+
 namespace VDCD.Cloud.Areas.Admin.Controllers
 {
     [Area("Admin")]
@@ -14,17 +17,20 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
         private readonly UserService _userService;
         private readonly UserRoleService _userRoleService;
         private readonly RbacDemoSeedService _rbacDemoSeedService;
+        private readonly IActivityLogService _activityLogService;
 
         public AccountController(
             CacheSevice cacheSevice,
             UserService userService,
             UserRoleService userRoleService,
-            RbacDemoSeedService rbacDemoSeedService)
+            RbacDemoSeedService rbacDemoSeedService,
+            IActivityLogService activityLogService)
         {
             _cacheSevice = cacheSevice;
             _userService = userService;
             _userRoleService = userRoleService;
             _rbacDemoSeedService = rbacDemoSeedService;
+            _activityLogService = activityLogService;
         }
 
         [AllowAnonymous]
@@ -86,11 +92,17 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
             var principal = new ClaimsPrincipal(identity);
             var authProperties = new AuthenticationProperties
             {
-                IsPersistent = false,
+                IsPersistent = true,
                 ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2)
             };
 
             await HttpContext.SignInAsync("AdminAuth", principal, authProperties);
+
+            // Log login
+            await _activityLogService.LogAsync(
+                ActivityLogType.Login,
+                $"User '{foundUser?.UserName ?? username}' logged in",
+                HttpContext);
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
@@ -136,6 +148,14 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
         [HttpGet("/admin/account/logout")]
         public async Task<IActionResult> Logout()
         {
+            var username = User.GetUsername();
+
+            // Log logout before sign-out so HttpContext still contains the user info
+            await _activityLogService.LogAsync(
+                ActivityLogType.Logout,
+                $"User '{username}' logged out",
+                HttpContext);
+
             await HttpContext.SignOutAsync("AdminAuth");
             return RedirectToAction("Login");
         }
@@ -157,5 +177,50 @@ namespace VDCD.Cloud.Areas.Admin.Controllers
 			};
             return Ok(user);
         }
-    }
+        public IActionResult DateNow()
+        {
+                       return Ok(DateTime.Now);
+		}
+		[HttpGet]
+		public async Task<IActionResult> CheckSession()
+		{
+			var result = await HttpContext.AuthenticateAsync("AdminAuth");
+
+			// Chưa login hoặc cookie không hợp lệ
+			if (!result.Succeeded || result.Principal == null)
+			{
+				return Ok(new
+				{
+					isAuthenticated = false,
+					isExpired = true,
+					remainingSeconds = 0
+				});
+			}
+
+			var expiresUtc = result.Properties?.ExpiresUtc;
+			var now = DateTimeOffset.UtcNow;
+
+			// Không có expire (hiếm)
+			if (!expiresUtc.HasValue)
+			{
+				return Ok(new
+				{
+					isAuthenticated = true,
+					isExpired = false,
+					remainingSeconds = (long?)null
+				});
+			}
+
+			var isExpired = expiresUtc.Value <= now;
+			var remaining = isExpired ? 0 : (long)(expiresUtc.Value - now).TotalSeconds;
+
+			return Ok(new
+			{
+				isAuthenticated = true,
+				isExpired = isExpired,
+				expiresUtc = expiresUtc.Value,
+				remainingSeconds = remaining
+			});
+		}
+	}
 }

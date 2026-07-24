@@ -5,27 +5,7 @@
 @functions {
     string GetSt(string key) => ViewBag.Settings.ContainsKey(key) ? ViewBag.Settings[key] : "";
 }
-<script>
-    $(document).ready(function () {
-        $.ajax({
-            url: '/home/GetHeader',
-            type: 'GET',
-            success: function (response) {
-                if (response.success) {
-                    // 1. Cập nhật Logo từ mảng footer
-                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
-                    if (logoData) {
-                        $('#main-logo').attr('src', logoData.value);
-                    }
-                }
-            },
-            error: function (err) {
-                console.error("Không thể lấy dữ liệu từ API", err);
-            }
-        });
-    });
-</script>
-<div class="bg-light py-5">
+<div class="bg-light py-5" style="margin-top: 45px;">
     <div class="container">
         <div class="row">
             <div class="col-lg-8">
@@ -169,9 +149,28 @@
             height: auto;
             border-radius: 8px;
         }
+
     /* Hiệu ứng cho thanh sidebar dính (sticky) */
     .sticky-top {
         transition: top 0.3s ease;
+    }
+
+    /* Responsive */
+    @@media (max-width: 991.98px) {
+        .sticky-top {
+            position: static !important;
+        }
+
+        .job-content {
+            font-size: 1rem;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .bg-light.py-5 {
+            padding-top: 2rem !important;
+            padding-bottom: 2rem !important;
+        }
     }
 </style>
 <script>

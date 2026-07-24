@@ -1,4 +1,4 @@
-﻿@model VDCD.Models.ProjectsViewModel
+@model VDCD.Models.ProjectsViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -10,12 +10,12 @@
     <div class="container-fluid px-0">
         <div class="hero-content text-white p-5">
 
-            <h1 class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <h1 data-aos="fade-down" data-aos-duration="600" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
             <hr class="border-light opacity-50 mb-4" style="width:90%">
-            <nav aria-label="breadcrumb">
+            <nav data-aos="fade-down" data-aos-duration="600" aria-label="breadcrumb">
                 <ol class="breadcrumb mb-2">
                     <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
-                    <li class="breadcrumb-item active text-white fw-light" aria-current="page">Dự án</li>
+                    <li class="breadcrumb-item active text-white fw-light" aria-current="page">D? �n</li>
                 </ol>
             </nav>
 
@@ -24,19 +24,20 @@
 </section>
 <style>
     .hero-section {
-        /* Thay đường dẫn ảnh của bạn vào đây */
+        /* Thay du?ng d?n ?nh c?a b?n v�o d�y */
         background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/uploads/56c829de-56c5-4e9c-ba11-eae2c44b66e4_Untitled-3-04-2048x2048.jpg');
         background-size: cover;
         background-position: center;
-        height: 700px; /* Điều chỉnh chiều cao tùy ý */
+        height: 700px; /* �i?u ch?nh chi?u cao t�y � */
         position: relative;
         display: flex;
-        align-items: flex-end; /* Đẩy nội dung xuống đáy */
+        align-items: flex-end; /* �?y n?i dung xu?ng d�y */
+        margin-top: 45px;
     }
 
     .hero-content {
         width: 100%;
-        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* Làm tối nhẹ phần chân chữ */
+        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* L�m t?i nh? ph?n ch�n ch? */
         padding-bottom: 60px !important;
         padding-left: 10% !important;
     }
@@ -62,33 +63,13 @@
         }
     }
 </style>
-<script>
-    $(document).ready(function () {
-        $.ajax({
-            url: '/home/GetHeader',
-            type: 'GET',
-            success: function (response) {
-                if (response.success) {
-                    // 1. Cập nhật Logo từ mảng footer
-                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
-                    if (logoData) {
-                        $('#main-logo').attr('src', logoData.value);
-                    }
-                }
-            },
-            error: function (err) {
-                console.error("Không thể lấy dữ liệu từ API", err);
-            }
-        });
-    });
-</script>
 
 <section class="py-5">
     <div class="container">
-        <h2 class="text-center text-danger fw-bold mb-4 text-uppercase">Dự án của chúng tôi</h2>
+        <h2 data-aos="fade-down" data-aos-duration="600" class="text-center display-6 fw-bold mb-4 text-uppercase">D? �n c?a ch�ng t�i</h2>
 
-        <div class="d-flex justify-content-center flex-wrap gap-2 mb-5">
-            @* Nút All Projects: Quay về trang danh sách chính *@
+        <div data-aos="fade-down" data-aos-duration="600" class="d-flex justify-content-center flex-wrap gap-2 mb-5">
+            @* N�t All Projects: Quay v? trang danh s�ch ch�nh *@
             <a href="/du-an"
                class="btn btn-light rounded-pill px-4 @(ViewBag.CurrentCategory == null ? "active" : "")">
                 All Projects
@@ -96,7 +77,7 @@
 
             @foreach (var cat in (IEnumerable<VDCD.Entities.Custom.Category>)ViewBag.Categories)
             {
-                @* Tạo URL thân thiện theo cấu trúc: /danh-muc/slug-id *@
+                @* T?o URL th�n thi?n theo c?u tr�c: /danh-muc/slug-id *@
                 var categoryUrl = $"/danh-muc/{cat.Slug}";
                 var isActive = ViewBag.CurrentCategory?.Id == cat.Id ? "active" : "";
 
@@ -107,13 +88,15 @@
             }
         </div>
 
-        <div class="row g-4">
+        <div data-aos="fade-down" data-aos-duration="600" class="row g-4">
             @foreach (var project in Model.Projects)
             {
                 <div class="col-md-6 col-lg-4">
                     <div class="project-card position-relative overflow-hidden rounded shadow-sm">
 
-                        <img src="@project.Image" class="img-fluid w-100" alt="@project.ProjectName" style="height: 350px; object-fit: cover;">
+                        <a href="/du-an/@project.Plug" class="text-white stretched-link">
+                            <img src="@project.Image" class="img-fluid w-100" alt="@project.ProjectName" style="height: 350px; object-fit: cover;" loading="lazy" width="400" height="350">
+                        </a>
 
                         <div class="project-overlay d-flex flex-column justify-content-end p-4">
                             <div class="d-flex justify-content-between align-items-start mb-2">
@@ -152,31 +135,45 @@
 </section>
 
 <style>
-    /* Container của toàn bộ card */
+    /* Container c?a to�n b? card */
     .project-card {
         position: relative;
-        border-bottom: 5px solid #ff0000; /* Thanh đỏ dưới cùng */
         transition: all 0.3s ease;
         cursor: pointer;
     }
-
-    /* Lớp phủ để làm tối ảnh, giúp chữ trắng nổi bật */
-    .project-overlay {
+    .project-overlay::before {
+        content: "";
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
         bottom: 0;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%);
+        left: 0;
+        height: 4px;
+        width: 100%;
+        background-color: #E80002;
+        transition: all ease 0.35s;
+        z-index: -1;
+    }
+    .project-card:hover .project-overlay::before {
+        height: 100%;
         z-index: 1;
     }
 
-        /* Đảm bảo nội dung nằm trên lớp phủ */
+    /* L?p ph? d? l�m t?i ?nh, gi�p ch? tr?ng n?i b?t */
+    .project-overlay {
+        position: absolute;
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to top, rgb(0 0 0 / 90%) 0%, rgb(0 0 0 / 30%) 60%, #00000000 100%);
+        z-index: 100;
+    }
+
+        /* �?m b?o n?i dung n?m tr�n l?p ph? */
         .project-overlay > div {
             z-index: 2;
         }
 
-    /* Fix màu chữ tiêu đề */
+    /* Fix m�u ch? ti�u d? */
     .project-card h5 {
         color: #ffffff !important;
         text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
@@ -184,13 +181,13 @@
         line-height: 1.4;
     }
 
-    /* Fix màu icon mũi tên */
+    /* Fix m�u icon mui t�n */
     .project-card a i {
         color: #ffffff !important;
         font-size: 1.2rem;
     }
 
-    /* Tùy chỉnh Badge (Nhãn danh mục) */
+    /* T�y ch?nh Badge (Nh�n danh m?c) */
     .project-card .badge {
         background: transparent !important;
         color: #ffffff !important;
@@ -198,32 +195,42 @@
         font-weight: 300;
     }
 
-    /* Hiệu ứng khi di chuột vào */
+    /* Hi?u ?ng khi di chu?t v�o */
     .project-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
     }
+    .project-card:hover .stretched-link {
+        transform: rotate(45deg);
+        transition: 0.6s all;
+    }
 
-    /* Chỉnh nút filter phía trên cho giống mẫu */
+    /* Ch?nh n�t filter ph�a tr�n cho gi?ng m?u */
     .btn-light {
-        background-color: #f1f3f5;
+        background-color: #fff;
         border: none;
-        color: #666;
+        color: #ff0000;
+        border: 1px solid #ff0000;
     }
 
         .btn-light.active {
-            background-color: #ffffff;
+            background-color: #ff0000;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            color: #000;
+            color: #fff;
         }
-    /* Tùy chỉnh phân trang */
+        .btn-light:hover {
+            background-color: #ff0000;
+            color: #fff;
+            transition: 0.5s all;
+        }
+    /* T�y ch?nh ph�n trang */
     .pagination .page-link {
         color: #333;
         padding: 10px 18px;
     }
 
     .pagination .page-item.active .page-link {
-        background-color: #ff0000; /* Màu đỏ đồng bộ với border-bottom dự án */
+        background-color: #ff0000; /* M�u d? d?ng b? v?i border-bottom d? �n */
         border-color: #ff0000;
         color: #fff;
     }

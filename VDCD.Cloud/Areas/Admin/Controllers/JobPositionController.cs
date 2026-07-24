@@ -23,10 +23,16 @@ namespace VDCD.Areas.Admin.Controllers
             return View(lst);
         }
         [HttpPost]
-        public IActionResult Save(JobPosition model)
+        public IActionResult Save([FromBody] JobPosition model)   // ← thêm [FromBody]
         {
             try
             {
+                if (model == null)
+                    return Json(new { success = false, message = "Dữ liệu gửi lên không hợp lệ" });
+
+                if (string.IsNullOrWhiteSpace(model.Title))
+                    return Json(new { success = false, message = "Tiêu đề không được để trống" });
+
                 model.Slug = SlugHelper.Generate(model.Title);
                 var keywords = GenerateKeywords(model.Title);
                 _jobPositionService.Save(model, keywords);

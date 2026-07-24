@@ -27,5 +27,7 @@ namespace VDCD.Entities.Custom
 
         public DateTime? CreateDate { get; set; }
         public DateTime? ExpiredDate { get; set; }
+        public string? Industry { get; set; }   // Ngành nghề
+        public string? Level { get; set; }      // Cấp bậc
     }
 }

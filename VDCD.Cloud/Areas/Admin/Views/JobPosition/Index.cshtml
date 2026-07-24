@@ -5,7 +5,6 @@
 }
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <style>
-    /* Làm cho vùng soạn thảo CKEditor cao hơn */
     .ck-editor__editable_inline {
         min-height: 400px;
     }
@@ -31,6 +30,8 @@
                             <th>Vị trí</th>
                             <th>Địa điểm</th>
                             <th>Loại hình</th>
+                            <th>Ngành nghề</th>
+                            <th>Cấp bậc</th>
                             <th>Trạng thái</th>
                             <th>Ngày tạo</th>
                             <th class="text-end">Thao tác</th>
@@ -44,6 +45,8 @@
                                 <td><strong>@item.Title</strong></td>
                                 <td>@item.Location</td>
                                 <td>@item.EmploymentType</td>
+                                <td>@item.Industry</td>
+                                <td>@item.Level</td>
                                 <td>
                                     @if (item.IsActive == true)
                                     {
@@ -56,12 +59,8 @@
                                 </td>
                                 <td>@(item.CreateDate?.ToString("dd/MM/yyyy"))</td>
                                 <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editJob(@item.Id)">
-                                        Sửa
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteJob(@item.Id)">
-                                        Xóa
-                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editJob(@item.Id)">Sửa</button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteJob(@item.Id)">Xóa</button>
                                 </td>
                             </tr>
                         }
@@ -72,6 +71,7 @@
     </div>
 </div>
 
+<!-- Modal Form -->
 <div class="modal fade" id="jobModal" data-bs-backdrop="static" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -92,6 +92,36 @@
                             <select class="form-select form-select-lg" id="EmploymentType" name="EmploymentType">
                                 <option value="Full-time">Full-time</option>
                                 <option value="Part-time">Part-time</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Ngành nghề</label>
+                            <select class="form-select" id="Industry" name="Industry">
+                                <option value="">-- Chọn ngành nghề --</option>
+                                <option value="Công nghệ thông tin (IT)">Công nghệ thông tin (IT)</option>
+                                <option value="Trí tuệ nhân tạo (AI)">Trí tuệ nhân tạo (AI)</option>
+                                <option value="Truyền thông - Marketing">Truyền thông - Marketing</option>
+                                <option value="Kinh doanh/Bán hàng">Kinh doanh/Bán hàng</option>
+                                <option value="An ninh mạng">An ninh mạng</option>
+                                <option value="Trắc đạc">Trắc đạc</option>
+                                <option value="Kỹ thuật hiện trường">Kỹ thuật hiện trường</option>
+                                <option value="Kế hoạch tổng hợp">Kế hoạch tổng hợp</option>
+                                <option value="Kế toán">Kế toán</option>
+                                <option value="Hành chính - Nhân sự">Hành chính - Nhân sự</option>
+                                <option value="Trợ lý">Trợ lý</option>
+                                <option value="Lao động phổ thông">Lao động phổ thông</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Cấp bậc</label>
+                            <select class="form-select" id="Level" name="Level">
+                                <option value="">-- Chọn cấp bậc --</option>
+                                <option value="Nhân viên">Nhân viên</option>
+                                <option value="Chuyên viên">Chuyên viên</option>
+                                <option value="Trưởng nhóm">Trưởng nhóm</option>
+                                <option value="Quản lý">Quản lý</option>
                             </select>
                         </div>
 
@@ -127,6 +157,7 @@
         </div>
     </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
@@ -136,16 +167,12 @@
     let editor;
 
     $(document).ready(function () {
-        // 1. Khởi tạo DataTables (Phân trang FE)
         $('#jobTable').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json'
-            },
+            language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' },
             pageLength: 10,
             order: [[0, 'desc']]
         });
 
-        // 2. Khởi tạo CKEditor
         ClassicEditor.create(document.querySelector('#Description'))
             .then(newEditor => { editor = newEditor; })
             .catch(error => { console.error(error); });
@@ -155,17 +182,18 @@
         $('#jobForm')[0].reset();
         $('#JobId').val(0);
         editor.setData('');
+        $('#Industry').val('');
+        $('#Level').val('');
         $('#modalTitle').text('Thêm vị trí mới');
         $('#jobModal').modal('show');
     }
 
-    // Hàm mở Modal để sửa
     function editJob(id) {
         $('#modalTitle').text('Chỉnh sửa tin tuyển dụng');
-        // 1. Gọi AJAX lấy data theo ID
         $.get(`/Admin/JobPosition/GetById/${id}`, function (result) {
             if (!result.success) {
                 alert(result.message);
+                return;
             }
             var data = result.data;
             $('#JobId').val(data.id);
@@ -174,20 +202,19 @@
             $('#EmploymentType').val(data.employmentType);
             $('#IsActive').prop('checked', data.isActive);
             $('#Salary').val(data.salary);
-
-            // Load ngày (format yyyy-MM-dd để input date hiểu)
+            $('#Industry').val(data.industry);
+            $('#Level').val(data.level);
             if (data.expiredDate) {
-                $('#ExpiredDate').val(data.expiredDate.split('T')[0]);
+                var datePart = data.expiredDate.split('T')[0]; 
+                    $('#ExpiredDate').val(datePart);
             }
-
-            // Đổ dữ liệu vào CKEditor
             editor.setData(data.description || '');
-
             $('#jobModal').modal('show');
+        }).fail(function () {
+            alert("Lỗi khi tải dữ liệu");
         });
     }
 
-    // Xử lý gửi Form
     $('#jobForm').on('submit', function (e) {
         e.preventDefault();
 
@@ -197,17 +224,28 @@
             Salary: $('#Salary').val(),
             Location: $('#Location').val(),
             EmploymentType: $('#EmploymentType').val(),
-            ExpiredDate: $('#ExpiredDate').val(),
+            ExpiredDate: $('#ExpiredDate').val() || null,
             IsActive: $('#IsActive').is(':checked'),
-            Description: editor.getData() // Lấy từ CKEditor instance
+            Description: editor.getData(),
+            Industry: $('#Industry').val(),
+            Level: $('#Level').val()
         };
 
-        $.post('/Admin/JobPosition/Save', formData, function (res) {
-            if (res.success) {
-                alert("Lưu thành công!");
-                location.reload();
-            } else {
-                alert("Có lỗi xảy ra: " + res.message);
+        $.ajax({
+            url: '/Admin/JobPosition/Save',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function (res) {
+                if (res.success) {
+                    alert("Lưu thành công!");
+                    location.reload();
+                } else {
+                    alert("Có lỗi: " + res.message);
+                }
+            },
+            error: function () {
+                alert("Lỗi kết nối đến server");
             }
         });
     });
@@ -215,9 +253,11 @@
     function deleteJob(id) {
         if (confirm('Bạn có chắc chắn muốn xóa tin tuyển dụng này?')) {
             $.get(`/Admin/JobPosition/Delete/${id}`, function (result) {
-                    alert(result.message);
+                alert(result.message);
+                if (result.success) location.reload();
+            }).fail(function () {
+                alert("Xóa thất bại");
             });
         }
     }
 </script>
-

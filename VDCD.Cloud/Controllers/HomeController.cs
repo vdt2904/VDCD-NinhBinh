@@ -29,15 +29,18 @@ namespace VDCD.Cloud.Controllers
         private readonly DepartmentService _departmentService;
         private readonly SeoMetaService _seoMetaService;
 
-        public HomeController(ILogger<HomeController> logger,UserBll userBll, SettingService settingService,CenterService centerService
+		private readonly string _domain;
+
+		public HomeController(ILogger<HomeController> logger,UserBll userBll, SettingService settingService,CenterService centerService
             , SeoMetaService seoMetaService, ProjectService projectService, CategoryService categoryService,PostsService postsService,
             CustomerService customerService, UserService service,UserDepartmentJobtitlePositionService userDepartmentJobtitlePositionService,
-            DepartmentService departmentService,SeoMetaService metaService) : base(seoMetaService)
+            DepartmentService departmentService,SeoMetaService metaService,IConfiguration configuration) : base(seoMetaService)
         {
             _logger = logger;
             userService = userBll;
             _settingService = settingService;   
             _centerService = centerService;
+            _domain = configuration["Kestrel:Endpoints"];
             _projectService = projectService;
             _categoryService = categoryService;
             _postsService = postsService;
@@ -73,9 +76,6 @@ namespace VDCD.Cloud.Controllers
         {
             ApplySeo("he-thong-trung-tam");
             var lstSetting = _settingService.GetAll();
-
-            // Biến toàn bộ list thành Dictionary để tra cứu theo Key
-            // ToDictionary giúp truy cập giá trị cực nhanh, không ảnh hưởng hiệu suất khi dữ liệu lớn
             var settingsDic = lstSetting.ToDictionary(x => x.SettingKey, x => x.Value);
             ViewBag.Categories = _categoryService.GetAll();
             ViewBag.Settings = settingsDic;
@@ -85,6 +85,44 @@ namespace VDCD.Cloud.Controllers
                 Centers = _centerService.GetAll().ToList(),
             };
             return View(Data);
+        }
+
+        public IActionResult KienTao(int page = 1, int? categoryId = null)
+        {
+            ApplySeo("kien-tao-tuong-lai-so");
+            var lstSetting = _settingService.GetAll();
+            var settingsDic = lstSetting.ToDictionary(x => x.SettingKey, x => x.Value);
+
+            ViewBag.Settings = settingsDic;
+            ViewBag.Categories = _categoryService.GetAll();
+
+            var allCategories = _categoryService.GetAll().ToList();
+            var allProjects = _projectService.GetAll().ToList();
+
+            // Lọc theo danh mục nếu có
+            if (categoryId.HasValue)
+                allProjects = allProjects.Where(p => p.CategoryId == categoryId.Value).ToList();
+
+            int pageSize = 9;
+            int totalProjects = allProjects.Count;
+
+            var projectsPaged = allProjects
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var model = new VDCD.Models.KienTaoViewModel
+            {
+                Settings = settingsDic,
+                Centers = _centerService.GetAll().ToList(),
+                Projects = projectsPaged,
+                Categories = allCategories,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling((double)totalProjects / pageSize),
+                CurrentCategoryId = categoryId,
+            };
+
+            return View(model);
         }
         public IActionResult Abouts()
         {
@@ -193,30 +231,32 @@ namespace VDCD.Cloud.Controllers
         {
             try
             {
-                // 1. Lấy Query cơ sở (chưa thực thi xuống DB)
-                var query = _postsService.GetAll(search);
+                // 1. Lấy toàn bộ danh sách (đã filter theo search từ service)
+                var allItems = _postsService.GetAll(search);
 
                 // 2. Tính toán tổng số lượng để phân trang
-                int totalItems = query.Count();
+                int totalItems = allItems.Count;
 
                 // 3. Xử lý logic lấy toàn bộ hoặc lấy theo trang
+                IEnumerable<Posts> query = allItems;
                 if (!getAll)
                 {
-                    query = (IReadOnlyList<Posts>)query.Skip((page - 1) * pageSize).Take(pageSize);
+                    query = allItems.Skip((page - 1) * pageSize).Take(pageSize);
                 }
 
                 // 4. Lấy danh sách Categories một lần duy nhất để map (Tránh N+1)
                 var categories = _categoryService.GetAll().ToDictionary(x => x.Id, x => x.CategoryName);
 
-                // 5. Thực thi truy vấn và Map dữ liệu
-                var data = query.ToList().Select(a => new
+                // 5. Map dữ liệu
+                var data = query.Select(a => new
                 {
                     Title = a.Title,
-                    Summary = a.Summary, // Sửa từ Description để khớp với view cũ của bạn
+                    Summary = a.Summary,
                     Thumbnail = a.Thumbnail,
-                    CategoryName = categories.ContainsKey((int)a.CategoryId) ? categories[(int)a.CategoryId] : "TỔNG HỢP",
+                    CategoryName = a.CategoryId.HasValue && categories.ContainsKey(a.CategoryId.Value)
+                        ? categories[a.CategoryId.Value]
+                        : "TỔNG HỢP",
                     PublishedDate = a.PublishedDate,
-                    // Giả sử bạn cần Slug để làm link chi tiết
                     Slug = a.Slug
                 }).ToList();
 
@@ -278,7 +318,7 @@ namespace VDCD.Cloud.Controllers
                         }
                     }
 
-                    return $"https://vdcd.site/{key}";
+                    return $"{_domain}/{key}";
                 })
                 .ToList();
 

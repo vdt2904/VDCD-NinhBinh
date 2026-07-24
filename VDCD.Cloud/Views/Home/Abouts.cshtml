@@ -1,4 +1,4 @@
-﻿@model VDCD.Models.HomeModelView
+@model VDCD.Models.HomeModelView
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -10,9 +10,9 @@
     <div class="container-fluid px-0">
         <div class="hero-content text-white p-5">
 
-            <h1 class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
+            <h1 data-aos="fade-right" data-aos-duration="600" class="display-3 fw-bold mb-0">@ViewData["Title"]</h1>
             <hr class="border-light opacity-50 mb-4" style="width:90%">
-            <nav aria-label="breadcrumb">
+            <nav data-aos="fade-right" data-aos-duration="600" aria-label="breadcrumb">
                 <ol class="breadcrumb mb-2">
                     <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none">Home</a></li>
                     <li class="breadcrumb-item active text-white fw-light" aria-current="page">Về chúng tôi</li>
@@ -24,19 +24,20 @@
 </section>
 <style>
     .hero-section {
-        /* Thay đường dẫn ảnh của bạn vào đây */
+        /* Thay du?ng d?n ?nh c?a b?n v�o d�y */
         background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/uploads/dcc316a8-6f43-421b-825d-afbf055b652c_slice1.jpg');
         background-size: cover;
         background-position: center;
-        height: 700px; /* Điều chỉnh chiều cao tùy ý */
+        height: 700px; /* �i?u ch?nh chi?u cao t�y � */
         position: relative;
         display: flex;
-        align-items: flex-end; /* Đẩy nội dung xuống đáy */
+        align-items: flex-end; /* �?y n?i dung xu?ng d�y */
+        margin-top: 45px;
     }
 
     .hero-content {
         width: 100%;
-        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* Làm tối nhẹ phần chân chữ */
+        background: linear-gradient(transparent, rgba(0,0,0,0.4)); /* L�m t?i nh? ph?n ch�n ch? */
         padding-bottom: 60px !important;
         padding-left: 10% !important;
     }
@@ -47,7 +48,7 @@
     }
 
     .hero-content h1 {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        @* font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; *@
         letter-spacing: -1px;
     }
 
@@ -62,57 +63,38 @@
         }
     }
 </style>
-<script>
-    $(document).ready(function () {
-        $.ajax({
-            url: '/home/GetHeader',
-            type: 'GET',
-            success: function (response) {
-                if (response.success) {
-                    // 1. Cập nhật Logo từ mảng footer
-                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
-                    if (logoData) {
-                        $('#main-logo').attr('src', logoData.value);
-                    }
-                }
-            },
-            error: function (err) {
-                console.error("Không thể lấy dữ liệu từ API", err);
-            }
-        });
-    });
-</script>
 
 <section class="brand-story py-5" style="background-color: #fff;">
     <div class="container">
-        <div class="row mb-4">
+        <div class="row mb-5">
             <div class="col-12 text-center">
-                <h5 class="text-danger text-uppercase fw-bold" style="letter-spacing: 2px;">
+                <div data-aos="fade-down" data-aos-duration="600" class="text-danger text-uppercase fw-bold mb-4" style="letter-spacing: 2px;">
                     <span class="border-top border-danger border-3 me-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
-                    Câu chuyện thương hiệu
-                </h5>
-                <h1 class="display-4 fw-black mt-2" style="font-weight: 900; letter-spacing: -1px;">VDCD NINH BÌNH</h1>
+                    <span class="small">Câu chuyện thương hiệu</span>
+                    <span class="border-top border-danger border-3 ms-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
+                </div>
+                <h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase">VDCD NINH BÌNH</h2>
             </div>
         </div>
 
-        <div class="row g-5 align-items-center">
-            <div class="col-lg-6">
+        <div class="row g-5">
+            <div class="col-lg-6" data-aos="fade-right" data-aos-duration="600">
                 <div class="position-relative">
-                    <img src="@GetSt("setting.general.trademark.image")" alt="VDCD Projects Map" class="img-fluid w-100 shadow-sm rounded">
+                    <img src="@GetSt("setting.general.trademark.image")" alt="VDCD Projects Map" class="img-fluid w-100 shadow-sm rounded" loading="lazy" width="600" height="400">
                 </div>
             </div>
 
-            <div class="col-lg-6">
+            <div class="col-lg-6" data-aos="fade-left" data-aos-duration="600">
                 <div class="brand-info">
-                    <h2 class="text-danger fw-bold mb-3" style="line-height: 1.2;">
-                        CÔNG TY CP TỔNG CÔNG TY CÔNG NGHỆ THIẾT KẾ XÂY DỰNG VIỆT NAM
-                    </h2>
+                    <h4 class="text-danger fw-bold mb-3" style="line-height: 1.2;">
+                        @GetSt("setting.general.footer.namecompany")
+                    </h4>
 
                     <div class="mb-4">
                         <p class="mb-1"><strong>Tên viết tắt:</strong> @GetSt("setting.general.trademark.initials")</p>
                         <p><strong>Giấy chứng nhận đăng ký kinh doanh số:</strong> @GetSt("setting.general.trademark.tax")</p>
                     </div>
-
+                        
                     <div class="description-text text-muted" style="text-align: justify; line-height: 1.8;">
                         <p>@Html.Raw(GetSt("setting.general.trademark.description").Replace("\n", "<br />"))</p>
 
@@ -125,26 +107,26 @@
 </section>
 
 <style>
-    /* Tùy chỉnh thêm để giống hệt thiết kế */
+    /* T�y ch?nh th�m d? gi?ng h?t thi?t k? */
     .fw-black {
         font-weight: 900;
     }
 
-    .brand-story {
+    @* .brand-story {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    } *@
 
     .text-danger {
-        color: #e31e24 !important; /* Màu đỏ đặc trưng của thương hiệu */
+        color: #e31e24 !important; /* M�u d? d?c trung c?a thuong hi?u */
     }
 </style>
 
 <style>
-    /* Tổng thể phần Thế mạnh */
+    /* T?ng th? ph?n Th? m?nh */
     .strengths-section {
         background-color: #f8f9fa;
         padding: 80px 0;
-        font-family: 'Segoe UI', Arial, sans-serif;
+        @* font-family: 'Segoe UI', Arial, sans-serif; *@
     }
 
     .section-subtitle {
@@ -165,9 +147,9 @@
             margin-right: 10px;
         }
 
-    /* Tinh chỉnh thẻ Card */
+    /* Tinh ch?nh th? Card */
     .strengths-carousel .slick-list {
-        padding: 20px 0; /* Tạo không gian cho hiệu ứng hover nhích lên */
+        padding: 20px 0; /* T?o kh�ng gian cho hi?u ?ng hover nh�ch l�n */
     }
 
     .card-strength {
@@ -179,16 +161,22 @@
         transition: all 0.3s ease;
         display: flex !important;
         flex-direction: column;
-        height: 450px; /* Độ cao cố định để các slide đều nhau */
+        height: 450px; /* �? cao c? d?nh d? c�c slide d?u nhau */
         position: relative;
         box-shadow: 0 5px 15px rgba(0,0,0,0.02);
     }
 
-        /* Hiệu ứng Hover: Hiện dải đỏ ở đáy và nhích lên */
+        /* Hi?u ?ng Hover: Hi?n d?i d? ? d�y v� nh�ch l�n */
         .card-strength:hover {
             transform: translateY(-10px);
             box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             border-bottom: 4px solid #e31e24 !important;
+        }
+        .card-strength:hover .strength-number {
+            transition: all 0.3s ease;
+            background: #f00;
+            color: #fff;
+            border: none;
         }
 
     .strength-number {
@@ -203,23 +191,31 @@
     }
 
     .strength-title {
-        font-weight: 800;
+        font-weight: 700;
         font-size: 1.6rem;
         color: #111;
         margin-bottom: 20px;
     }
 
-    /* Xử lý nội dung có xuống dòng từ Database */
+    /* X? l� n?i dung c� xu?ng d�ng t? Database */
     .strength-description {
-        white-space: pre-line; /* Quan trọng nhất để nhận diện Enter */
+        white-space: pre-line; /* Quan tr?ng nh?t d? nh?n di?n Enter */
         color: #666;
         font-size: 0.95rem;
         line-height: 1.7;
         text-align: justify;
+        display: -webkit-box;
+        -webkit-line-clamp: 12;      /* s? d�ng mu?n hi?n th? */
+        -webkit-box-orient: vertical;
         overflow: hidden;
     }
 
-    /* Custom nút điều hướng Carousel */
+    .strength-description:hover {
+        -webkit-line-clamp: unset;
+        overflow: auto;
+    }
+
+    /* Custom n�t di?u hu?ng Carousel */
     .slick-prev:before, .slick-next:before {
         color: #e31e24;
         font-size: 24px;
@@ -230,13 +226,17 @@
     }
 </style>
 
-<section class="strengths-section">
+<section class="strengths-section overflow-hidden">
     <div class="container">
         <div class="row mb-5 align-items-center">
-            <div class="col-lg-3">
-                <h5 class="section-subtitle">Thế mạnh.</h5>
+            <div data-aos="fade-down" data-aos-duration="600" class="col-lg-3">
+                <div class="text-danger text-uppercase fw-bold" style="letter-spacing: 2px;">
+                <span class="border-top border-danger border-3 me-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
+                <span class="small">Thế mạnh</span>
+                <span class="border-top border-danger border-3 ms-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
+                </div>
             </div>
-            <div class="col-lg-9">
+            <div data-aos="fade-down" data-aos-duration="600" class="col-lg-9">
                 <p class="mb-0 fw-bold text-muted" style="max-width: 800px;">
                     VDCD sở hữu công nghệ lõi và đội ngũ nhân sự là chuyên gia hàng đầu trong lĩnh vực chuyển đổi số,
                     xử lý dữ liệu theo chuẩn mô hình BIM & GIS và phát triển hệ thống phần mềm chuyên biệt.
@@ -247,7 +247,7 @@
         <div class="strengths-carousel">
             @{
                 int i = 0;
-                // Vòng lặp quét toàn bộ dữ liệu từ setting.general.vision
+                // V�ng l?p qu�t to�n b? d? li?u t? setting.general.vision
                 while (Model.Settings.ContainsKey($"setting.general.vision.tab_name.{i}"))
                 {
                     var tabName = GetSt($"setting.general.vision.tab_name.{i}");
@@ -255,7 +255,7 @@
 
                     if (!string.IsNullOrEmpty(tabName))
                     {
-                        <div class="slide-item">
+                        <div class="slide-item" data-aos="fade-right" data-aos-duration="600">
                             <div class="card-strength">
                                 <div class="strength-number">
                                     @(i + 1 < 10 ? "0" + (i + 1) : (i + 1).ToString()).
@@ -276,7 +276,7 @@
 
 
 <script>
-    $(document).ready(function () {
+    document.addEventListener('DOMContentLoaded', function () {
         $('.strengths-carousel').slick({
             dots: false,
             infinite: false,
@@ -286,18 +286,9 @@
             autoplay: true,
             autoplaySpeed: 5000,
             responsive: [
-                {
-                    breakpoint: 1200,
-                    settings: { slidesToShow: 3 }
-                },
-                {
-                    breakpoint: 992,
-                    settings: { slidesToShow: 2 }
-                },
-                {
-                    breakpoint: 768,
-                    settings: { slidesToShow: 1 }
-                }
+                { breakpoint: 1200, settings: { slidesToShow: 3 } },
+                { breakpoint: 992, settings: { slidesToShow: 2 } },
+                { breakpoint: 768, settings: { slidesToShow: 1 } }
             ]
         });
     });
@@ -307,125 +298,245 @@
     .solutions-section {
         padding: 80px 0;
         background-color: #fff;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    /* Tiêu đề chính giữa */
     .main-title {
-        font-weight: 900;
-        font-size: 3.5rem;
+        font-size: 2.5rem;
         text-align: center;
-        margin-bottom: 60px;
+        margin-bottom: 40px;
         color: #000;
         letter-spacing: -1px;
+        text-transform: uppercase;
+        font-weight: 700;
     }
 
-    .label-solution {
-        color: #e31e24;
+    /* Slide card layout */
+    .solution-slide-card {
+        display: flex !important;
+        flex-direction: row;
+        align-items: stretch;
+        gap: 0;
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 6px;
+        overflow: hidden;
+        margin: 0 15px;
+        min-height: 420px;
+    }
+
+    .solution-slide-left {
+        flex: 0 0 45%;
+        padding: 40px 35px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .solution-slide-right {
+        flex: 0 0 55%;
+        position: relative;
+        overflow: hidden;
+        min-height: 350px;
+    }
+
+    .solution-slide-right img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.6s ease;
+    }
+
+    .solution-slide-card:hover .solution-slide-right img {
+        transform: scale(1.05);
+    }
+
+    .solution-column-title {
         font-weight: 700;
-        text-transform: uppercase;
+        font-size: 1.6rem;
+        margin-bottom: 24px;
+        color: #000;
+        line-height: 1.3;
+    }
+
+    .solution-list-container p {
+        position: relative;
+        padding-left: 18px;
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+        color: #444;
+        line-height: 1.6;
+        text-align: justify;
+    }
+
+    .solution-list-container p::before {
+        content: "�";
+        color: #e31e24;
+        font-weight: bold;
+        position: absolute;
+        left: 0;
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+
+    /* Slider nav buttons */
+    .solutions-nav {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 30px;
+    }
+
+    .solutions-nav button {
+        width: 48px;
+        height: 48px;
+        border: 2px solid #333;
+        background: transparent;
+        border-radius: 0;
         display: flex;
         align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        color: #333;
     }
 
-        .label-solution::before {
-            content: "";
-            width: 25px;
-            height: 2px;
-            background: #e31e24;
+    .solutions-nav button:hover {
+        background: #e31e24;
+        border-color: #e31e24;
+        color: #fff;
+    }
+
+    /* Responsive */
+    @@media (max-width: 991.98px) {
+        .solution-slide-card {
+            flex-direction: column;
+            margin: 0 10px;
+            min-height: unset;
         }
 
-    /* Tiêu đề cột (Giải pháp công nghệ, Tư vấn khảo sát...) */
-    .column-title {
-        font-weight: 800;
-        font-size: 1.5rem;
-        margin-bottom: 20px;
-        color: #000;
-    }
-
-    /* Xử lý danh sách từ nội dung xuống dòng */
-    .solution-list {
-        white-space: pre-line; /* Nhận diện xuống dòng từ DB */
-        list-style: none;
-        padding-left: 0;
-        color: #444;
-        font-size: 0.95rem;
-        line-height: 2;
-    }
-
-    /* Tạo dấu chấm đỏ đầu dòng cho mỗi dòng văn bản */
-    .solution-list-container {
-        /* Trick: Biến text có xuống dòng thành dạng list giả lập */
-    }
-
-        .solution-list-container p {
-            position: relative;
-            padding-left: 20px;
-            margin-bottom: 8px;
-            text-align: justify;
+        .solution-slide-left {
+            flex: unset;
+            padding: 30px 25px;
         }
 
-            /* Vẽ dấu chấm đỏ đầu mỗi dòng */
-            .solution-list-container p::before {
-                content: "•";
-                color: #e31e24;
-                font-weight: bold;
-                position: absolute;
-                left: 0;
-                font-size: 1.2rem;
-            }
+        .solution-slide-right {
+            flex: unset;
+            min-height: 250px;
+        }
+
+        .solution-column-title {
+            font-size: 1.3rem;
+        }
+    }
+
+    @@media (max-width: 575.98px) {
+        .solution-slide-right {
+            min-height: 200px;
+        }
+
+        .solution-slide-left {
+            padding: 24px 20px;
+        }
+
+        .solution-column-title {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+        }
+    }
 </style>
 
-<section class="solutions-section">
+<section class="solutions-section overflow-hidden">
     <div class="container">
-        <div class="d-flex justify-content-start mb-2">
-            <div class="label-solution">Giải pháp.</div>
+        <div class="d-flex justify-content-center mb-4">
+            <h5 data-aos="fade-down" data-aos-duration="600" class="text-danger text-uppercase fw-bold" style="letter-spacing: 2px;">
+                <span class="border-top border-danger border-3 me-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
+                <span class="small">Giải pháp</span>
+                <span class="border-top border-danger border-3 ms-2" style="width: 30px; display: inline-block; vertical-align: middle;"></span>
+            </h5>
         </div>
 
-        <h2 class="main-title">Lĩnh vực hoạt động</h2>
+        <h2 data-aos="fade-down" data-aos-duration="1500" class="main-title">Lĩnh vực hoạt động</h2>
 
-        <div class="row g-5">
+        <div class="solutions-slider" data-aos="fade-up" data-aos-duration="600">
             @{
                 int i1 = 0;
-                // Vòng lặp lấy dữ liệu từ setting.general.solution (theo ảnh image_0ed966.png)
                 while (Model.Settings.ContainsKey($"setting.general.solution.title.{i1}"))
                 {
                     var title = GetSt($"setting.general.solution.title.{i1}");
                     var content = GetSt($"setting.general.solution.content.{i1}");
+                    var image = GetSt($"setting.general.solution.image.{i1}");
+                    if (string.IsNullOrEmpty(image)) image = "/images/default.png";
 
-                    <div class="col-lg-4 col-md-6">
-                        <h3 class="column-title">@title</h3>
-                        <div class="solution-list-container">
-                            @if (!string.IsNullOrEmpty(content))
-                            {
-                                // Tách chuỗi theo dấu xuống dòng và duyệt từng dòng để thêm bullet point
-                                var lines = content.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                                foreach (var line in lines)
-                                {
-                                    <p>@line.Trim()</p>
-                                }
-                            }
+                    <div>
+                        <div class="solution-slide-card">
+                            <div class="solution-slide-left">
+                                <h3 class="solution-column-title">@title</h3>
+                                <div class="solution-list-container">
+                                    @if (!string.IsNullOrEmpty(content))
+                                    {
+                                        var lines = content.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                                        foreach (var line in lines)
+                                        {
+                                            <p>@line.Trim()</p>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                            <div class="solution-slide-right">
+                                <img src="@image" alt="@title" loading="lazy" width="600" height="420">
+                            </div>
                         </div>
                     </div>
                     i1++;
                 }
             }
         </div>
+
+        <div class="solutions-nav">
+            <button id="prevSolution" aria-label="Previous">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <button id="nextSolution" aria-label="Next">
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
     </div>
 </section>
-<section class="partners-section py-5 bg-light">
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        $('.solutions-slider').slick({
+            dots: false,
+            infinite: true,
+            speed: 600,
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 5000,
+            arrows: false,
+            adaptiveHeight: true
+        });
+        document.getElementById('prevSolution').addEventListener('click', function () {
+            $('.solutions-slider').slick('slickPrev');
+        });
+        document.getElementById('nextSolution').addEventListener('click', function () {
+            $('.solutions-slider').slick('slickNext');
+        });
+    });
+</script>
+<section class="partners-section py-5 bg-light overflow-hidden">
     <div class="container">
-        <div class="row mb-4 align-items-center">
+        <div class="row mb-4 justify-content-center align-items-center">
             <div class="col-md-auto">
-                <div class="d-flex align-items-center">
-                    <span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
-                    <span class="text-danger fw-bold text-uppercase small" style="white-space: nowrap;">khách hàng & đối tác.</span>
-                </div>
+                <h5 data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center">
+					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="text-danger fw-bold text-uppercase" style="white-space: nowrap;">khách hàng & đối tác</span>
+					<span class="line ms-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+				</h5>
             </div>
-            <div class="col border-top border-secondary-subtle ms-3 d-none d-md-block">
-            </div>
+            @* <div class="col border-top border-secondary-subtle ms-3 d-none d-md-block">
+            </div> *@
         </div>
 
         <div class="row">
@@ -433,12 +544,14 @@
                 <div class="customer-slider">
                     @foreach (var item in Model.Customers)
                     {
-                        <div class="px-4">
+                        <div class="px-4" data-aos="fade-right" data-aos-duration="600">
                             <div class="partner-logo-wrapper d-flex align-items-center justify-content-center">
-                                <img src="@item.Image"
+                                <img data-lazy="@item.Image"
                                      alt="@item.CustomerName"
                                      title="@item.CustomerName"
-                                     class="img-fluid partner-logo">
+                                     class="img-fluid partner-logo"
+                                     loading="lazy"
+                                     width="160" height="90">
                             </div>
                         </div>
                     }
@@ -448,32 +561,21 @@
     </div>
 </section>
 <script>
-    $(document).ready(function () {
+    document.addEventListener('DOMContentLoaded', function () {
         $('.customer-slider').slick({
-            slidesToShow: 6,      // Hiển thị 6 logo một lúc trên PC
+            slidesToShow: 6,
             slidesToScroll: 1,
+            lazyLoad: 'ondemand',
             autoplay: true,
             autoplaySpeed: 2000,
-            arrows: false,        // Ẩn nút điều hướng để slider chạy tự nhiên
+            arrows: false,
             dots: false,
             infinite: true,
             responsive: [
-                {
-                    breakpoint: 1200,
-                    settings: { slidesToShow: 5 }
-                },
-                {
-                    breakpoint: 992,
-                    settings: { slidesToShow: 4 }
-                },
-                {
-                    breakpoint: 768,
-                    settings: { slidesToShow: 3 }
-                },
-                {
-                    breakpoint: 480,
-                    settings: { slidesToShow: 2 }
-                }
+                { breakpoint: 1200, settings: { slidesToShow: 5 } },
+                { breakpoint: 992, settings: { slidesToShow: 4 } },
+                { breakpoint: 768, settings: { slidesToShow: 3 } },
+                { breakpoint: 480, settings: { slidesToShow: 2 } }
             ]
         });
     });
@@ -481,33 +583,33 @@
 <style>
     .partners-section {
         padding: 60px 0;
-        background-color: #fff; /* Hoặc #f8f9fa nếu muốn nền xám nhạt */
+        background-color: #fff; /* Ho?c #f8f9fa n?u mu?n n?n x�m nh?t */
     }
 
     .partner-logo-wrapper {
-        height: 150px; /* Tăng chiều cao khung chứa */
+        height: 150px; /* Tang chi?u cao khung ch?a */
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 0 15px;
-        /* XÓA DÒNG filter: grayscale(100%) TẠI ĐÂY ĐỂ HIỆN MÀU */
+        /* X�A D�NG filter: grayscale(100%) T?I ��Y �? HI?N M�U */
         transition: all 0.3s ease;
     }
 
         .partner-logo-wrapper:hover {
-            transform: scale(1.1); /* Hiệu ứng phóng to nhẹ khi di chuột */
+            transform: scale(1.1); /* Hi?u ?ng ph�ng to nh? khi di chu?t */
         }
 
     .partner-logo {
-        /* ĐIỀU CHỈNH ĐỘ LỚN TẠI ĐÂY */
-        max-height: 120px; /* Tăng lên 90px hoặc 100px nếu bạn thấy vẫn bé */
+        /* �I?U CH?NH �? L?N T?I ��Y */
+        max-height: 120px; /* Tang l�n 90px ho?c 100px n?u b?n th?y v?n b� */
         max-width: 100%;
         width: auto;
         object-fit: contain;
         display: block;
     }
 
-    /* Đảm bảo khoảng cách giữa các logo trong slider thoáng hơn */
+    /* �?m b?o kho?ng c�ch gi?a c�c logo trong slider tho�ng hon */
     .customer-slider .px-4 {
         padding-left: 25px !important;
         padding-right: 25px !important;

@@ -175,17 +175,6 @@ namespace VDCD.Business.Service
             }
         }
 
-        public User GetByUsername(string username)
-        {
-            var user = FindByUsername(username);
-            if (user == null)
-            {
-                throw new ArgumentNullException(nameof(username));
-            }
-
-            user.RoleName = _userRoleService.GetRoleNameByUserId(user.UserId);
-            return user;
-        }
 
         public User? FindByUsername(string? username, bool onlyActive = false)
         {

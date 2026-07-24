@@ -51,7 +51,17 @@ namespace VDCD.Business.Service
                 _contactMessagesRepo.Update(contact);
                 _context.SaveChanges();
             }
-        }
+			 _notifier.Notify("NewStatus", new
+			{
+				/*                contact.Name,
+								contact.Phone,
+								contact.Email,
+								contact.Title,
+								Time = DateTime.Now.ToString("HH:mm:ss")*/
+				name = contact.Name,
+				time = DateTime.Now.ToString("HH:mm dd/MM")
+			});
+		}
 
         public ContactMessages GetById(int id)
         {
@@ -69,7 +79,17 @@ namespace VDCD.Business.Service
                 contact.RepliedAt = DateTime.Now;
                 _contactMessagesRepo.Update(contact);
                 _context.SaveChanges();
-            }
+				 _notifier.Notify("NewStatus", new
+				{
+					/*                contact.Name,
+									contact.Phone,
+									contact.Email,
+									contact.Title,
+									Time = DateTime.Now.ToString("HH:mm:ss")*/
+					name = contact.Name,
+					time = DateTime.Now.ToString("HH:mm dd/MM")
+				});
+			}
         }
         public async Task Create(ContactCreateDto contact)
         {

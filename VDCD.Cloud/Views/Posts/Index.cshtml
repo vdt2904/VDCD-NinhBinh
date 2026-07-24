@@ -38,6 +38,7 @@
         position: relative;
         display: flex;
         align-items: flex-end; /* Đẩy nội dung xuống đáy */
+        margin-top: 45px;
     }
 
     .hero-content {
@@ -68,26 +69,6 @@
         }
     }
 </style>
-<script>
-    $(document).ready(function () {
-        $.ajax({
-            url: '/home/GetHeader',
-            type: 'GET',
-            success: function (response) {
-                if (response.success) {
-                    // 1. Cập nhật Logo từ mảng footer
-                    const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
-                    if (logoData) {
-                        $('#main-logo').attr('src', logoData.value);
-                    }
-                }
-            },
-            error: function (err) {
-                console.error("Không thể lấy dữ liệu từ API", err);
-            }
-        });
-    });
-</script>
 
 <div class="container py-5">
     <div class="row">
@@ -95,7 +76,7 @@
             <article class="post-details">
                 <header class="post-header mb-4">
                     <div class="post-meta text-muted text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">
-                        @categoryName • @Model.PublishedDate?.ToString("MMMM d, yyyy", new System.Globalization.CultureInfo("vi-VN"))
+                        @categoryName • @Model.PublishedDate?.ToString("MMMM-dd-yyyy", new System.Globalization.CultureInfo("vi-VN"))
                     </div>
                     <h1 class="fw-bold mb-4" style="font-size: 2.5rem; line-height: 1.2;">
                         @Model.Title
@@ -163,7 +144,7 @@
     /* Font và màu sắc chủ đạo */
     h1, h2, h3, .sidebar-title {
         color: #111;
-        font-family: 'Segoe UI', Roboto, sans-serif;
+        font-family: 'Roboto', Roboto, sans-serif;
     }
 
     .sidebar-title {

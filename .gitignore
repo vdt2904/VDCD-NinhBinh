@@ -1,7 +1,6 @@
 .vs/
 bin/
 obj/
-logs/
 # App settings (chứa secret)
 appsettings.json
 appsettings.*.json

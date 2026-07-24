@@ -6,8 +6,6 @@
 @functions {
     string GetSt(string key) => ViewBag.Settings.ContainsKey(key) ? ViewBag.Settings[key] : "";
 }
-
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 <script>
     $(document).ready(function () {
         $.ajax({
@@ -15,6 +13,7 @@
             type: 'GET',
             success: function (response) {
                 if (response.success) {
+                    // 1. Cập nhật Logo từ mảng footer
                     const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
                     if (logoData) {
                         $('#main-logo').attr('src', logoData.value);
@@ -28,62 +27,13 @@
     });
 </script>
 
-<div class="container py-5" style="margin-top: 110px;">
-    <h2 data-aos="fade-down" data-aos-duration="1500" class="text-center mb-5 fw-bold">Cơ hội nghề nghiệp</h2>
-
-    <!-- Bộ lọc (tự động, không cần nút) -->
-    <div class="row g-3 mb-4 p-3 bg-light rounded shadow-sm">
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Ngành nghề</label>
-            <select id="filterIndustry" class="form-select">
-                <option value="">Tất cả</option>
-                @foreach (var industry in Model.Select(x => x.Industry).Where(x => !string.IsNullOrEmpty(x)).Distinct().OrderBy(x => x))
-                {
-                    <option value="@industry">@industry</option>
-                }
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Cấp bậc</label>
-            <select id="filterLevel" class="form-select">
-                <option value="">Tất cả</option>
-                @foreach (var level in Model.Select(x => x.Level).Where(x => !string.IsNullOrEmpty(x)).Distinct().OrderBy(x => x))
-                {
-                    <option value="@level">@level</option>
-                }
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Loại hình</label>
-            <select id="filterEmploymentType" class="form-select">
-                <option value="">Tất cả</option>
-                @foreach (var type in Model.Select(x => x.EmploymentType).Where(x => !string.IsNullOrEmpty(x)).Distinct().OrderBy(x => x))
-                {
-                    <option value="@type">@type</option>
-                }
-            </select>
-        </div>
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Địa điểm</label>
-            <select id="filterLocation" class="form-select">
-                <option value="">Tất cả</option>
-                @foreach (var loc in Model.Select(x => x.Location).Where(x => !string.IsNullOrEmpty(x)).Distinct().OrderBy(x => x))
-                {
-                    <option value="@loc">@loc</option>
-                }
-            </select>
-        </div>
-    </div>
+<div class="container py-5">
+    <h2 class="text-center mb-5 fw-bold">Cơ hội nghề nghiệp</h2>
 
     <div class="row g-4" id="job-list">
         @foreach (var job in Model)
         {
-            <div class="col-md-6 col-lg-4 job-item"
-                 data-industry="@job.Industry"
-                 data-level="@job.Level"
-                 data-employmenttype="@job.EmploymentType"
-                 data-location="@job.Location"
-                 data-aos="fade-right" data-aos-duration="1500">
+            <div class="col-md-6 col-lg-4 job-item">
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-body">
                         <span class="badge bg-light text-primary mb-2">@job.EmploymentType</span>
@@ -100,90 +50,53 @@
     </div>
 
     <nav class="mt-5">
-        <ul class="pagination justify-content-center" id="pagination"></ul>
+        <ul class="pagination justify-content-center" id="pagination">
+        </ul>
     </nav>
 </div>
 
-<script>
-    const pageSize = 6;
-    const items = document.querySelectorAll('.job-item');
-    const paginationElement = document.getElementById('pagination');
-    let currentPage = 1;
 
-    // Hàm lọc (dựa trên giá trị các select)
-    function filterJobs() {
-        const industry = $('#filterIndustry').val();
-        const level = $('#filterLevel').val();
-        const empType = $('#filterEmploymentType').val();
-        const location = $('#filterLocation').val();
+    <script>
+        const pageSize = 6; // Số lượng tin trên 1 trang
+        const items = document.querySelectorAll('.job-item');
+        const paginationElement = document.getElementById('pagination');
+        let currentPage = 1;
 
-        // Duyệt từng item và đánh dấu filtered-out
-        $('.job-item').each(function () {
-            const $item = $(this);
-            const matchIndustry = !industry || $item.data('industry') === industry;
-            const matchLevel = !level || $item.data('level') === level;
-            const matchEmpType = !empType || $item.data('employmenttype') === empType;
-            const matchLocation = !location || $item.data('location') === location;
+        function displayJobs(page) {
+            currentPage = page;
+            const start = (page - 1) * pageSize;
+            const end = start + pageSize;
 
-            if (matchIndustry && matchLevel && matchEmpType && matchLocation) {
-                $item.removeClass('filtered-out');
-            } else {
-                $item.addClass('filtered-out');
-            }
-        });
+            items.forEach((item, index) => {
+                if (index >= start && index < end) {
+                    item.classList.remove('d-none');
+                } else {
+                    item.classList.add('d-none');
+                }
+            });
 
-        // Reset về trang 1 và cập nhật phân trang
-        currentPage = 1;
-        updatePaginationAndDisplay();
-    }
-
-    // Cập nhật phân trang và hiển thị dựa trên các item không bị lọc
-    function updatePaginationAndDisplay() {
-        const visibleItems = Array.from(items).filter(item => !item.classList.contains('filtered-out'));
-        const totalPages = Math.ceil(visibleItems.length / pageSize);
-        if (currentPage > totalPages) currentPage = totalPages || 1;
-
-        // Ẩn hết tất cả item
-        items.forEach(item => item.classList.add('d-none'));
-
-        // Hiện item thuộc trang hiện tại
-        const start = (currentPage - 1) * pageSize;
-        const end = start + pageSize;
-        visibleItems.forEach((item, idx) => {
-            if (idx >= start && idx < end) {
-                item.classList.remove('d-none');
-            }
-        });
-
-        // Vẽ lại phân trang
-        paginationElement.innerHTML = '';
-        if (totalPages <= 1) return;
-
-        for (let i = 1; i <= totalPages; i++) {
-            const li = document.createElement('li');
-            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-            li.innerHTML = `<button class="page-link" onclick="goToPage(${i})">${i}</button>`;
-            paginationElement.appendChild(li);
+            setupPagination();
         }
-    }
 
-    // Hàm chuyển trang
-    function goToPage(page) {
-        currentPage = page;
-        updatePaginationAndDisplay();
-    }
+        function setupPagination() {
+            paginationElement.innerHTML = "";
+            const pageCount = Math.ceil(items.length / pageSize);
 
-    // Gắn sự kiện change cho các select (lọc tự động)
-    $(document).ready(function () {
-        $('#filterIndustry, #filterLevel, #filterEmploymentType, #filterLocation').on('change', function () {
-            filterJobs();
+            if (pageCount <= 1) return; // Không hiện nếu chỉ có 1 trang
+
+            for (let i = 1; i <= pageCount; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                li.innerHTML = `<button class="page-link" onclick="displayJobs(${i})">${i}</button>`;
+                paginationElement.appendChild(li);
+            }
+        }
+
+        // Khởi tạo lần đầu
+        document.addEventListener('DOMContentLoaded', () => {
+            displayJobs(1);
         });
-
-        // Ẩn tất cả item ban đầu, sau đó hiện trang đầu
-        $('.job-item').addClass('d-none');
-        filterJobs(); // chạy lọc lần đầu (hiện tất cả)
-    });
-</script>
+    </script>
 
 <style>
     .job-item {

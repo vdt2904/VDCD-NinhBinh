@@ -1,101 +1,35 @@
 ﻿<!DOCTYPE html>
-<html lang="vi" style="overflow-x: hidden;">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]</title>
     <meta name="description" content="@ViewData["Description"]" />
     <meta name="facebook-domain-verification" content="hzvsk2ujlfe1ba7vs9tvtuur0x54ez" />
-    <meta name="google-site-verification" content="Ob7yNe9gch26KTzxY3AadZmpxvIlRgGklyzONzeG-wQ" />
     @if (ViewData["NoIndex"] as bool? == true)
     {
         <meta name="robots" content="noindex, nofollow" />
     }
 
-    @* === CRITICAL: inline CSS tối thiểu để render above-the-fold không bị trắng === *@
-    <style>
-        html { font-size: 14px; }
-        @@media (min-width: 768px) { html { font-size: 16px; } }
-        body { margin: 0; overflow-x: hidden; font-family: "Roboto", sans-serif; }
-        .header-main { position: fixed; top: 0; left: 0; width: 100%; z-index: 999; }
-        .bg-black { background-color: #000 !important; }
-        .navbar { padding: 0.5rem 0; }
-        .hero-slider { position: relative; width: 100%; height: 100vh; min-height: 400px; overflow: hidden; margin-top: 45px; }
-        .carousel-item { height: 100vh; min-height: 400px; background-color: #000; }
-        @@media (max-width: 768px) { .hero-slider, .carousel-item { height: 70vh; min-height: 320px; } }
-    </style>
-
-    @* === Preconnect: giảm DNS/TLS latency === *@
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preconnect" href="https://unpkg.com" crossorigin>
-    @* dns-prefetch fallback cho browser không hỗ trợ preconnect *@
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-    <link rel="dns-prefetch" href="https://unpkg.com">
-
-    @* === Google Fonts: display=swap + chỉ load weight cần dùng === *@
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"></noscript>
-
-    @* === Bootstrap CSS: non-blocking preload === *@
-    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css"></noscript>
-
-    @* === Slick CSS: non-blocking === *@
-    <link rel="preload" as="style" href="/Content/Home/slick.css" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="/Content/Home/slick.css"></noscript>
-
-    @* === AOS CSS: non-blocking === *@
-    <link rel="preload" as="style" href="/Content/Home/aos.css" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="/Content/Home/aos.css"></noscript>
-
-    @* === Bootstrap Icons: non-blocking === *@
-    <link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"></noscript>
-
-    @* === Font Awesome: chỉ load solid + brands (bỏ regular/light) === *@
-    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
-    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
-
-    @* === site.css: nhỏ, load bình thường === *@
-    <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
-
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+  
+    <link rel="stylesheet" type="text/css" href="~/Content/Home/slick.css" />
+    <script type="text/javascript" src="~/Script/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="~/Script/Home/slick.min.js"></script>
+    <script src="~/Script/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="icon" href="/uploads/cbf7823d-e5f1-49fd-801a-8bf2253d4547_iconlogo.png" sizes="32x32" />
 </head>
-<body style="margin-bottom:unset; overflow-x: hidden;">
+<body style="margin-bottom:unset;">
     @await Html.PartialAsync("/Views/Shared/_PartialHeader.cshtml")
-    <div style="margin:unset;max-width:unset;padding:unset">
-        <main role="main" style="padding-bottom:unset">
+    <div class="container" style="margin: unset;max-width: unset;padding:unset">
+        <main role="main" class="" style="padding-bottom:unset">
             @RenderBody()
         </main>
     </div>
     @await Html.PartialAsync("/Views/Shared/_PartialFooter.cshtml")
 
-    @* === JS: tất cả defer xuống cuối body === *@
-    <script src="~/Script/jquery-3.6.0.min.js" defer></script>
-    <script src="~/Script/bootstrap.bundle.min.js" defer></script>
-    <script src="~/Script/Home/slick.min.js" defer></script>
-    <script src="~/Script/Home/aos.js" defer></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            if (typeof AOS !== 'undefined') {
-                // Trên mobile tắt AOS hoàn toàn để giảm main thread work
-                var isMobile = window.innerWidth < 768;
-                AOS.init({
-                    once: true,
-                    duration: isMobile ? 0 : 600,
-                    disable: isMobile ? true : false,
-                    offset: 50,
-                    mirror: false,
-                    throttleDelay: 99,
-                });
-            }
-        });
-    </script>
 </body>
 </html>

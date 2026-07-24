@@ -1,175 +1,110 @@
-@model VDCD.Models.HomeModelView
+﻿@model VDCD.Models.HomeModelView
 @{
 
 }
 <section class="hero-slider">
 	<div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
 		<div class="carousel-indicators custom-indicators" id="slider-indicators"></div>
+
 		<div class="carousel-inner" id="slider-content">
-			@* Placeholder skeleton để tránh layout shift khi JS chưa load *@
-			<div class="carousel-item active">
-				<div class="zoom-bg" style="background-color:#111;"></div>
-			</div>
 		</div>
-		<div id="sec1-title"></div>
-		<div class="explore-button-wrapper heartbeat">
-			<a href="#" class="btn-explore jello-horizontal">
-				Khám Phá Dự Án<span class="icon-arrow">→</span>
+
+		<div class="explore-button-wrapper">
+			<a href="#" class="btn-explore">
+				Khám Phá Dự Án <span class="icon-arrow">↗</span>
 			</a>
 		</div>
 	</div>
 </section>
 <script>
-	// Dùng DOMContentLoaded thay vì $(document).ready để không phụ thuộc jQuery load trước
-	document.addEventListener('DOMContentLoaded', function () {
-		function initSlider(response) {
-			var slices = [];
-			for (var i = 0; i < response.slice.length; i += 2) {
-				slices.push({ title: response.slice[i].value, image: response.slice[i+1].value });
-			}
+	$(document).ready(function () {
+		$.ajax({
+			url: '/home/GetHeader',
+			type: 'GET',
+			success: function (response) {
+				if (response.success) {
+					// 1. Cập nhật Logo từ mảng footer
+					const logoData = response.footer.find(item => item.settingKey === "setting.general.footer.logo");
+					if (logoData) {
+						$('#main-logo').attr('src', logoData.value);
+					}
 
-			var indicatorsHtml = '', slidesHtml = '', secTitleHtml = '';
-			slices.forEach(function(item, index) {
-				var activeClass = index === 0 ? 'active' : '';
-				indicatorsHtml += '<button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="' + index + '" class="' + activeClass + '"></button>';
-				var words = item.title.split(' ');
-				secTitleHtml += '<div class="carousel-caption custom-caption d-flex flex-column justify-content-start align-items-center" style="top:10%;bottom:auto;padding-top:0;">'
-					+ '<h1 class="hero-title">' + words[0] + ' <span class="text-red">' + words.slice(1).join(' ') + '</span></h1>'
-					+ '<h2 class="hero-subtitle text-white mt-3 text-center">KIẾN TẠO TƯƠNG LAI SỐ</h2>'
-					+ '</div>';
-				slidesHtml += `
-<div class="carousel-item ${activeClass}">
-    <img
-        class="zoom-bg hero-image"
-        src="${item.image}"
-        alt="${item.title}"
-        ${index === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"'}
-        decoding="async"
-        width="1920"
-        height="1080"
-    />
-</div>`;
-				if (index === 0) {
-					var link = document.createElement('link');
-					link.rel = 'preload'; link.as = 'image'; link.href = item.image;
-					document.head.appendChild(link);
-				}
-			});
+					// 2. Cập nhật Slider từ mảng slice
+					let indicatorsHtml = '';
+					let slidesHtml = '';
 
-			document.getElementById('slider-indicators').innerHTML = indicatorsHtml;
-			document.getElementById('sec1-title').innerHTML = secTitleHtml;
-			document.getElementById('slider-content').innerHTML = slidesHtml;
-
-			var carouselEl = document.querySelector('#heroCarousel');
-			const zoomEls = document.querySelectorAll('.zoom-bg');
-			new bootstrap.Carousel(carouselEl, { interval: 8000, pause: false });
-			carouselEl.addEventListener('slide.bs.carousel', function () {
-
-				zoomEls.forEach(el => {
-					el.classList.add('restart-animation');
-				});
-
-				requestAnimationFrame(() => {
-					requestAnimationFrame(() => {
-						zoomEls.forEach(el => {
-							el.classList.remove('restart-animation');
+					// Gom nhóm title và image vì API trả về các object rời rạc
+					const slices = [];
+					for (let i = 0; i < response.slice.length; i += 2) {
+						slices.push({
+							title: response.slice[i].value,
+							image: response.slice[i + 1].value
 						});
-					});
-				});
-			});
-		}
+					}
 
-		// Nếu header đã load xong trước (cached), dùng luôn
-		if (window.__headerData) {
-			initSlider(window.__headerData);
-		} else {
-			// Chờ event từ _PartialHeader
-			document.addEventListener('headerLoaded', function(e) {
-				initSlider(e.detail);
-			});
-		}
+					slices.forEach((item, index) => {
+						const activeClass = index === 0 ? 'active' : '';
+
+						// Tạo Indicators
+						indicatorsHtml += `<button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="${index}" class="${activeClass}"></button>`;
+
+						// Tạo Slide Content với cấu trúc Zoom-bg
+						slidesHtml += `<div class="carousel-item ${activeClass}">
+		<div class="zoom-bg" style="background-image: url('${item.image}');"></div>
+		<div class="carousel-caption custom-caption d-flex flex-column justify-content-start align-items-center"
+			 style="top: 10%; bottom: auto; padding-top: 0;">
+			<h1 class="hero-title">
+				${item.title.split(' ')[0]} <span class="text-red">${item.title.split(' ').slice(1).join(' ')}</span>
+			</h1>
+			<h2 class="hero-subtitle text-white mt-3 text-center">Trung Tâm Đổi Mới Sáng Tạo Ninh Bình</h2>
+		</div>
+	</div>`;
+					});
+
+					$('#slider-indicators').html(indicatorsHtml);
+					$('#slider-content').html(slidesHtml);
+
+					// Khởi động lại carousel sau khi thêm dữ liệu động
+					new bootstrap.Carousel('#heroCarousel', {
+						interval: 5000,
+						pause: false
+					});
+				}
+			},
+			error: function (err) {
+				console.error("Không thể lấy dữ liệu từ API", err);
+			}
+		});
 	});
 </script>
 <style>
-	.heartbeat {
-		animation: heartbeat 2.5s ease-in-out infinite both;
-	}
-	@@keyframes heartbeat {
-	from {
-		transform: scale(1);
-		transform-origin: center center;
-		animation-timing-function: ease-out;
-	}
-	10% {
-		transform: scale(0.91);
-		animation-timing-function: ease-in;
-	}
-	17% {
-		transform: scale(0.98);
-		animation-timing-function: ease-out;
-	}
-	33% {
-		transform: scale(0.87);
-		animation-timing-function: ease-in;
-	}
-	45% {
-		transform: scale(1);
-		animation-timing-function: ease-out;
-	}
-	}
-
 	.carousel-caption.custom-caption {
-		top: auto !important; /* Đưa lên cách mép trên 10% chiều cao ảnh */
-		bottom: 18%  !important; /* Hủy bỏ việc dính vào đáy */
+		top: 10% !important; /* Đưa lên cách mép trên 10% chiều cao ảnh */
+		bottom: auto !important; /* Hủy bỏ việc dính vào đáy */
 		transform: none !important;
 	}
-	@@media (max-width: 1440px) {
-        .carousel-caption.custom-caption {
-			bottom: 20%  !important; /* Hủy bỏ việc dính vào đáy */
-		}
-    }
-	@@media (max-width: 1280px) {
-        .carousel-caption.custom-caption .hero-subtitle {
-			font-size: 45px !important;
-		}
-    }
-	@@media (max-width: 500px) {
-        .carousel-caption.custom-caption .hero-subtitle {
-			font-size: 22px !important;
-		}
-		.carousel-caption.custom-caption {
-			bottom: 26%  !important; /* Hủy bỏ việc dính vào đáy */
-		}
-    }
-	@@keyframes kenBurnsLeft {
-        0% {
-            /* Bắt đầu ở vị trí trung tâm, tỉ lệ 1:1 */
-            transform: scale(1) translate(0, 0);
-        }
-        100% {
-            /* scale(1.1): Phóng to 10% 
-            translate(-10%, 0): Dịch sang TRÁI 10% chiều rộng của chính nó
-            */
-            transform: scale(1.2) translate(-5%, 0);
-        }
-    }
 </style>
-@* <script>
+<script>
 	$(document).ready(function () {
+		// Khởi tạo Carousel với hiệu ứng fade
 		var myCarousel = document.querySelector('#heroCarousel');
 		var carousel = new bootstrap.Carousel(myCarousel, {
 			interval: 5000,
 			pause: false
 		});
 
+		// Reset lại trạng thái zoom khi chuyển slide để tạo hiệu ứng liên tục
 		myCarousel.addEventListener('slide.bs.carousel', function () {
+			$('.zoom-bg').css('transition', 'none');
+			$('.zoom-bg').css('transform', 'scale(1)');
 
+			// Cần một khoảng nghỉ cực ngắn để trình duyệt nhận diện reset scale
 			setTimeout(function () {
-				$('.zoom-bg').css('animation', 'kenBurnsLeft 8s ease-in-out infinite alternate');
+				$('.zoom-bg').css('transition', 'transform 6s ease-out');
 			}, 50);
 		});
 	});
-</script> *@
+</script>
 @functions {
 	// Hàm hỗ trợ lấy giá trị nhanh và an toàn
 	string GetSt(string key) => Model.Settings.ContainsKey(key) ? Model.Settings[key] : "";
@@ -193,9 +128,9 @@
 	/* Định vị khối thống kê đè lên ảnh */
 	.stats-container {
 		position: absolute;
-		top: 0px;
+		top: -50px;
 		right: 0;
-		width: 400px;
+		width: 350px;
 		z-index: 10;
 	}
 
@@ -235,19 +170,18 @@
 	<div class="container">
 		<div class="row mb-4">
 			<div class="col-12">
-				<div class="d-flex align-items-center mb-4">
-					<span class="line me-2" data-aos="fade-down" data-aos-duration="1500"></span>
-					<span class="text-danger fw-bold text-uppercase small" data-aos="fade-down" data-aos-duration="1500">Về chúng tôi</span>
-					<span class="line ms-2" data-aos="fade-down" data-aos-duration="1500"></span>
+				<div class="d-flex align-items-center mb-2">
+					<span class="line me-2"></span>
+					<span class="text-danger fw-bold text-uppercase small">Về chúng tôi.</span>
 				</div>
-				<h1 class="display-6 fw-bold text-uppercase" data-aos="fade-down" data-aos-duration="1500">
+				<h1 class="display-5 fw-bold text-uppercase">
 					@GetSt("setting.general.aboutus.headertext")
 				</h1>
 			</div>
 		</div>
 
 		<div class="row g-0 position-relative mt-5">
-			<div class="col-lg-4 pe-lg-5 mb-4 mb-lg-0 mt-5" data-aos="fade-right" data-aos-delay="500" data-aos-duration="1500">
+			<div class="col-lg-4 pe-lg-5 mb-4 mb-lg-0">
 				<h3 class="fw-bold fs-4 mb-4">
 					@GetSt("setting.general.aboutus.title")
 				</h3>
@@ -257,20 +191,20 @@
 			</div>
 
 			<div class="col-lg-8 position-relative">
-				<div class="main-image-wrapper mt-5">
-					<img data-aos="zoom-in" data-aos-duration="1500" src="@GetSt("setting.general.aboutus.image")" alt="VDCD Tech" class="img-fluid w-100 shadow-sm" loading="lazy" decoding="async" width="800" height="450">
+				<div class="main-image-wrapper">
+					<img src="@GetSt("setting.general.aboutus.image")" alt="VDCD Tech" class="img-fluid w-100 shadow-sm">
 				</div>
 
 				<div class="stats-container d-flex">
-					<div class="stat-box bg-red text-white p-4 flex-fill" data-aos="flip-left" data-aos-duration="1500">
+					<div class="stat-box bg-red text-white p-4 flex-fill text-center">
 						<i class="fa-solid fa-trophy mb-3" style="font-size: 2.5rem;"></i>
 						<div class="counter-num h2 fw-bold mb-0">500+</div>
-						<div class="text-uppercase small">Dự án hoàn thành</div>
+						<div class="text-uppercase small fw-bold">Dự án hoàn thành</div>
 					</div>
-					<div class="stat-box bg-black text-white p-4 flex-fill" data-aos="flip-left" data-aos-duration="1500" data-aos-delay="500">
+					<div class="stat-box bg-black text-white p-4 flex-fill text-center">
 						<i class="fa-solid fa-handshake mb-3" style="font-size: 2.5rem;"></i>
 						<div class="counter-num h2 fw-bold mb-0">250+</div>
-						<div class="text-uppercase small">Khách hàng</div>
+						<div class="text-uppercase small fw-bold">Khách hàng</div>
 					</div>
 				</div>
 			</div>
@@ -288,9 +222,7 @@
 					<div class="service-card position-relative overflow-hidden">
 
 						@* Ảnh nền của toàn bộ ô *@
-						<div class="service-bg-holder lazy-bg"
-							data-bg="@item.Image">
-						</div>
+						<div class="service-bg-holder" style="background-image: url('@item.Image');"></div>
 
 						@* Lớp phủ tối *@
 						<div class="service-overlay"></div>
@@ -300,12 +232,7 @@
 							<div class="icon-box">
 								<div class="bg-danger d-inline-flex align-items-center justify-content-center box-icon-red">
 									@* THAY ĐỔI Ở ĐÂY: Dùng thẻ img cho icon *@
-									@{
-										var icon = string.IsNullOrEmpty(item.Icon) 
-											? "/images/icon-default.webp" 
-											: item.Icon;
-									}
-									<img src="@icon" alt="icon" class="service-icon-img" loading="lazy" decoding="async" width="35" height="35">
+									<img src="@item.Icon" alt="icon" class="service-icon-img">
 								</div>
 							</div>
 
@@ -350,8 +277,8 @@
 	}
 
 	.box-icon-red {
-		width: 75px;
-		height: 75px;
+		width: 65px;
+		height: 65px;
 		z-index: 3;
 	}
 
@@ -380,7 +307,7 @@
 	}
 
 	.service-item:hover .service-overlay {
-		background: rgba(0, 0, 0, 0.8);
+		background: rgba(227, 6, 19, 0.5);
 	}
 
 	.learn-more-btn {
@@ -414,58 +341,31 @@
 		.Take(visionQuantity)
 		.ToList();
 }
-<script>
-document.addEventListener('DOMContentLoaded', function () {
 
-    const lazyBackgrounds = document.querySelectorAll('.lazy-bg');
 
-    const observer = new IntersectionObserver((entries, obs) => {
-        entries.forEach(entry => {
-
-            if (!entry.isIntersecting) return;
-
-            const el = entry.target;
-            const bg = el.dataset.bg;
-
-            if (bg) {
-                el.style.backgroundImage = `url('${bg}')`;
-                el.classList.add('loaded');
-            }
-
-            obs.unobserve(el);
-        });
-    }, {
-        rootMargin: '200px'
-    });
-
-    lazyBackgrounds.forEach(el => observer.observe(el));
-});
-</script>
-
-<section class="vision-section py-5 position-relative overflow-hidden" style="padding-top: 90px !important;">
+<section class="vision-section py-5 position-relative">
 	<div class="vision-bg-overlay d-none d-lg-block"></div>
 
 	<div class="container position-relative" style="z-index: 2;">
 		@* 1. TIÊU ĐỀ CHÍNH *@
 		<div class="row mb-4">
 			<div class="col-12 text-center text-lg-start">
-				<div data-aos="fade-down" data-aos-duration="1500" class="d-flex align-items-center mb-3 justify-content-center">
-					<span class="line me-2 section-line"></span>
-					<span class="text-danger fw-bold text-uppercase small">Tầm nhìn & giá trị</span>
-					<span class="line ms-2 section-line"></span>
+				<div class="d-flex align-items-center mb-2 justify-content-center justify-content-lg-start">
+					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="text-danger fw-bold text-uppercase small">Tầm nhìn & giá trị.</span>
 				</div>
-				<h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase text-center">@GetSt("setting.general.vision.main_title")</h2>
+				<h2 class="display-5 fw-bold text-uppercase">@GetSt("setting.general.vision.main_title")</h2>
 			</div>
 		</div>
 
 		@* 2. THANH ĐIỀU HƯỚNG TAB (Đã tách ra ngoài để sửa lỗi click 2 lần) *@
 		<div class="row mb-4">
-			<div class="col-lg-12">
-				<ul class="nav nav-pills gap-3 justify-content-center" id="visionTab" role="tablist">
+			<div class="col-lg-6 offset-lg-6 ps-lg-5">
+				<ul class="nav nav-pills gap-3 justify-content-center justify-content-lg-start" id="visionTab" role="tablist">
 					@foreach (var idx in visionIndexes)
 					{
 						<li class="nav-item" role="presentation">
-							<button data-aos="flip-left" data-aos-delay="500" data-aos-duration="1500" class="nav-link rounded-pill px-4 fw-bold @(idx == visionIndexes.First() ? "active" : "bg-white text-dark shadow-sm")"
+							<button class="nav-link rounded-pill px-4 fw-bold @(idx == visionIndexes.First() ? "active" : "bg-white text-dark shadow-sm")"
 									id="tab-btn-@idx"
 									data-bs-toggle="pill"
 									data-bs-target="#content-tab-@idx"
@@ -479,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		</div>
 
 		@* 3. NỘI DUNG TAB *@
-		<div class="tab-content mt-5" id="visionTabContent">
+		<div class="tab-content" id="visionTabContent">
 			@foreach (var idx in visionIndexes)
 			{
 				var isActive = (idx == visionIndexes.First()) ? "show active" : "";
@@ -487,20 +387,20 @@ document.addEventListener('DOMContentLoaded', function () {
 				<div class="tab-pane fade @isActive" id="content-tab-@idx" role="tabpanel">
 					<div class="row align-items-center">
 						<div class="col-lg-6 p-0 position-relative">
-							<div class="vision-image shadow-lg" data-aos="fade-right" data-aos-duration="1500">
-								<img src="@GetSt($"setting.general.vision.image.{idx}")" class="img-fluid w-100 vision-img" alt="Vision" loading="@(idx == visionIndexes.First() ? "eager" : "lazy")" decoding="async" width="600" height="500">
+							<div class="vision-image shadow-lg">
+								<img src="@GetSt($"setting.general.vision.image.{idx}")" class="img-fluid w-100" alt="Vision" style="height: 500px; object-fit: cover;">
 							</div>
 						</div>
 
 						<div class="col-lg-6 ps-lg-5 mt-4 mt-lg-0">
 							<div class="vision-content-box">
-								<h3 class="fw-bold mb-3 fs-4 text-uppercase">@GetSt($"setting.general.vision.title.{idx}")</h3>
-								<p data-aos="fade-left" data-aos-duration="1500" class="text-muted lh-lg mb-4" style="text-align: justify;">
+								<h3 class="fw-bold mb-3 fs-2 text-uppercase">@GetSt($"setting.general.vision.title.{idx}")</h3>
+								<p class="text-muted lh-lg mb-4" style="text-align: justify;">
 									@GetSt($"setting.general.vision.content.{idx}")
 								</p>
 
 								@* XỬ LÝ DÒNG CHỮ XUỐNG DÒNG THÀNH LIST *@
-								<div class="vision-lines-list" data-aos="fade-left" data-aos-duration="1500">
+								<div class="vision-lines-list">
 									@{
 										var linesRaw = GetSt($"setting.general.vision.lines.{idx}");
 										if (!string.IsNullOrEmpty(linesRaw))
@@ -558,24 +458,6 @@ document.addEventListener('DOMContentLoaded', function () {
 			color: #fff !important;
 		}
 
-	/* Ảnh vision responsive */
-	.vision-img {
-		height: 500px;
-		object-fit: cover;
-	}
-
-	@@media (max-width: 991.98px) {
-		.vision-img {
-			height: 300px;
-		}
-	}
-
-	@@media (max-width: 575.98px) {
-		.vision-img {
-			height: 220px;
-		}
-	}
-
 	/* Lớp nền xám bên phải */
 	.vision-bg-overlay {
 		position: absolute;
@@ -587,17 +469,16 @@ document.addEventListener('DOMContentLoaded', function () {
 		z-index: 1;
 	}
 </style>
-<section class="featured-projects py-5 text-white overflow-hidden">
+<section class="featured-projects py-5 bg-black text-white overflow-hidden">
 	<div class="container py-4" style="max-width:unset;">
 		@* Tiêu đề *@
 		<div class="row mb-5">
 			<div class="col-12">
-				<div data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center mb-4">
-					<span class="line me-2 section-line"></span>
-					<span class="text-danger fw-bold text-uppercase small">dự án</span>
-					<span class="line ms-2 section-line"></span>
+				<div class="d-flex align-items-center mb-2" style="margin-left: 20%;">
+					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="text-danger fw-bold text-uppercase small">dự án.</span>
 				</div>
-				<h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase text-center">Dự án nổi bật</h2>
+				<h2 class="display-4 fw-bold text-uppercase text-center">Dự án nổi bật</h2>
 			</div>
 		</div>
 
@@ -611,9 +492,9 @@ document.addEventListener('DOMContentLoaded', function () {
 					var categoryName = category != null ? category.CategoryName : "Dự án";
 
 					@* Mỗi slide item *@
-					<div data-aos="flip-left" data-aos-duration="1500" class="px-2">
+					<div class="px-2">
 						<div class="project-card position-relative overflow-hidden shadow">
-							<img data-lazy="@item.Image" class="project-img w-100" alt="@item.ProjectName" loading="lazy" decoding="async" width="400" height="400">
+							<img src="@item.Image" class="project-img w-100" alt="@item.ProjectName">
 							<div class="project-overlay"></div>
 							<div class="project-info p-4">
 								<h4 class="fw-bold mb-2 text-white text-truncate">
@@ -632,11 +513,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		@* Nút điều hướng *@
 		<div class="row mt-5">
-			<div class="col-12 d-flex gap-2 justify-content-center">
-				<button data-aos="fade-right" data-aos-duration="1000" id="prevProject" class="btn btn-outline-light rounded-0 p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+			<div class="col-12 d-flex gap-2 justify-content-center justify-content-lg-start" style="padding-left: 10%;">
+				<button id="prevProject" class="btn btn-outline-light rounded-0 p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
 					<i class="fa-solid fa-arrow-left"></i>
 				</button>
-				<button data-aos="fade-left" data-aos-duration="1000" id="nextProject" class="btn btn-outline-light rounded-0 p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+				<button id="nextProject" class="btn btn-outline-light rounded-0 p-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
 					<i class="fa-solid fa-arrow-right"></i>
 				</button>
 			</div>
@@ -644,26 +525,15 @@ document.addEventListener('DOMContentLoaded', function () {
 	</div>
 </section>
 <script>
-	document.addEventListener('DOMContentLoaded', function () {
-
-    const slider = document.querySelector('.project-slider');
-
-    if (!slider) return;
-
-    const observer = new IntersectionObserver((entries) => {
-
-        entries.forEach(entry => {
-
-            if (!entry.isIntersecting) return;
-
-            $(slider).slick({
-                infinite: true,
-                slidesToShow: 4,
-                lazyLoad: 'ondemand',
-                arrows: false,
-                autoplay: true,
-                autoplaySpeed: 3000,
-				responsive: [
+	$(document).ready(function () {
+		$('.project-slider').slick({
+			infinite: true,
+			slidesToShow: 4, // Mặc định hiện 4 ảnh như col-lg-3
+			slidesToScroll: 1,
+			arrows: false, // Tắt mũi tên mặc định của Slick
+			autoplay: true,
+			autoplaySpeed: 3000,
+			responsive: [
 				{
 					breakpoint: 1200,
 					settings: { slidesToShow: 3 }
@@ -677,17 +547,16 @@ document.addEventListener('DOMContentLoaded', function () {
 					settings: { slidesToShow: 1 }
 				}
 			]
-            });
+		});
 
-            observer.disconnect();
-        });
-
-    }, {
-        rootMargin: '300px'
-    });
-
-    observer.observe(slider);
-});
+		// Sự kiện cho nút bấm Custom
+		$('#prevProject').click(function () {
+			$('.project-slider').slick('slickPrev');
+		});
+		$('#nextProject').click(function () {
+			$('.project-slider').slick('slickNext');
+		});
+	});
 </script>
 <style>
 	.project-slider .slick-list {
@@ -713,15 +582,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 
 	.featured-projects {
-		animation: color-change-2x 4s linear infinite alternate both;
-	}
-	@@keyframes color-change-2x {
-	0% {
-		background: #000000;
-	}
-	100% {
-		background: #2d2c2c;
-	}
+		background-color: #111 !important; /* Màu nền đen nhám */
 	}
 
 	.project-card {
@@ -796,12 +657,11 @@ document.addEventListener('DOMContentLoaded', function () {
 		@* TIÊU ĐỀ CHÍNH *@
 		<div class="row mb-5">
 			<div class="col-12 text-center">
-				<div data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center mb-4">
-					<span class="line me-2 section-line"></span>
-					<span class="text-danger fw-bold text-uppercase small">dịch vụ</span>
-					<span class="line ms-2 section-line"></span>
+				<div class="d-flex align-items-center mb-2 ">
+					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="text-danger fw-bold text-uppercase small">dịch vụ.</span>
 				</div>
-				<h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase">
+				<h2 class="display-4 fw-bold text-uppercase">
 					@GetSt("setting.general.services.titlemain")
 				</h2>
 			</div>
@@ -811,7 +671,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		<div class="row g-4 justify-content-center">
 			@foreach (var idx in serviceIndexes)
 			{
-				<div class="col-lg-4 col-md-6" data-aos="flip-up" data-aos-duration="1500">
+				<div class="col-lg-4 col-md-6">
 					<div class="service-box p-5 bg-white shadow-sm position-relative h-100">
 						@* Số thứ tự (01, 02, 03...) *@
 						<div class="service-number position-absolute top-0 start-0 border p-2 bg-light text-muted small">
@@ -852,6 +712,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	.tech-bg-overlay {
 		position: absolute;
 		inset: 0;
+		background-image: url('/path-to-your-network-icon-bg.png'); /* Bạn có thể dùng ảnh mạng lưới mờ */
 		background-size: cover;
 		opacity: 0.05;
 		z-index: 1;
@@ -883,7 +744,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		-webkit-line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
-		height: 4.2rem;
+		height: 3.2rem;
 	}
 
 	.content-limit {
@@ -915,18 +776,17 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 </style>
 
-<section class="partners-section py-5 bg-light overflow-hidden">
+<section class="partners-section py-5 bg-light">
 	<div class="container">
-		<div class="row mb-4 justify-content-center align-items-center">
+		<div class="row mb-4 align-items-center">
 			<div class="col-md-auto">
-				<div data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center">
-					<span class="line me-2 section-line"></span>
-					<span class="text-danger fw-bold text-uppercase small" style="white-space: nowrap;">khách hàng & đối tác</span>
-					<span class="line ms-2 section-line"></span>
+				<div class="d-flex align-items-center">
+					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="text-danger fw-bold text-uppercase small" style="white-space: nowrap;">khách hàng & đối tác.</span>
 				</div>
 			</div>
-			@* <div class="col border-top border-secondary-subtle ms-3 d-none d-md-block">
-			</div> *@
+			<div class="col border-top border-secondary-subtle ms-3 d-none d-md-block">
+			</div>
 		</div>
 
 		<div class="row">
@@ -934,15 +794,12 @@ document.addEventListener('DOMContentLoaded', function () {
 				<div class="customer-slider">
 					@foreach (var item in Model.Customers)
 					{
-						<div class="px-4" data-aos="zoom-in-up" data-aos-duration="1500">
+						<div class="px-4">
 							<div class="partner-logo-wrapper d-flex align-items-center justify-content-center">
-								<img data-lazy="@item.Image"
+								<img src="@item.Image"
 									 alt="@item.CustomerName"
 									 title="@item.CustomerName"
-									 class="img-fluid partner-logo"
-									 loading="lazy"
-									 decoding="async"
-									 width="160" height="90">
+									 class="img-fluid partner-logo">
 							</div>
 						</div>
 					}
@@ -952,26 +809,16 @@ document.addEventListener('DOMContentLoaded', function () {
 	</div>
 </section>
 <script>
-	document.addEventListener('DOMContentLoaded', function () {
-
-    const slider = document.querySelector('.customer-slider');
-
-    if (!slider) return;
-
-    const observer = new IntersectionObserver((entries) => {
-
-        entries.forEach(entry => {
-
-            if (!entry.isIntersecting) return;
-
-            $(slider).slick({
-                infinite: true,
-                slidesToShow: 4,
-                lazyLoad: 'ondemand',
-                arrows: false,
-                autoplay: true,
-                autoplaySpeed: 3000,
-				responsive: [
+	$(document).ready(function () {
+		$('.customer-slider').slick({
+			slidesToShow: 6,      // Hiển thị 6 logo một lúc trên PC
+			slidesToScroll: 1,
+			autoplay: true,
+			autoplaySpeed: 2000,
+			arrows: false,        // Ẩn nút điều hướng để slider chạy tự nhiên
+			dots: false,
+			infinite: true,
+			responsive: [
 				{
 					breakpoint: 1200,
 					settings: { slidesToShow: 5 }
@@ -989,17 +836,8 @@ document.addEventListener('DOMContentLoaded', function () {
 					settings: { slidesToShow: 2 }
 				}
 			]
-            });
-
-            observer.disconnect();
-        });
-
-    }, {
-        rootMargin: '300px'
-    });
-
-    observer.observe(slider);
-});
+		});
+	});
 </script>
 <style>
 	.partners-section {
@@ -1040,36 +878,25 @@ document.addEventListener('DOMContentLoaded', function () {
 	<div class="container">
 		<div class="row mb-5">
 			<div class="col-12" style="text-align: center;">
-				<div data-aos="fade-down" data-aos-duration="1500" class="d-flex justify-content-center align-items-center mb-4">
-					<span class="line me-2 section-line"></span>
-					<span class="text-danger fw-bold text-uppercase small">tin tức</span>
-					<span class="line ms-2 section-line"></span>
+				<div class="d-flex align-items-center mb-2">
+					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="text-danger fw-bold text-uppercase small">tin tức.</span>
 				</div>
-				<h2 data-aos="fade-down" data-aos-duration="1500" class="display-6 fw-bold text-uppercase">Bài viết mới</h2>
+				<h2 class="display-4 fw-bold text-uppercase">Bài viết mới</h2>
 			</div>
 		</div>
 
 		<div class="row g-4">
 			@foreach (var item in Model.Blogs)
 			{
-				<div class="col-lg-4 col-md-6 blog-item" data-aos="flip-down" data-aos-duration="1000">
+				<div class="col-lg-4 col-md-6 blog-item">
 					<div class="blog-card">
 						@* Phần ảnh và ngày tháng *@
 						<div class="blog-thumb position-relative overflow-hidden mb-3">
-							@{
-								var thumbnail = string.IsNullOrEmpty(item.Thumbnail) 
-									? "/images/default.png" 
-									: item.Thumbnail;
-							}
-
 							<a href="/tin-tuc/@item.Slug">
-								<img src="@thumbnail"
-									class="img-fluid w-100"
-									alt="@item.Title"
-									loading="lazy"
-									decoding="async"
-									width="400" height="250">
+								<img src="@item.Thumbnail" class="img-fluid w-100" alt="@item.Title">
 							</a>
+
 							@* Box ngày tháng đè lên ảnh *@
 							<div class="date-box position-absolute top-0 start-0 bg-white p-2 text-center shadow-sm">
 								<span class="d-block fw-bold fs-4 lh-1">@item.PublishedDate.Value.ToString("dd")</span>
@@ -1085,7 +912,7 @@ document.addEventListener('DOMContentLoaded', function () {
 								.ToDictionary(c => (int)c.Id, c => (string)c.CategoryName);
 							}
 
-							<span class="blog-cate small">
+							<span class="text-muted small text-uppercase fw-bold">
 								@(
 															blogCats.ContainsKey(item.CategoryId ?? 0)
 															? blogCats[item.CategoryId ?? 0]
@@ -1093,7 +920,7 @@ document.addEventListener('DOMContentLoaded', function () {
 															)
 							</span>
 
-							<h4 class="blog-title my-2">
+							<h4 class="blog-title mb-3">
 								<a href="/tin-tuc/@item.Slug" class="text-decoration-none text-dark fw-bold">
 									@item.Title
 								</a>
@@ -1129,17 +956,6 @@ document.addEventListener('DOMContentLoaded', function () {
 			color: #333;
 		}
 
-	.blog-card {
-		border: 1px solid #eee;
-		border-radius: 0 0 10px 10px;
-		box-shadow: 3px 7px 8px #eee;
-		height: 100%;
-	}
-
-	.blog-content {
-		padding: 0 10px 30px;
-	}
-
 	/* Ảnh bài viết */
 	.blog-thumb img {
 		height: 250px;
@@ -1153,21 +969,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	/* Tiêu đề bài viết */
 	.blog-title {
-		font-size: 18px;
+		font-size: 1.25rem;
 		line-height: 1.4;
 		display: -webkit-box;
 		-webkit-line-clamp: 2; /* Giới hạn 2 dòng tiêu đề */
 		-webkit-box-orient: vertical;
 		overflow: hidden;
-		height: 2rem;
-	}
-
-	.blog-cate {
-		background: #e30613;
-		padding: 2px 6px;
-		color: #fff !important;
-		font-size: 12px;
-		border-radius: 3px;
+		height: 3.5rem;
 	}
 
 		.blog-title a:hover {
@@ -1205,56 +1013,55 @@ document.addEventListener('DOMContentLoaded', function () {
 	<div class="container py-5">
 		<div class="row align-items-start">
 			<div class="col-lg-4 mb-5 mb-lg-0">
-				<div data-aos="fade-right" data-aos-duration="1500" class="d-flex align-items-center mb-2">
-					<span class="line me-2 section-line"></span>
-					<span class="text-danger fw-bold text-uppercase small">con số ấn tượng</span>
-					<span class="line ms-2 section-line"></span>
+				<div class="d-flex align-items-center mb-2">
+					<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+					<span class="text-danger fw-bold text-uppercase small">con số ấn tượng.</span>
 				</div>
-				<h2 data-aos="fade-right" data-aos-duration="1500" class="display-3 fw-bold text-uppercase brand-text">VDCD</h2>
+				<h2 class="display-3 fw-bold text-uppercase brand-text">VDCD</h2>
 			</div>
 
 			<div class="col-lg-8">
-				<div class="row g-5 mb">
-					<div data-aos="fade-down" data-aos-duration="1500" data-aos-delay="50" class="col-md-6 stat-item">
+				<div class="row g-5">
+					<div class="col-md-6 stat-item">
 						<div class="d-flex justify-content-between align-items-center border-top pt-2 mb-3">
 							<span class="text-muted small">01.</span>
 							<span class="text-muted small text-uppercase fw-bold">Trung tâm</span>
 						</div>
 						<div class="d-flex align-items-center">
-							<h3 class="stat-number mb-0 me-3" data-target="12">0</h3>
-							<p class="stat-text mb-0 text-dark fw-bold">Trung tâm thuộc hệ sinh thái công nghệ</p>
+							<h3 class="stat-number mb-0 me-3">12</h3>
+							<p class="stat-text mb-0 text-dark fw-bold">Trung tâm thuộc hệ sinh<br>thái công nghệ</p>
 						</div>
 					</div>
 
-					<div data-aos="fade-down" data-aos-duration="1500" data-aos-delay="100" class="col-md-6 stat-item">
+					<div class="col-md-6 stat-item">
 						<div class="d-flex justify-content-between align-items-center border-top pt-2 mb-3">
 							<span class="text-muted small">02.</span>
 							<span class="text-muted small text-uppercase fw-bold">Kinh nghiệm</span>
 						</div>
 						<div class="d-flex align-items-center">
-							<h3 class="stat-number mb-0 me-3" data-target="20">0</h3>
-							<p class="stat-text mb-0 text-dark fw-bold">Năm nền tảng phát triển về tài chính – nhân lực</p>
+							<h3 class="stat-number mb-0 me-3">20</h3>
+							<p class="stat-text mb-0 text-dark fw-bold">Năm nền tảng phát triển<br>về tài chính – nhân lực</p>
 						</div>
 					</div>
 
-					<div data-aos="fade-down" data-aos-duration="1500" data-aos-delay="150" class="col-md-6 stat-item">
+					<div class="col-md-6 stat-item">
 						<div class="d-flex justify-content-between align-items-center border-top pt-2 mb-3">
 							<span class="text-muted small">03.</span>
 							<span class="text-muted small text-uppercase fw-bold">Nhân sự</span>
 						</div>
 						<div class="d-flex align-items-center">
-							<h3 class="stat-number mb-0 me-3" data-target="1500">0</h3>
+							<h3 class="stat-number mb-0 me-3">1500</h3>
 							<p class="stat-text mb-0 text-dark fw-bold">Nhân sự khắp cả nước</p>
 						</div>
 					</div>
 
-					<div data-aos="fade-down" data-aos-duration="1500" data-aos-delay="200" class="col-md-6 stat-item">
+					<div class="col-md-6 stat-item">
 						<div class="d-flex justify-content-between align-items-center border-top pt-2 mb-3">
 							<span class="text-muted small">04.</span>
 							<span class="text-muted small text-uppercase fw-bold">Dự án</span>
 						</div>
 						<div class="d-flex align-items-center">
-							<h3 class="stat-number mb-0 me-3" data-target="500">0</h3>
+							<h3 class="stat-number mb-0 me-3">500</h3>
 							<p class="stat-text mb-0 text-dark fw-bold">Dự án đã hoàn thành</p>
 						</div>
 					</div>
@@ -1266,7 +1073,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <style>
 	.statistics-section {
 		background-color: #fff;
-		@* font-family: 'Inter', sans-serif; /* Hoặc font bạn đang dùng */ *@
+		font-family: 'Inter', sans-serif; /* Hoặc font bạn đang dùng */
 	}
 
 	.brand-text {
@@ -1298,10 +1105,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 	/* Responsive cho di động */
 	@@media (max-width: 991.98px) {
-		.statistics-section .mb{
-			margin: 0 auto !important;
-		}
-
 		.stat-number {
 			font-size: 4rem;
 		}
@@ -1311,78 +1114,27 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 	}
 </style>
-
-@* Counter *@
-<script>
-	document.addEventListener('DOMContentLoaded', function () {
-
-    const section = document.querySelector('.statistics-section');
-
-    if (!section) return;
-
-    const observer = new IntersectionObserver((entries) => {
-
-        entries.forEach(entry => {
-
-            if (!entry.isIntersecting) return;
-
-            document.querySelectorAll('.stat-number').forEach(function(el) {
-
-                const target = parseInt(el.dataset.target);
-
-                let startTime = null;
-
-                function step(timestamp) {
-
-                    if (!startTime) startTime = timestamp;
-
-                    const progress = Math.min((timestamp - startTime) / 2000, 1);
-
-                    el.textContent = Math.floor(progress * target);
-
-                    if (progress < 1) {
-                        requestAnimationFrame(step);
-                    } else {
-                        el.textContent = target;
-                    }
-                }
-
-                requestAnimationFrame(step);
-            });
-
-            observer.disconnect();
-        });
-
-    }, {
-        threshold: 0.3
-    });
-
-    observer.observe(section);
-});
-</script>
-
 <section class="ideals-section position-relative bg-black overflow-hidden">
 	<div class="container-fluid p-0">
 		<div class="row g-0 align-items-center" style="min-height: 550px;">
 
 			<div class="col-lg-7 d-flex align-items-center justify-content-center py-5">
 				<div class="content-wrapper px-4 px-md-5">
-					<div data-aos="fade-down" data-aos-duration="1500" class="d-flex align-items-center mb-4">
-						<span class="line me-2 section-line"></span>
-						<span class="text-danger fw-bold text-uppercase small">đồng hành & phát triển</span>
-						<span class="line ms-2 section-line"></span>
+					<div class="d-flex align-items-center mb-4">
+						<span class="line me-2" style="width: 30px; height: 2px; background-color: #e30613; display: inline-block;"></span>
+						<span class="text-danger fw-bold text-uppercase small">đồng hành & phát triển.</span>
 					</div>
 
-					<h2 data-aos="fade-down" data-aos-duration="1500" class="text-white fw-bold display-4 text-uppercase mb-0" style="letter-spacing: -1px; line-height: 1.5;">
-						Cùng VDCD biến ý tưởng
+					<h2 class="text-white fw-bold display-4 text-uppercase mb-0" style="letter-spacing: -1px; line-height: 1.1;">
+						Cùng VDCD biến ý tưởng<br>
 						thành hiện thực
 					</h2>
 				</div>
 			</div>
 
 			<div class="col-lg-5 position-relative">
-				<div data-aos="zoom-in-left" data-aos-duration="1500" class="image-container">
-					<img src="/uploads/8fa2dee3-43e4-4d6c-a573-c8e42a28d04d_h1_img-5.png" alt="VDCD Building" class="img-fluid building-image" loading="lazy" decoding="async" width="600" height="550">
+				<div class="image-container">
+					<img src="/uploads/8fa2dee3-43e4-4d6c-a573-c8e42a28d04d_h1_img-5.png" alt="VDCD Building" class="img-fluid building-image">
 				</div>
 			</div>
 		</div>

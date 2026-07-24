@@ -4,14 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VDCD.Business.Helper;
 using VDCD.Business.Infrastructure;
 using VDCD.DataAccess;
 using VDCD.Entities.Cache;
 using VDCD.Entities.Custom;
 using static System.Net.WebRequestMethods;
-using Microsoft.AspNetCore.Http;
-using VDCD.Entities.Enums;
 
 namespace VDCD.Business.Service
 {
@@ -23,17 +20,12 @@ namespace VDCD.Business.Service
         protected readonly AppDbContext _context;
         private readonly IRepository<SeoMeta> _seoRepo;
         private readonly HttpClient _http;
-        private readonly IActivityLogService _activityLogService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
         public FacebookService(IRepository<FacebookPost> fbRepo,
             IRepository<FacebookToken> fbtRepo,
                               ICacheService cache,
                               AppDbContext context,
                               IRepository<SeoMeta> seoRepo,
-                              HttpClient http,
-                              IActivityLogService activityLogService,
-                              IHttpContextAccessor httpContextAccessor)
+                              HttpClient http)
         {
             _fbRepo = fbRepo;
             _cache = cache;
@@ -41,8 +33,6 @@ namespace VDCD.Business.Service
             _seoRepo = seoRepo;
             _http = http;
             _fbtRepo = fbtRepo;
-            _activityLogService = activityLogService;
-            _httpContextAccessor = httpContextAccessor;
         }
         public void save(FacebookPost fbPost)
         {
@@ -56,17 +46,11 @@ namespace VDCD.Business.Service
             }
             _context.SaveChanges();
             ClearCache();
-
-            // Log creation/update
-            _activityLogService
-                .LogAsync(ActivityLogType.Post, $"Saved Facebook post '{fbPost.Title}' (Id={fbPost.Id})", _httpContextAccessor.HttpContext)
-                .GetAwaiter()
-                .GetResult();
         }
         public async Task<string> PostTextAsync(int id,string pageId, string message, string pageToken)
         {
             var encodedMessage = Uri.EscapeDataString(message);
-            message = SocialContentFormatter.ToFacebookText(message);
+
             var url = $"https://graph.facebook.com/v24.0/{pageId}/feed?message={message}&access_token={pageToken}";
 
             var response = await _http.PostAsync(url, null);
@@ -78,15 +62,13 @@ namespace VDCD.Business.Service
             }
             Posted(id);
 
-/*            await _activityLogService.LogAsync(ActivityLogType.Post, $"Posted Facebook post id {id} (text)", _httpContextAccessor.HttpContext);*/
-
 			return json;
         }
         public async Task<string> PostImagesAsync(int id,string pageId,IEnumerable<string> imageUrls,string message,string token)
         {
             var attachedMedia = new List<KeyValuePair<string, string>>();
-			message = SocialContentFormatter.ToFacebookText(message);
-			int index = 0;
+
+            int index = 0;
 
             foreach (var img in imageUrls)
             {
@@ -137,17 +119,14 @@ namespace VDCD.Business.Service
             if (!postResponse.IsSuccessStatusCode)
                 throw new Exception($"Create post error: {postJson}");
 			Posted(id);
-
-/*            await _activityLogService.LogAsync(ActivityLogType.Post, $"Posted Facebook post id {id} (images)", _httpContextAccessor.HttpContext);*/
-
 			return postJson;
         }
 
         public async Task<string> PostVideoAsync(int id,string pageId,string videoUrl,string message,string token)
         {
             var url = $"https://graph.facebook.com/{pageId}/videos";
-			message = SocialContentFormatter.ToFacebookText(message);
-			var content = new FormUrlEncodedContent(new[]
+
+            var content = new FormUrlEncodedContent(new[]
             {
             new KeyValuePair<string, string>("file_url", videoUrl),
             new KeyValuePair<string, string>("description", message),
@@ -156,9 +135,6 @@ namespace VDCD.Business.Service
 
             var res = await _http.PostAsync(url, content);
 			Posted(id);
-
-/*            await _activityLogService.LogAsync(ActivityLogType.Post, $"Posted Facebook post id {id} (video)", _httpContextAccessor.HttpContext);*/
-
 			return await res.Content.ReadAsStringAsync();
         }
         public async Task<string> PostVideoWithImagesAsync(int id,string pageId,string videoUrl, IEnumerable<string> imageUrls, string message,string token)
@@ -166,8 +142,8 @@ namespace VDCD.Business.Service
         {
             // 1️⃣ Đăng video trước
             var videoUrlEndpoint = $"https://graph.facebook.com/v24.0/{pageId}/videos";
-			message = SocialContentFormatter.ToFacebookText(message);
-			var videoContent = new FormUrlEncodedContent(new[]
+
+            var videoContent = new FormUrlEncodedContent(new[]
             {
         new KeyValuePair<string, string>("file_url", videoUrl),
         new KeyValuePair<string, string>("description", message),
@@ -229,15 +205,12 @@ namespace VDCD.Business.Service
 
             var commentContent = new FormUrlEncodedContent(commentParams);
 
-            var commentRes = await _http.PostAsync(commentUrl, commentContent); 
+            var commentRes = await _http.PostAsync(commentUrl, commentContent);
             var commentJson = await commentRes.Content.ReadAsStringAsync();
 
             if (!commentRes.IsSuccessStatusCode)
                 throw new Exception($"Comment images error: {commentJson}");
 			Posted(id);
-
-/*            await _activityLogService.LogAsync(ActivityLogType.Post, $"Posted Facebook post id {id} (video+images)", _httpContextAccessor.HttpContext);*/
-
 			return videoJson;
         }
         public IReadOnlyList<FacebookPost> GetAll()
@@ -270,12 +243,6 @@ namespace VDCD.Business.Service
             _fbRepo.Update(fb); 
             _context.SaveChanges();
             ClearCache();
-
-            // Log posted event (synchronous wait)
-            _activityLogService
-                .LogAsync(ActivityLogType.Post, $"Marked Facebook post Id={id} as posted", _httpContextAccessor.HttpContext)
-                .GetAwaiter()
-                .GetResult();
         }
         public void Delete(int id)
         {

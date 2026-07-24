@@ -29,9 +29,6 @@ namespace VDCD.Entities.Custom
         public int? Status { get; set; }
         public string? TypePost { get; set; }
         public string? Title { get; set; }
-        public int? IsAi { get; set; }
-        public string? Prompt { get; set; }
-        public string? Files { get; set; }
     }
 
 }

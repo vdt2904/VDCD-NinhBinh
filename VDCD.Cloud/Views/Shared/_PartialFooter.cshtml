@@ -10,16 +10,16 @@
 }
 <footer class="footer-section bg-black text-white pt-100 pb-4">
     <div class="container">
-        <div class="row border-bottom border-dark-subtle pb-5 mb-5 contact-info-row m-2">
-            <div data-aos="fade-down" data-aos-duration="2000" class="col-md-4 mb-4 mb-md-0 border-end border-dark-subtle">
+        <div class="row border-bottom border-dark-subtle pb-5 mb-5 contact-info-row">
+            <div class="col-md-4 mb-4 mb-md-0 border-end border-dark-subtle">
                 <p class="text-danger fw-bold small text-uppercase mb-2" style="letter-spacing: 2px;">Hotline</p>
-                <h3 class="fw-bold mb-0 fs-2" style="color:white">@GetSt("setting.general.footer.phone")</h3>
+                <h3 class="fw-bold mb-0 display-6" style="color:white">@GetSt("setting.general.footer.phone")</h3>
             </div>
-            <div data-aos="fade-down" data-aos-duration="2000" class="col-md-4 mb-4 mb-md-0 border-end border-dark-subtle ps-md-5">
+            <div class="col-md-4 mb-4 mb-md-0 border-end border-dark-subtle ps-md-5">
                 <p class="text-danger fw-bold small text-uppercase mb-2" style="letter-spacing: 2px;">Email</p>
                 <h3 class="fw-bold mb-0 fs-2" style="color:white">@GetSt("setting.general.footer.mail")</h3>
             </div>
-            <div data-aos="fade-down" data-aos-duration="2000" class="col-md-4 ps-md-5">
+            <div class="col-md-4 ps-md-5">
                 <p class="text-danger fw-bold small text-uppercase mb-2" style="letter-spacing: 2px;">Trụ Sở</p>
                 <h4 class="fw-bold mb-0 lh-base" style="color:white">@GetSt("setting.general.footer.address")</h4>
             </div>
@@ -28,13 +28,8 @@
         <div class="row mb-5 py-4">
             <div class="col-lg-4 mb-5 mb-lg-0">
                 <a href="/" class="d-block mb-4">
-                    <img src="@GetSt("setting.general.footer.logo")" alt="VDCD Logo" class="footer-logo" loading="lazy" width="200" height="70">
+                    <img src="@GetSt("setting.general.footer.logo")" alt="VDCD Logo" class="footer-logo">
                 </a>
-                <div class="company-info text-secondary small" style="margin-bottom: 5%;">
-                    <p class="mb-2 text-light fw-bold">@GetSt("setting.general.trademark.initials")</p>
-                    <p class="mb-2">Mã số thuế: <span class="text-light">@GetSt("setting.general.trademark.tax")</span></p>
-                    <p class="mb-0">Chịu trách nhiệm bởi: <span class="text-light">@GetSt("setting.general.footer.personresponsible")</span></p>
-                </div>
                 <div class="social-links d-flex gap-3">
                     <a href="@GetSt("setting.general.social.facebook")" class="social-item" target="_blank">
                         <i class="fa-brands fa-facebook-f"></i>
@@ -46,8 +41,6 @@
                         <i class="fa-brands fa-youtube"></i>
                     </a>
                 </div>
-                <!-- Phần thông tin công ty mới thêm vào dưới Logo và MXH -->
-                
             </div>
 
             <div class="col-6 col-lg-3 offset-lg-1">
@@ -84,9 +77,8 @@
     }
 
     .footer-section {
-        @* font-family: 'Inter', sans-serif; *@
+        font-family: 'Inter', sans-serif;
         background-color: #080808; /* Đen sâu hơn nhìn sẽ sang hơn */
-        border-top: 4px solid #e30613; /* Đường kẻ đỏ nổi bật hơn */
     }
 
     /* Tăng size thông tin liên hệ */
@@ -96,10 +88,9 @@
     }
 
     .footer-logo {
-        max-width: 100%;
-        height: auto;
-        max-height: 70px; /* Giới hạn chiều cao tối đa */
+        height: 70px; /* Tăng từ 50px lên 70px */
         width: auto;
+
     }
 
     /* Social Items to hơn */
@@ -123,12 +114,6 @@
             color: white;
             transform: translateY(-5px);
         }
-
-    /* CSS bổ sung cho phần thông tin doanh nghiệp */
-    .company-info p {
-        font-size: 0.95rem;
-        line-height: 1.6;
-    }
 
     /* Menu Link to và thoáng */
     .footer-menu a {
@@ -164,9 +149,6 @@
 
     /* Fix đường kẻ cho mobile */
     @@media (max-width: 767.98px) {
-        .footer-logo {
-            max-height: 50px;
-        }
         .contact-info-row div {
             border-right: none !important;
             border-bottom: 1px solid #333;
@@ -176,21 +158,6 @@
 
         .pt-100 {
             padding-top: 60px;
-        }
-
-        .contact-info-row h3 {
-            font-size: 1.4rem !important;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .contact-info-row h3 {
-            font-size: 1.2rem !important;
-        }
-
-        .social-item {
-            width: 38px;
-            height: 38px;
         }
     }
 
@@ -248,6 +215,6 @@
     });
 </script>
 
-<button type="button" class="scroll-top d-flex align-items-center justify-content-center" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">
-<i class="bi bi-arrow-up-short"></i>
-</button>
+<a href="javascript:void(0)" class="scroll-top d-flex align-items-center justify-content-center">
+    <i class="bi bi-arrow-up-short"></i>
+</a>

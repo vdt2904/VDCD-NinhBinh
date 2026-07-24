@@ -5,12 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 using NuGet.Common;
 using System.Text.Json;
 using VDCD.Business.Service;
-using VDCD.Business.Infrastructure;
 using VDCD.Entities.Custom;
 using VDCD.Entities.DTO;
 using VDCD.Entities.Security;
 using VDCD.Helper;
-using VDCD.Entities.Enums;
 
 namespace VDCD.Areas.Admin.Controllers
 {
@@ -24,21 +22,18 @@ namespace VDCD.Areas.Admin.Controllers
         private readonly PositionService _positionService;
         private readonly FacebookService _facebookService;
         private readonly SettingService _settingService;
-        private readonly IActivityLogService _activityLogService;
-		private readonly IRealtimeNotifier _notifier;
-		public FacebookController(DepartmentService departmentService, UserService userService,
-            JobtitleService jobtitleService, PositionService positionService, FacebookService facebookService, SettingService settingService, IActivityLogService activityLogService, IRealtimeNotifier notifier)
-		{
-			_departmentService = departmentService;
-			_userService = userService;
-			_jobtitleService = jobtitleService;
-			_positionService = positionService;
-			_facebookService = facebookService;
-			_settingService = settingService;
-			_activityLogService = activityLogService;
-			_notifier = notifier;
-		}
-		public IActionResult Index()
+        
+        public FacebookController(DepartmentService departmentService, UserService userService,
+            JobtitleService jobtitleService, PositionService positionService, FacebookService facebookService,SettingService settingService)
+        {
+            _departmentService = departmentService;
+            _userService = userService;
+            _jobtitleService = jobtitleService;
+            _positionService = positionService;
+            _facebookService = facebookService;
+            _settingService = settingService;
+        }
+        public IActionResult Index()
         {
             return View();
         }
@@ -50,8 +45,8 @@ namespace VDCD.Areas.Admin.Controllers
 
             try
             {
-				var PageID = _settingService.Get("setting.facebook.page_id");
-				var Token = _settingService.Get("setting.facebook.page_token");
+                var PageID = _settingService.Get("setting.facebook.page_id");
+                var Token = _settingService.Get("setting.facebook.page_token");
 				object result;
 
                 bool hasImages = model.ImageUrls != null && model.ImageUrls.Any();
@@ -138,20 +133,7 @@ namespace VDCD.Areas.Admin.Controllers
                 var user = _userService.GetByUsername(username);
                 fbp.UserCreateId = user.UserId;
                 _facebookService.save(fbp);
-
-                // Log creation
-                await _activityLogService.LogAsync(ActivityLogType.Post, $"Created Facebook post (Id={fbp.Id}) by {user.UserName}", HttpContext);
-				await _notifier.Notify("postfb", new
-				{
-					/*                contact.Name,
-									contact.Phone,
-									contact.Email,
-									contact.Title,
-									Time = DateTime.Now.ToString("HH:mm:ss")*/
-					name = fbp.Title,
-					time = DateTime.Now.ToString("HH:mm dd/MM")
-				});
-				return Ok(new {success = true});
+                return Ok(new {success = true});
             }
             catch (Exception ex)
             {
@@ -168,9 +150,6 @@ namespace VDCD.Areas.Admin.Controllers
                 var username = Helper.Helper.CurrentUser(HttpContext);
                 var user = _userService.GetByUsername(username);
                 fbp.UserReviewerId = user.UserId;
-/*                var username = Helper.Helper.CurrentUser(HttpContext);
-                var user = _user_service.GetByUsername(username);
-                fbp.UserReviewerId = user.UserId;*/
 
                 bool hasImages = fbp.ImageUrls != null && fbp.ImageUrls.Any();
                 bool hasVideos = fbp.VideoUrl != null && fbp.VideoUrl.Any();
@@ -206,10 +185,6 @@ namespace VDCD.Areas.Admin.Controllers
                 }
                 fbp.FacebookPostId = jobId;
                 _facebookService.save(fbp);
-
-                // Log scheduling
-                await _activityLogService.LogAsync(ActivityLogType.Post, $"Scheduled Facebook post Id={id} for {fbp.ScheduledDate}", HttpContext);
-
                 return Ok(new {success = true});
 
             }catch (Exception ex) {

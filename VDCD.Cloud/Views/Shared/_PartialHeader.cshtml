@@ -20,17 +20,12 @@
 .navbar-nav .nav-link {
         color: #fff !important;
         /* Sử dụng clamp để font không quá to trên màn hình nhỏ */
-        font-size: clamp(16px, 1.2vw, 16px) !important; 
+        font-size: clamp(16px, 1.2vw, 20px) !important; 
         line-height: 1.5;
         font-weight: bold;
         font-family: var(--e-global-typography-text-font-family), sans-serif;
         padding: 0.5rem clamp(0.5rem, 1vw, 1.1rem) !important;
         transition: color 0.2s ease-in-out;
-        font-family: "Lora", sans-serif;
-    }
-
-    .nav-item:hover .nav-link {
-        color: #ff0000 !important;
     }
 
     .btn-login-custom {
@@ -39,26 +34,25 @@
         padding: 8px clamp(15px, 2vw, 25px);
         border-radius: 50px;
         text-decoration: none;
-        font-size: clamp(16px, 1.2vw, 16px);
+        font-size: clamp(16px, 1.2vw, 20px);
         line-height: 1.5;
         font-weight: bold;
         display: inline-block;
         transition: all 0.3s ease;
-        font-family: "Roboto", sans-serif;
     }
 
     /* --- TỐI ƯU HERO SLIDER --- */
     .hero-title {
-        /* Chữ tự động co giãn: Cực tiểu 28px, Linh hoạt 6vw, Cực đại 60px */
-        font-size: clamp(28px, 6vw, 60px) !important;
+        /* Chữ tự động co giãn: Cực tiểu 35px, Linh hoạt 6vw, Cực đại 80px */
+        font-size: clamp(35px, 6vw, 80px) !important;
         font-weight: 900;
         color: #fff;
-        margin: 0 5% 0 5%;
+        margin: 10%;
         line-height: 1.1;
     }
 
     .hero-subtitle {
-        font-size: clamp(18px, 4.5vw, 50px) !important;
+        font-size: clamp(25px, 4.5vw, 60px) !important;
         font-weight: 800;
         color: #fff;
         letter-spacing: 2px;
@@ -83,31 +77,23 @@
     .explore-button-wrapper {
         position: absolute;
         bottom: 50px;
-        right: 5%;
+        right: 5%; /* Thu hẹp lại để không bị sát mép màn hình lớn */
         z-index: 20;
     }
 
-    .header-main {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 999;
-        transition: all 0.3s ease;
-    }
-
-    @@media (max-width: 991.98px) {
-        .hero-title {
-            margin: 0 3% 0 3%;
+    @@media (max-width: 768px) {
+        .explore-button-wrapper {
+            right: auto;
+            left: 15px;
+            bottom: 30px;
         }
+        .custom-caption { bottom: 15%; }
     }
-
-
 </style>
 <header class="header-main">
     <nav class="navbar navbar-expand-lg navbar-dark bg-black py-2">
         <div class="container-fluid px-lg-5">
-            <a class="navbar-brand py-0" href="/" style="width: 30%;">
+            <a class="navbar-brand py-0" href="/">
                 <img src="" alt="Logo" class="header-logo" id="main-logo">
             </a>
 
@@ -119,32 +105,8 @@
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link" href="~/ve-chung-toi">Về chúng tôi</a></li>
                     <li class="nav-item"><a class="nav-link" href="~/co-cau-to-chuc">Cơ cấu tổ chức</a></li>
-                    <li class="nav-item"><a class="nav-link" href="~/kien-tao-tuong-lai-so">Kiến tạo tương lai số</a></li>
-                    <!-- <li class="nav-item"><a class="nav-link" href="~/he-thong-trung-tam">Hệ thống trung tâm</a></li>
-                    <li class="nav-item"><a class="nav-link" href="~/du-an">Dự án</a></li> -->
-                    <!-- MENU CHA -->
-                    <!-- <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle"
-                        href="#"
-                        id="futureDropdown"
-                        role="button">
-                            Kiến tạo tương lai số
-                        </a>
-
-                        <ul class="dropdown-menu">
-                            <li>
-                                <a class="dropdown-item" href="~/he-thong-trung-tam">
-                                    Hệ thống trung tâm
-                                </a>
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item" href="~/du-an">
-                                    Dự án
-                                </a>
-                            </li>
-                        </ul>
-                    </li> -->
+                    <li class="nav-item"><a class="nav-link" href="~/he-thong-trung-tam">Hệ thống trung tâm</a></li>
+                    <li class="nav-item"><a class="nav-link" href="~/du-an">Dự án</a></li>
                     <li class="nav-item"><a class="nav-link" href="~/tin-tuc">Tin tức</a></li>
                     <li class="nav-item"><a class="nav-link" href="~/lien-he">Liên hệ</a></li>
                     <li class="nav-item"><a class="nav-link" href="~/tuyen-dung">Tuyển dụng</a></li>
@@ -156,57 +118,26 @@
                         </a>
                     </li>
  *@
-                    <!-- <li class="nav-item ms-lg-2">
+                    <li class="nav-item ms-lg-2">
                         <a class="btn-login-custom" href="/admin/account/login">Đăng Nhập</a>
-                    </li> -->
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 </header>
 <style>
-    .header-logo {
-        max-width: 100%;
-        height: auto;
-        max-height: 60px; /* Chiều cao tối đa trên desktop */
-        width: auto;
-    }
-
     .hero-slider {
         position: relative;
         width: 100%;
-        height: 100vh;
-        min-height: 400px;
+        height: 100vh; /* Full màn hình */
         overflow: hidden;
-        margin-top: 45px;
     }
 
     /* Hiệu ứng Zoom nhẹ cho ảnh nền */
     .carousel-item {
         height: 100vh;
-        min-height: 400px;
         background-color: #000;
-    }
-
-    @@media (max-width: 768px) {
-        .hero-slider,
-        .carousel-item {
-            height: 70vh;
-            min-height: 320px;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .hero-slider,
-        .carousel-item {
-            height: 60vh;
-            min-height: 280px;
-            margin-top: 0;
-        }
-
-        .navbar-dark .navbar-brand {
-            width: 70% !important;
-        }
     }
 
     .zoom-bg {
@@ -215,82 +146,50 @@
         left: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover;
-    display: block;
+        background-size: cover;
+        background-position: center;
         transition: transform 6s ease-out; /* Thời gian zoom */
         transform: scale(1);
     }
 
-   .section-line {
-    width: 30px;
-    height: 2px;
-    background-color: #e30613;
-    display: inline-block;
-}
-
     /* Khi slide active, thực hiện zoom lên 1.1 */
     .carousel-item.active .zoom-bg {
-        @* transform: scale(1.15); *@
-        animation: kenBurnsLeft 10s ease-in-out infinite alternate;
-    }
-
-    .carousel-item.active .zoom-bg.restart-animation {
-    animation: none;
-}
-
-     @@keyframes kenBurnsLeft {
-        0% {
-            /* Bắt đầu ở vị trí trung tâm, tỉ lệ 1:1 */
-            transform: scale(1) translate(0, 0);
-        }
-        100% {
-            /* scale(1.1): Phóng to 10% 
-            translate(-10%, 0): Dịch sang TRÁI 10% chiều rộng của chính nó
-            */
-            transform: scale(1.2) translate(-5%, 0);
-        }
+        transform: scale(1.15);
     }
 
     /* Overlay tối để nổi bật chữ */
     .carousel-item::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 70%; 
-    background: linear-gradient(
-        to top, 
-        rgba(0, 0, 0, 0.9) 0%, 
-        rgba(0, 0, 0, 0.5) 60%, 
-        rgba(0, 0, 0, 0) 100%
-    );
-    pointer-events: none;
-}
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6));
+    }
 
-    /* Căn chỉnh chữ - đã được định nghĩa ở block style trên */
+    /* Căn chỉnh chữ */
     .custom-caption {
         text-align: left;
-        left: 0 !important;
-        right: 0 !important;
+        left: 10%;
         bottom: 20%;
         z-index: 10;
     }
 
     .hero-title {
-        font-size: clamp(28px, 6vw, 60px) !important;
+        font-size: 80px;
         font-weight: 900;
         color: #fff;
-        margin: 0 5% 0 5%;
-        line-height: 1.1;
+        margin: 0 0 0 5%;
+        line-height: 1;
     }
 
-    @* .hero-subtitle {
+    .hero-subtitle {
         font-size: 60px;
         font-weight: 800;
         color: #fff;
         letter-spacing: 2px;
-    } *@
+    }
 
     .text-red {
         color: #ff0000;
@@ -299,38 +198,12 @@
     /* Nút Khám phá dự án */
     .explore-button-wrapper {
         position: absolute;
-        bottom: 100px;
-        left: calc(50% - 120px);
-        right: auto;
-        width: auto;
+        bottom: 50px;
+        right: 10%;
         z-index: 20;
-        text-align: left;
-    }
-
-    @@media (max-width: 768px) {
-        .explore-button-wrapper {
-            right: auto;
-            left: calc(50% - 120px);
-            bottom: 90px;
-            width: auto;
-        }
-        .custom-caption {
-            bottom: 15%;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .hero-title {
-            margin: 0 2% 0 2%;
-        }
-        .explore-button-wrapper {
-            bottom: 100px;
-            left: 85px;
-        }
     }
 
     .btn-explore {
-        font-size: 18px;
         border: 1px solid #fff;
         color: #fff;
         padding: 10px 25px;
@@ -341,7 +214,6 @@
         align-items: center;
         transition: 0.3s;
         background: rgba(0,0,0,0.3);
-        display: ruby;
     }
 
     .icon-arrow {
@@ -362,8 +234,8 @@
 
     /* Indicators tùy chỉnh */
     .custom-indicators {
-        @* justify-content: flex-start;
-        left: 10%; *@
+        justify-content: flex-start;
+        left: 10%;
         margin-bottom: 50px;
     }
 
@@ -375,130 +247,4 @@
             border: none;
             margin-right: 10px;
         }
-
-        /* =========================
-   DROPDOWN MENU DESKTOP + MOBILE
-========================= */
-
-.navbar .dropdown {
-    position: relative;
-}
-
-/* Dropdown mặc định */
-.dropdown-menu {
-    background: #000;
-    border: none;
-    border-radius: 14px;
-    padding: 10px 0;
-    min-width: 260px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-}
-
-/* Item */
-.dropdown-item {
-    color: #fff !important;
-    font-family: "Lora", sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    padding: 14px 22px;
-    transition: all 0.25s ease;
-}
-
-.dropdown-item:hover {
-    background: rgba(255, 0, 0, 0.12);
-    color: #ff0000 !important;
-    padding-left: 28px;
-}
-
-/* Icon dropdown */
-.navbar .dropdown-toggle::after {
-    margin-left: 8px;
-    vertical-align: middle;
-}
-
-/* =========================
-   DESKTOP
-========================= */
-@@media (min-width: 992px) {
-
-    .navbar .dropdown-menu {
-        display: block;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(12px);
-        transition:
-            opacity 0.25s ease,
-            transform 0.25s ease,
-            visibility 0.25s;
-        pointer-events: none;
-    }
-
-    .navbar .dropdown:hover .dropdown-menu {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-        pointer-events: auto;
-    }
-}
-
-/* =========================
-   MOBILE
-========================= */
-@@media (max-width: 991.98px) {
-
-    .navbar-collapse {
-        background: #000;
-        padding: 15px 0;
-    }
-
-    .dropdown-menu {
-        position: static !important;
-        transform: none !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        display: none;
-        width: 100%;
-        margin-top: 8px;
-        background: rgba(255,255,255,0.03);
-        border-radius: 10px;
-        box-shadow: none;
-        padding: 0;
-    }
-
-    /* Hover mobile/tablet */
-    .navbar .dropdown:hover .dropdown-menu,
-    .navbar .dropdown:focus-within .dropdown-menu {
-        display: block;
-    }
-
-    .dropdown-item {
-        padding: 14px 18px 14px 30px;
-        font-size: 14px;
-    }
-
-    .dropdown-item:hover {
-        padding-left: 36px;
-    }
-}
 </style>
-
-<script>
-    // Load logo một lần duy nhất tại đây — không cần lặp lại ở từng view
-    document.addEventListener('DOMContentLoaded', function () {
-        fetch('/home/GetHeader')
-            .then(function (r) { return r.json(); })
-            .then(function (res) {
-                if (!res.success) return;
-                var logoItem = res.footer.find(function (x) { return x.settingKey === 'setting.general.footer.logo'; });
-                if (logoItem) {
-                    var el = document.getElementById('main-logo');
-                    if (el) el.src = logoItem.value;
-                }
-                // Expose toàn bộ response để các view khác dùng nếu cần (slider, v.v.)
-                window.__headerData = res;
-                document.dispatchEvent(new CustomEvent('headerLoaded', { detail: res }));
-            })
-            .catch(function (e) { console.warn('GetHeader failed', e); });
-    });
-</script>

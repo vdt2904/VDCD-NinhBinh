@@ -1,17 +1,15 @@
 ﻿using Hangfire;
-using Hangfire.Dashboard;
-using Hangfire.MySql;
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.EntityFrameworkCore;
-using Serilog;
 using System;
+using Hangfire.MySql;
 using System.Transactions;
+using Microsoft.EntityFrameworkCore;
 using VDCD.Business;
 using VDCD.Business.Infrastructure;
 using VDCD.Business.Service;
 using VDCD.DataAccess;
-using VDCD.Entities.Security;
 using VDCD.Hubs;
+using Microsoft.AspNetCore.Http.Features;
+using VDCD.Entities.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,11 +21,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
     )
 );
-Log.Logger = new LoggerConfiguration()
-	.MinimumLevel.Debug()
-	.WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
-	.CreateLogger();
-builder.Host.UseSerilog();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<ICacheService, CacheSevice>();
 
@@ -39,13 +32,6 @@ builder.Services.AddScoped<SettingService>();
 builder.Services.AddScoped<FileManagerService>();
 builder.Services.AddScoped<CacheSevice>();
 builder.Services.AddScoped<CategoryService>();*/
-builder.Services.AddHttpClient<IAiService, AiService>(client =>
-{
-    client.Timeout = TimeSpan.FromMinutes(5); // tăng lên 5 phút
-});
-
-builder.Services.AddScoped<IAiPostService, AiPostService>();
-builder.Services.AddScoped<IActivityLogService, ActivityLogService>();
 
 builder.Services.AddControllersWithViews();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -94,7 +80,6 @@ builder.Services.AddAuthentication("AdminAuth")
 
 builder.Services.AddAuthorization();
 builder.Services.AddHttpClient();
-builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -164,30 +149,16 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-var cacheMaxAge = "31536000"; // 1 năm
-app.UseStaticFiles(new StaticFileOptions
-{
-    OnPrepareResponse = ctx =>
-    {
-        // Chỉ áp dụng cho các file tĩnh (hình ảnh, css, js)
-        ctx.Context.Response.Headers.Append(
-            "Cache-Control", $"public, max-age={cacheMaxAge}");
-    }
-});
+app.UseStaticFiles();
 
 app.UseRouting();
 app.UseAuthentication();
 app.UseHangfireDashboard("/admin/hangfire", new DashboardOptions
 {
-	// Cho phép tất cả mọi người truy cập (Chỉ dùng khi test, sau này nên thêm Filter)
-	Authorization = new[] { new HangfireCustomAuthFilter() }
+    // Cho phép tất cả mọi người truy cập (Chỉ dùng khi test, sau này nên thêm Filter)
+    Authorization = new[] { new Hangfire.Dashboard.LocalRequestsOnlyAuthorizationFilter() }
 });
 app.UseAuthorization();
-app.MapControllerRoute(
-    name: "kien-tao",
-    pattern: "kien-tao-tuong-lai-so",
-    defaults: new { controller = "Home", action = "KienTao" }
-);
 app.MapControllerRoute(
     name: "center",
     pattern: "he-thong-trung-tam",
@@ -268,10 +239,3 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 app.MapHub<NotificationHub>("/hub/notification");
 app.Run();
-public class HangfireCustomAuthFilter : IDashboardAuthorizationFilter
-{
-	public bool Authorize(DashboardContext context)
-	{
-		return true; // Cho phép tất cả
-	}
-}

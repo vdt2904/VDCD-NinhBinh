@@ -7,8 +7,6 @@ using VDCD.Business.Infrastructure;
 using VDCD.DataAccess;
 using VDCD.Entities.Cache;
 using VDCD.Entities.Custom;
-using Microsoft.AspNetCore.Http;
-using VDCD.Entities.Enums;
 
 namespace VDCD.Business.Service
 {
@@ -18,22 +16,15 @@ namespace VDCD.Business.Service
         private readonly ICacheService _cache;
         protected readonly AppDbContext _context;
         private readonly IRepository<SeoMeta> _seoRepo;
-        private readonly IActivityLogService _activityLogService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-
         public PostsService(IRepository<Posts> postsRepo,
                               ICacheService cache,
                               AppDbContext context,
-                              IRepository<SeoMeta> seoRepo,
-                              IActivityLogService activityLogService,
-                              IHttpContextAccessor httpContextAccessor)
+                              IRepository<SeoMeta> seoRepo)
         {
             _postsRepo = postsRepo;
             _cache = cache;
             _context = context;
             _seoRepo = seoRepo;
-            _activityLogService = activityLogService;
-            _httpContextAccessor = httpContextAccessor;
         }
         public IReadOnlyList<Posts> GetAll()
         {
@@ -56,39 +47,30 @@ namespace VDCD.Business.Service
         public IReadOnlyList<Posts> GetAll(string search = "")
         {
             // Đảm bảo search không bị null để tránh lỗi khi dùng .Contains
-            search = search?.Trim() ?? "";
+            search = search ?? "";
 
             // 1. Kiểm tra Cache
             if (_cache.TryGet(CacheParam.PostsAll, out List<Posts> cached))
             {
-                if (string.IsNullOrEmpty(search))
-                    return cached;
-
-                return cached
-                    .Where(x => x.Title != null && x.Title.Contains(search, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+                // Phải .ToList() rồi mới cast sang IReadOnlyList
+                return cached.Where(x => x.Title.Contains(search)).ToList();
             }
 
-            // 2. Nếu không có cache, lấy toàn bộ từ Repo (không filter search ở đây)
+            // 2. Nếu không có cache, lấy từ Repo
             var data = _postsRepo
                 .GetsReadOnly()
+                .Where(x => x.Title.Contains(search))
                 .OrderByDescending(x => x.Id)
                 .ToList();
 
-            // 3. Lưu toàn bộ dữ liệu vào Cache (không filter)
+            // 3. Lưu vào Cache
             _cache.Set(
                 CacheParam.PostsAll,
                 data,
                 TimeSpan.FromMinutes(CacheParam.PostsAllTimeout)
             );
 
-            // 4. Trả về kết quả đã filter theo search
-            if (string.IsNullOrEmpty(search))
-                return data;
-
-            return data
-                .Where(x => x.Title != null && x.Title.Contains(search, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            return data;
         }
         public void Save(Posts model, string keywords)
         {
@@ -128,13 +110,6 @@ namespace VDCD.Business.Service
             _context.SaveChanges();
             ClearCache();
             SaveSeo(model, keywords);
-
-            // Log activity (synchronous wait to avoid changing method signature)
-            var action = model.Id == 0 ? "Created" : "Updated";
-            /*_activityLogService
-                .LogAsync(ActivityLogType.Post, $"{action} post '{model.Title}'", _httpContextAccessor.HttpContext)
-                .GetAwaiter()
-                .GetResult();*/
         }
         public Posts? GetById(int id)
         {
@@ -169,12 +144,6 @@ namespace VDCD.Business.Service
             _context.SaveChanges();
 
             ClearCache();
-
-            // Log delete
-            /*_activityLogService
-                .LogAsync(ActivityLogType.Post, $"Deleted post '{entity.Title}'", _httpContextAccessor.HttpContext)
-                .GetAwaiter()
-                .GetResult();*/
         }
 
         // =======================

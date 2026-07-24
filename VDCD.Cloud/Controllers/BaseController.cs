@@ -14,7 +14,6 @@ namespace VDCD.Controllers
         protected void ApplySeo(string key)
         {
             var seo = _seo.Get(key);
-            if (seo == null) return;
 
             ViewData["Title"] = seo.Title;
             ViewData["Description"] = seo.Description;

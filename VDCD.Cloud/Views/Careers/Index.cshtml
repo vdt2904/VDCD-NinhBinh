@@ -34,7 +34,7 @@
     <!-- Bộ lọc (tự động, không cần nút) -->
     <div class="row g-3 mb-4 p-3 bg-light rounded shadow-sm">
         <div class="col-md-3">
-            <label class="form-label fw-semibold">Nghành nghề</label>
+            <label class="form-label fw-semibold">Ngành nghề</label>
             <select id="filterIndustry" class="form-select">
                 <option value="">Tất cả</option>
                 @foreach (var industry in Model.Select(x => x.Industry).Where(x => !string.IsNullOrEmpty(x)).Distinct().OrderBy(x => x))

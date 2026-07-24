@@ -463,7 +463,7 @@
 											<div class="input-group">
 												<input type="text" class="form-control vision-image" id="input-vision-image-@vCount" name="setting.general.vision.image.@vCount" value="@image">
 												<button class="btn btn-outline-secondary" type="button" onclick="openFileManagerVision('@vCount')">
-													<i class="bi bi-image"></i>
+													<i class="bi bi-image"></i> Chọn ảnh
 												</button>
 											</div>
 										</div>
@@ -613,7 +613,7 @@
 											<div class="input-group">
 												<input type="text" class="form-control op-image" id="input-op-image-@opCount" name="setting.general.operation.image.@opCount" value="@imageVal">
 												<button class="btn btn-outline-secondary" type="button" onclick="openFileManagerOp('@opCount')">
-													<i class="bi bi-image"></i>
+													<i class="bi bi-image"></i> Chọn ảnh
 												</button>
 											</div>
 										</div>
@@ -728,8 +728,15 @@
 										<div class="col-md-12 mb-2">
 											<label class="form-label small fw-bold">Ảnh minh họa (URL)</label>
 											<div class="input-group">
-												<input type="text" class="form-control sol-image" name="setting.general.solution.image.@solCount" value="@imageVal" placeholder="Nhập URL hoặc chọn từ File Manager">
-												<button type="button" class="btn btn-outline-secondary btn-pick-sol-img" onclick="openSolImagePicker(this)">
+												<input type="text"
+													   class="form-control sol-image"
+													   id="input-solution-image-@solCount"
+													   name="setting.general.solution.image.@solCount"
+													   value="@imageVal">
+
+												<button type="button"
+														class="btn btn-outline-secondary"
+														onclick="openFileManagerSolution('@solCount')">
 													<i class="bi bi-image"></i> Chọn ảnh
 												</button>
 											</div>
@@ -1182,6 +1189,13 @@
 		myModal.show();
 	}
 
+	function openFileManagerSolution(index) {
+		currentTargetInput = 'input-solution-image-' + index;
+		document.getElementById('fileManagerIframe').src = '/Admin/FileManager/Index';
+		var myModal = new bootstrap.Modal(document.getElementById('fileManagerModal'));
+		myModal.show();
+	}
+
 	function removeSlider(btn) {
 		if (confirm("Bạn có chắc muốn xóa slider này?")) {
 			btn.closest('.slider-item').remove();
@@ -1242,7 +1256,7 @@
 								<div class="input-group">
 									<input type="text" class="form-control vision-image" id="input-vision-image-${index}" name="setting.general.vision.image.${index}">
 									<button class="btn btn-outline-secondary" type="button" onclick="openFileManagerVision('${index}')">
-										<i class="bi bi-image"></i>
+										<i class="bi bi-image"></i> Chọn ảnh
 									</button>
 								</div>
 							</div>
@@ -1382,7 +1396,7 @@
 						<div class="input-group">
 							<input type="text" class="form-control op-image" id="input-op-image-${index}" name="setting.general.operation.image.${index}">
 							<button class="btn btn-outline-secondary" type="button" onclick="openFileManagerOp('${index}')">
-								<i class="bi bi-image"></i>
+								<i class="bi bi-image"></i> Chọn ảnh
 							</button>
 						</div>
 					</div>
@@ -1461,9 +1475,14 @@
 					<div class="col-md-12 mb-2">
 						<label class="form-label small fw-bold">Ảnh minh họa (URL)</label>
 						<div class="input-group">
-							<input type="text" class="form-control sol-image" name="setting.general.solution.image.${index}" placeholder="Nhập URL hoặc chọn từ File Manager">
-							<button type="button" class="btn btn-outline-secondary btn-pick-sol-img" onclick="openSolImagePicker(this)">
-								<i class="bi bi-image"></i> Chọn ảnh
+							<input type="text"
+									class="form-control sol-image"
+									id="input-solution-image-${index}"
+									name="setting.general.solution.image.${index}">
+
+							<button type="button"
+									class="btn btn-outline-secondary"
+										onclick="openFileManagerSolution('${index}')">i class="bi bi-image"></i> Chọn ảnh
 							</button>
 						</div>
 					</div>

@@ -1,6 +1,9 @@
 ﻿@model IEnumerable<VDCD.Entities.Custom.JobPosition>
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var activeJobs = Model
+        .Where(x => x.IsActive == true)
+        .ToList();
 }
 
 @functions {
@@ -37,7 +40,11 @@
             <label class="form-label fw-semibold">Ngành nghề</label>
             <select id="filterIndustry" class="form-select">
                 <option value="">Tất cả</option>
-                @foreach (var industry in Model.Select(x => x.Industry).Where(x => !string.IsNullOrEmpty(x)).Distinct().OrderBy(x => x))
+                @foreach (var industry in activeJobs
+                    .Select(x => x.Industry)
+                    .Where(x => !string.IsNullOrEmpty(x))
+                    .Distinct()
+                    .OrderBy(x => x))
                 {
                     <option value="@industry">@industry</option>
                 }
@@ -47,7 +54,11 @@
             <label class="form-label fw-semibold">Cấp bậc</label>
             <select id="filterLevel" class="form-select">
                 <option value="">Tất cả</option>
-                @foreach (var level in Model.Select(x => x.Level).Where(x => !string.IsNullOrEmpty(x)).Distinct().OrderBy(x => x))
+                @foreach (var level in activeJobs
+                    .Select(x => x.Level)
+                    .Where(x => !string.IsNullOrEmpty(x))
+                    .Distinct()
+                    .OrderBy(x => x))
                 {
                     <option value="@level">@level</option>
                 }
@@ -57,7 +68,11 @@
             <label class="form-label fw-semibold">Loại hình</label>
             <select id="filterEmploymentType" class="form-select">
                 <option value="">Tất cả</option>
-                @foreach (var type in Model.Select(x => x.EmploymentType).Where(x => !string.IsNullOrEmpty(x)).Distinct().OrderBy(x => x))
+                @foreach (var type in activeJobs
+                    .Select(x => x.EmploymentType)
+                    .Where(x => !string.IsNullOrEmpty(x))
+                    .Distinct()
+                    .OrderBy(x => x))
                 {
                     <option value="@type">@type</option>
                 }
@@ -67,7 +82,11 @@
             <label class="form-label fw-semibold">Địa điểm</label>
             <select id="filterLocation" class="form-select">
                 <option value="">Tất cả</option>
-                @foreach (var loc in Model.Select(x => x.Location).Where(x => !string.IsNullOrEmpty(x)).Distinct().OrderBy(x => x))
+                @foreach (var loc in activeJobs
+                    .Select(x => x.Location)
+                    .Where(x => !string.IsNullOrEmpty(x))
+                    .Distinct()
+                    .OrderBy(x => x))
                 {
                     <option value="@loc">@loc</option>
                 }
@@ -76,7 +95,7 @@
     </div>
 
     <div class="row g-4" id="job-list">
-        @foreach (var job in Model)
+        @foreach (var job in activeJobs)
         {
             <div class="col-md-6 col-lg-4 job-item"
                  data-industry="@job.Industry"
